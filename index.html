@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>סימולטור אולפנת הראל</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#f4f6fb; --card:#fff; --ink:#1e2a3a; --muted:#6b7a90;
+  --brand:#4338ca; --brand2:#7c3aed; --ok:#059669; --warn:#d97706; --bad:#dc2626;
+  --gold:#b45309; --line:#e4e9f2; --soft:#eef1f8;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{font-family:'Segoe UI','Heebo',Arial,sans-serif; background:var(--bg); color:var(--ink); font-size:14px;}
+header.app{background:linear-gradient(135deg,#312e81,#6d28d9 60%,#9333ea); color:#fff; padding:18px 26px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
+header.app h1{font-size:21px; font-weight:800;}
+header.app .sub{opacity:.85; font-size:12.5px;}
+nav.tabs{display:flex; gap:4px; background:#fff; padding:8px 18px; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:50; overflow-x:auto;}
+nav.tabs button{border:none; background:transparent; padding:9px 16px; border-radius:10px; font-size:14px; font-weight:600; color:var(--muted); cursor:pointer; white-space:nowrap; font-family:inherit;}
+nav.tabs button.active{background:var(--brand); color:#fff;}
+nav.tabs button:hover:not(.active){background:var(--soft); color:var(--ink);}
+main{padding:20px; max-width:1500px; margin:0 auto;}
+.row{display:flex; gap:14px; flex-wrap:wrap;}
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; box-shadow:0 1px 3px rgba(30,42,58,.06);}
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px;}
+.kpi{border-radius:14px; padding:14px 16px; color:#fff; position:relative; overflow:hidden;}
+.kpi .n{font-size:26px; font-weight:800;}
+.kpi .t{font-size:12.5px; opacity:.92;}
+.kpi.k1{background:linear-gradient(135deg,#4338ca,#6366f1);}
+.kpi.k2{background:linear-gradient(135deg,#047857,#10b981);}
+.kpi.k3{background:linear-gradient(135deg,#b45309,#f59e0b);}
+.kpi.k4{background:linear-gradient(135deg,#7c3aed,#a78bfa);}
+.kpi.k5{background:linear-gradient(135deg,#be123c,#f43f5e);}
+.kpi.k6{background:linear-gradient(135deg,#475569,#94a3b8);}
+h2.sec{font-size:16px; font-weight:800; margin:6px 0 12px;}
+h3.sec{font-size:14px; font-weight:700; margin:4px 0 10px; color:var(--brand);}
+table.tbl{width:100%; border-collapse:collapse; font-size:13px;}
+table.tbl th{background:var(--soft); padding:8px 9px; text-align:right; font-weight:700; border-bottom:2px solid var(--line); position:sticky; top:0; white-space:nowrap;}
+table.tbl td{padding:7px 9px; border-bottom:1px solid var(--line); text-align:right;}
+table.tbl tr:hover td{background:#f8faff;}
+.scroll{overflow:auto; max-height:70vh; border:1px solid var(--line); border-radius:10px;}
+.badge{display:inline-block; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:700; white-space:nowrap;}
+.b-exc{background:#fef3c7; color:#92400e; border:1px solid #f59e0b;}
+.b-pot{background:#ede9fe; color:#5b21b6; border:1px solid #a78bfa;}
+.b-ok{background:#d1fae5; color:#065f46;}
+.b-warn{background:#ffedd5; color:#9a3412;}
+.b-bad{background:#fee2e2; color:#991b1b;}
+.b-miss{background:#e2e8f0; color:#334155;}
+.grade-exc{color:var(--gold); font-weight:800;}
+.grade-ok{color:var(--ink);}
+.grade-warn{color:var(--warn); font-weight:700;}
+.grade-bad{color:var(--bad); font-weight:800;}
+.grade-miss{color:#94a3b8;}
+input[type=number], select, input[type=text]{border:1px solid #cbd5e1; border-radius:8px; padding:6px 8px; font-size:13px; font-family:inherit; background:#fff; color:var(--ink);}
+input[type=number]{width:62px; text-align:center;}
+input[type=number]:focus, select:focus{outline:2px solid #a5b4fc; border-color:var(--brand);}
+input.cell-miss{background:#f1f5f9; border-style:dashed;}
+input.g-red, .g-red{color:#dc2626 !important; font-weight:800;}
+input.g-blue, .g-blue{color:#1d4ed8 !important; font-weight:800; font-style:italic;}
+input.sim-cell{background:#fff7ed !important; border-color:#f59e0b !important; color:#b45309; font-weight:800; box-shadow:0 0 0 1px #f59e0b;}
+#simBanner{display:none; background:linear-gradient(90deg,#fff7ed,#ffedd5); border-bottom:2px solid #f59e0b; padding:8px 18px; font-size:13px; align-items:center; gap:10px; flex-wrap:wrap; position:sticky; top:49px; z-index:49;}
+body.sim-on #simBanner{display:flex;}
+body.sim-on nav.tabs{border-bottom-color:#f59e0b;}
+#simTabBtn{border:2px solid transparent;}
+body.sim-on #simTabBtn{background:#f59e0b !important; color:#fff !important; border-color:#b45309;}
+button.btn{border:none; border-radius:10px; padding:9px 16px; font-size:13.5px; font-weight:700; cursor:pointer; font-family:inherit; background:var(--brand); color:#fff;}
+button.btn:hover{filter:brightness(1.1);}
+button.btn.sec{background:var(--soft); color:var(--ink); border:1px solid var(--line);}
+button.btn.ok{background:var(--ok);}
+button.btn.warn{background:var(--warn);}
+button.btn.bad{background:var(--bad);}
+button.btn.sm{padding:5px 10px; font-size:12px; border-radius:8px;}
+.toolbar{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:14px;}
+.toolbar label{font-weight:600; color:var(--muted); font-size:13px;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+.grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+@media(max-width:1000px){.grid2,.grid3{grid-template-columns:1fr;}}
+.alert-item{display:flex; gap:10px; align-items:center; padding:8px 12px; border-radius:10px; margin-bottom:6px; font-size:13px;}
+.al-bad{background:#fef2f2; border-right:4px solid var(--bad);}
+.al-warn{background:#fffbeb; border-right:4px solid var(--warn);}
+.al-info{background:#eff6ff; border-right:4px solid #3b82f6;}
+.al-pot{background:#f5f3ff; border-right:4px solid var(--brand2);}
+.al-miss{background:#f8fafc; border-right:4px solid #94a3b8;}
+.chartbox{position:relative; height:280px;}
+.subj-card{border:1px solid var(--line); border-radius:12px; margin-bottom:10px; overflow:hidden;}
+.subj-head{background:var(--soft); padding:10px 14px; font-weight:700; cursor:pointer; display:flex; justify-content:space-between; align-items:center;}
+.subj-body{padding:12px 14px; display:none;}
+.subj-card.open .subj-body{display:block;}
+.pill{background:#fff; border:1px solid var(--line); border-radius:999px; padding:2px 10px; font-size:11.5px; color:var(--muted);}
+.note{font-size:12px; color:var(--muted); margin-top:6px;}
+.delta-up{color:var(--ok); font-weight:800;}
+.delta-dn{color:var(--bad); font-weight:800;}
+.name-link{color:var(--brand); font-weight:700; cursor:pointer; text-decoration:none;}
+.name-link:hover{text-decoration:underline;}
+#giModal{position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:210; display:none; align-items:flex-start; justify-content:center; padding:30px 15px; overflow:auto;}
+#giModal.show{display:flex;}
+#giModal .box{background:#fff; border-radius:16px; max-width:900px; width:100%; padding:20px; max-height:88vh; overflow:auto;}
+#studentModal{position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:200; display:none; align-items:flex-start; justify-content:center; padding:30px 15px; overflow:auto;}
+#studentModal.show{display:flex;}
+#studentModal .box{background:#fff; border-radius:16px; max-width:1000px; width:100%; padding:20px; max-height:88vh; overflow:auto;}
+.comp-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px;}
+.comp-box{border:1px solid var(--line); border-radius:10px; padding:9px; background:#fbfcff;}
+.comp-box .cn{font-size:11.5px; color:var(--muted); font-weight:600; margin-bottom:5px; min-height:28px;}
+.comp-inputs{display:flex; gap:6px; align-items:center; font-size:11.5px; flex-wrap:wrap;}
+.comp-row{display:flex; gap:6px; align-items:center; font-size:11.5px; padding:3px 0; border-top:1px dashed #e2e8f0;}
+.comp-row:first-of-type{border-top:none;}
+.comp-row .lbl{min-width:54px; color:var(--muted); font-weight:700;}
+.comp-row input[type=number]{width:58px;}
+.comp-box .cn{min-height:auto;}
+footer{padding:14px; text-align:center; color:var(--muted); font-size:12px;}
+@media print{
+  body>*{display:none !important;}
+  #printArea{display:block !important; padding:0;}
+  #printArea .no-print{display:none !important;}
+  table.tbl th{position:static;}
+  .scroll{max-height:none; overflow:visible; border:none;}
+}
+#printArea{display:none;}
+body.print-mode #printArea{display:block; padding:20px; background:#fff;}
+.status-cell{min-width:110px;}
+.toast{position:fixed; bottom:20px; left:20px; background:#1e293b; color:#fff; padding:12px 20px; border-radius:12px; z-index:500; font-size:13.5px; box-shadow:0 8px 24px rgba(0,0,0,.25); opacity:0; transition:opacity .3s;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<header class="app">
+  <div id="logoSlot" style="flex-shrink:0;"></div>
+  <div>
+    <h1>סימולטור אולפנת הראל</h1>
+    <div class="sub">מגזר ממלכתי דתי · חישוב זכאות, איתור מצטיינות, סימולציות ודוחות</div>
+  </div>
+  <div id="profileSlot" style="display:flex; gap:6px; align-items:center; margin-inline-start:14px;"></div>
+  <div id="saveInd" onclick="setTab('settings')" title="לחצי לפרטי השמירה והגיבוי" style="cursor:pointer; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35); border-radius:10px; padding:5px 10px; font-size:12px; line-height:1.35; white-space:nowrap;"></div>
+  <div style="margin-inline-start:auto; display:flex; gap:8px; flex-wrap:wrap;">
+    <button class="btn sec sm" onclick="exportExcel()">📥 ייצוא לאקסל</button>
+    <button class="btn sec sm" onclick="document.getElementById('xlsxFile').click()">📤 ייבוא מאקסל</button>
+    <button class="btn sec sm" onclick="exportJSON()">💾 גיבוי</button>
+    <button class="btn sec sm" onclick="document.getElementById('jsonFile').click()">♻️ שחזור</button>
+    <input type="file" id="xlsxFile" accept=".xlsx" style="display:none" onchange="importExcel(this)">
+    <input type="file" id="jsonFile" accept=".json" style="display:none" onchange="importJSON(this)">
+  </div>
+</header>
+<nav class="tabs" id="tabs">
+  <button data-tab="dash" class="active" onclick="setTab('dash')">📊 דשבורד</button>
+  <button data-tab="students" onclick="setTab('students')">👩‍🎓 תלמידות</button>
+  <button data-tab="entry" onclick="setTab('entry')">✏️ הזנת ציונים</button>
+  <button data-tab="sim" onclick="setTab('sim')">🧪 סימולציה</button>
+  <button data-tab="reports" onclick="setTab('reports')">📄 דוחות</button>
+  <button data-tab="alerts" onclick="setTab('alerts')">🚨 התראות</button>
+  <button data-tab="settings" onclick="setTab('settings')">⚙️ הגדרות</button>
+  <button data-tab="help" onclick="setTab('help')">❓ מדריך</button>
+</nav>
+<main id="main"></main>
+<div id="studentModal" onclick="if(event.target===this)closeStudent()"><div class="box" id="studentBox"></div></div>
+<div id="giModal" onclick="if(event.target===this)closeGradeImport()"><div class="box" id="giBox"></div></div>
+<div id="printArea"></div>
+<div class="toast" id="toast"></div>
+<footer>סימולטור אולפנת הראל · <b>גרסה 1.0</b> (31.08.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
+<script>
+"use strict";
+/* ============ מודל המקצועות ============ */
+const I=(n,w)=>({n,t:'i',w});
+const E=(n,w,s)=>({n,t:'e',w,s}); // s = אחוז מגן
+const B=()=>({n:'עבודה נוספת / הערכה חלופית',t:'i',w:0,b:1}); // רכיב שיפור ציון — מופעל ע"י מתן משקל; האחוזים מתחלקים יחסית
+const MUGBAR_COMPS=u=>[I('הערכה פנימית',30),E('בחינה חיצונית א׳',70,30),E('בחינה חיצונית ב׳',0,30),E('בחינה חיצונית ג׳',0,30),B()];
+const SUBJECTS=[
+ {id:'lashon',   name:'לשון',          opts:[2], comps:u=>[I('הערכה פנימית',30),E('בחינה חיצונית',70,50),B()]},
+ {id:'history',  name:'היסטוריה',      opts:[2], comps:u=>[I('הערכה חלופית',30),E('בגרות חיצונית',35,0),E('משימות מבוקרות',35,0),B()]},
+ {id:'sifrut',   name:'ספרות',         opts:[1], comps:u=>[I('הערכה פנימית',30),E('בחינה חיצונית',70,30),B()]},
+ {id:'machshevet',name:'מחשבת ישראל',  opts:[1], comps:u=>[I('הערכה חלופית',30),E('בגרות חיצונית',50,0),E('משימה מבוקרת',20,0),B()]},
+ {id:'ezrachut', name:'אזרחות',        opts:[2], comps:u=>[I('הערכה חלופית',30),E('בגרות חיצונית',70,0),B()]},
+ {id:'english',  name:'אנגלית',        opts:[4,5], comps:u=>[I('הערכה פנימית',26),E('שאלון א׳',27,30),E('שאלון ב׳',27,60),E('בחינה בע"פ',20,30),B()]},
+ {id:'math',     name:'מתמטיקה',       opts:[3,4,5], comps:u=> u===3?[I('הערכה פנימית',25),E('שאלון ראשון',35,50),E('שאלון שני',40,60),B()]
+                                                     : u===4?[I('הערכה פנימית',0),E('שאלון ראשון',65,50),E('שאלון שני',35,60),B()]
+                                                            :[I('הערכה פנימית',0),E('שאלון ראשון',60,50),E('שאלון שני',40,60),B()]},
+ {id:'tanakh',   name:'תנ"ך',          opts:[3,5], comps:u=> u===5?[I('הערכה חלופית',20),E('בגרות חיצונית',20,0),E('משימות מבוקרות',20,0),I('הערכה חלופית הגבר',16),E('מבחן הגבר',24,0),B()]
+                                                            :[I('הערכה חלופית',30),E('בגרות חיצונית',35,0),E('משימות מבוקרות',35,0),I('הערכה חלופית הגבר',0),E('מבחן הגבר',0,0),B()]},
+ {id:'toshba',   name:'תושב"ע',        opts:[3,5], comps:u=> u===5?[I('הערכה פנימית',18),E('בחינה חיצונית א׳',21,0),E('בחינה חיצונית ב׳',21,0),E('בחינת הגבר',28,0),I('הערכה פנימית הגבר',12),B()]
+                                                            :[I('הערכה פנימית',30),E('בחינה חיצונית א׳',35,0),E('בחינה חיצונית ב׳',35,0),E('בחינת הגבר',0,0),I('הערכה פנימית הגבר',0),B()]},
+ {id:'mugbar1',  name:'מקצוע מוגבר',   opts:[0,5], named:true, comps:MUGBAR_COMPS},
+ {id:'mugbar2',  name:'מוגבר/התמחות ב׳',opts:[0,3,5], named:true, comps:MUGBAR_COMPS},
+ {id:'mugbar3',  name:'מוגבר/התמחות ג׳',opts:[0,3,5], named:true, comps:MUGBAR_COMPS},
+ {id:'hng',      name:'חנ"ג',           opts:[0,1], internalOnly:true, comps:u=>[I('ציון סופי',100)]},
+ {id:'mada',     name:'מבוא למדעים',    opts:[0,1], internalOnly:true, comps:u=>[I('ציון סופי',100)]},
+ {id:'shelach',  name:'של"ח',           opts:[0,1], internalOnly:true, comps:u=>[I('ציון סופי',100)]},
+ {id:'taavura',  name:'חינוך תעבורתי',  opts:[0,1], internalOnly:true, comps:u=>[I('ציון סופי',100)]},
+];
+const SUBJ_MAP=Object.fromEntries(SUBJECTS.map(s=>[s.id,s]));
+
+/* ============ צבעי ציונים: שחור=דווח למשרד · אדום=אמיתי לא דווח · כחול=פיקטיבי/סימולציה ============ */
+const GSTAT={r:{lbl:'ציון אמיתי — טרם דווח למשרד',cls:'g-red',ic:'🔴'},b:{lbl:'ציון פיקטיבי / הערכה',cls:'g-blue',ic:'🔵'}};
+function gstatOf(st,key){ return (st.gstat||{})[key]||''; }
+function gstatCls(st,key){ const s=gstatOf(st,key); return s?' '+GSTAT[s].cls:''; }
+function cycleGstat(id,key){
+  const st=state.students.find(s=>s.id===id); if(!st) return;
+  st.gstat=st.gstat||{};
+  const cur=st.gstat[key]||'';
+  const nxt=cur===''?'r':(cur==='r'?'b':'');
+  if(nxt) st.gstat[key]=nxt; else delete st.gstat[key];
+  save(); refreshOpenViews(id);
+}
+function statusLegend(){
+  return `<div class="note" style="display:flex; gap:14px; flex-wrap:wrap; align-items:center;">
+    <b>סימון ציונים:</b>
+    <span><span style="color:#111; font-weight:800;">■</span> שחור — דווח למשרד</span>
+    <span><span style="color:#dc2626; font-weight:800;">■</span> אדום — אמיתי, טרם דווח</span>
+    <span><span style="color:#1d4ed8; font-weight:800;">■</span> כחול — פיקטיבי / הערכה</span>
+    <span class="pill">💡 לחיצה ימנית על ציון מחליפה סימון</span>
+    ${state.flipFav?'<span class="pill" style="background:#fffbeb; border-color:#fcd34d;">🔀 היפוך אחוזים לטובת הבחינה — פעיל</span>':''}
+  </div>`;
+}
+// קריאת צבעי הגופן מתוך ה-XML של קובץ האקסל
+function sheetFontColors(wb,sheetName){
+  try{
+    const files=wb.files; if(!files) return null;
+    const get=n=>{ const e=files[n]; if(!e) return null;
+      if(typeof e==='string') return e;
+      if(e.content!==undefined) return typeof e.content==='string'?e.content:new TextDecoder('utf-8').decode(new Uint8Array(e.content));
+      return new TextDecoder('utf-8').decode(new Uint8Array(e)); };
+    const styles=get('xl/styles.xml'); if(!styles) return null;
+    const fontsBlock=(styles.match(/<fonts[\s\S]*?<\/fonts>/)||[''])[0];
+    const fonts=fontsBlock.match(/<font>[\s\S]*?<\/font>|<font\/>/g)||[];
+    const fcol=fonts.map(fo=>{ const m=fo.match(/<color([^\/>]*)\/?>/); if(!m) return null;
+      const a=m[1];
+      const rgb=a.match(/rgb="([0-9A-Fa-f]{6,8})"/); if(rgb) return rgb[1].slice(-6).toUpperCase();
+      return null; });
+    const xfsBlock=(styles.match(/<cellXfs[\s\S]*?<\/cellXfs>/)||[''])[0];
+    const xfs=xfsBlock.match(/<xf [^>]*?\/?>/g)||[];
+    const s2c=xfs.map(x=>{ const m=x.match(/fontId="(\d+)"/); return m?fcol[+m[1]]:null; });
+    const wbxml=get('xl/workbook.xml'); if(!wbxml) return null;
+    const names=[]; const rn=/<sheet[^>]*name="([^"]*)"/g; let mm;
+    while((mm=rn.exec(wbxml))) names.push(mm[1]);
+    const idx=names.indexOf(sheetName); if(idx<0) return null;
+    const sheet=get('xl/worksheets/sheet'+(idx+1)+'.xml'); if(!sheet) return null;
+    const out={};
+    const re=/<c r="([A-Z]+\d+)"([^>]*)>/g; let m2;
+    while((m2=re.exec(sheet))){
+      const sm=m2[2].match(/ s="(\d+)"/); if(!sm) continue;
+      const c=s2c[+sm[1]]; if(c) out[m2[1]]=c;
+    }
+    return out;
+  }catch(e){ return null; }
+}
+function classifyColor(hex){
+  if(!hex) return '';
+  const r=parseInt(hex.slice(0,2),16), g=parseInt(hex.slice(2,4),16), b=parseInt(hex.slice(4,6),16);
+  if(r>120&&r>g*2&&r>b*2) return 'r';           // אדום
+  if(b>110&&b>r+40&&b>g+10) return 'b';          // כחול
+  return '';                                      // שחור/ברירת מחדל
+}
+
+/* ============ קטלוג שאלונים (בגרות גמישה) ============ */
+const CODE_HINTS={
+ 'lashon.0':'11283','lashon.1':'11281',
+ 'history.0':'29283','history.1':'29215','history.2':'29211/2',
+ 'sifrut.0':'9183','sifrut.1':'9181',
+ 'machshevet.0':'38183','machshevet.1':'38115','machshevet.2':'38111',
+ 'ezrachut.0':'34273','ezrachut.1':'34281',
+ 'english.0':'16483/16583','english.1':'16382/16582','english.2':'16471','english.3':'16485/16585',
+ 'math.0':'35172','math.1':'35371/471/571','math.2':'35372/472/572',
+ 'tanakh.0':'2383','tanakh.1':'2325/2315','tanakh.2':'2321/2311','tanakh.3':'2563','tanakh.4':'2551',
+ 'toshba.0':'5383','toshba.1':'5316','toshba.2':'5311/2','toshba.3':'5281','toshba.4':'5283'
+};
+// אפשרויות סמל שאלון לבחירה לפי רכיב (מקובץ "מספרי שאלונים")
+const CODE_OPTIONS={
+ 'lashon.0':['11283'],'lashon.1':['11281','11241','11274','11284'],
+ 'history.0':['29283'],'history.1':['29215'],'history.2':['29211','29212'],
+ 'sifrut.0':['9183'],'sifrut.1':['9181','9184','9157'],
+ 'machshevet.0':['38183'],'machshevet.1':['38115'],'machshevet.2':['38111'],
+ 'ezrachut.0':['34273'],'ezrachut.1':['34281','34224'],
+ 'english.0':['D-16483','F-16583'],'english.1':['C-16382','G-16582'],'english.2':['E-16471'],'english.3':['16485','16585'],
+ 'math.0':['35172'],'math.1':['35371','35471','35571'],'math.2':['35372','35472','35572'],
+ 'tanakh.0':['2383','2583'],'tanakh.1':['2325','2525','2315','2515'],'tanakh.2':['2321','2322','2521','2522','2311','2312','2511','2512'],'tanakh.3':['2563'],'tanakh.4':['2551','2351'],
+ 'toshba.0':['5383'],'toshba.1':['5316'],'toshba.2':['5311','5312'],'toshba.3':['5281','5284'],'toshba.4':['5283']
+};
+const MUG_INT_CODES=['788283','51283','36283','43283','12362'];
+const MUG_EXT_CODES=['788381','51387','36361','36371','36386','43381','43386','12281','12241'];
+function codeOptions(key){
+  if(CODE_OPTIONS[key]) return CODE_OPTIONS[key];
+  if(/^mugbar\d\.0$/.test(key)) return MUG_INT_CODES;
+  if(/^mugbar\d\./.test(key)) return MUG_EXT_CODES;
+  return [];
+}
+function codeSelect(st,key){
+  const cur=(st.codes||{})[key]||'';
+  const opts=codeOptions(key);
+  const inList=opts.includes(cur);
+  return `<select style="font-size:11px; max-width:150px;" onchange="if(this.value==='__c'){setCodeCustom('${st.id}','${key}')}else{setCode('${st.id}','${key}',this.value)}">
+    <option value="">סמל שאלון…</option>
+    ${opts.map(o=>`<option value="${esc(o)}" ${cur===o?'selected':''}>${esc(o)}</option>`).join('')}
+    ${cur&&!inList?`<option value="${esc(cur)}" selected>${esc(cur)}</option>`:''}
+    <option value="__c">אחר — הקלדה…</option>
+  </select>`;
+}
+function setCodeCustom(id,key){
+  const st=state.students.find(s=>s.id===id); if(!st) return;
+  const v=prompt('הקלידי סמל שאלון:', (st.codes||{})[key]||'');
+  if(v!==null) setCode(id,key,v);
+  refreshOpenViews(id);
+}
+// מבני מגמות מהקטלוג: [סוג, משקל, סמל] — הראשון פנימי, השאר חיצוניים לפי הסדר
+const MUGBAR_PRESETS={
+ 'תקשורת':      [[30,'788283'],[70,'788381']],
+ 'פיזיקה':      [[30,'36283'],[30,'36361'],[25,'36371'],[15,'36386']],
+ 'ביולוגיה':    [[30,'43283'],[55,'43381'],[15,'43386']],
+ 'תאטרון':      [[50,'51283'],[50,'51387']],
+ 'לימודי א"י':  [[50,'12362'],[30,'12281'],[20,'12241']]
+};
+function applyMugbarPreset(stId,sid,presetName){
+  if(!presetName) return;
+  const st=state.students.find(s=>s.id===stId); if(!st) return;
+  const p=MUGBAR_PRESETS[presetName]; if(!p) return;
+  st.mugbarNames=st.mugbarNames||{}; st.mugbarNames[sid]=presetName;
+  st.units=st.units||{}; if(!st.units[sid]) st.units[sid]=5;
+  st.ov=st.ov||{}; st.codes=st.codes||{};
+  // רכיב 0 = פנימי; רכיבים 1-3 = חיצוניים
+  const ext=p.slice(1);
+  st.ov[sid+'.0']=Object.assign({},st.ov[sid+'.0'],{w:p[0][0]});
+  st.codes[sid+'.0']=p[0][1];
+  for(let i=1;i<=3;i++){
+    const e=ext[i-1];
+    st.ov[sid+'.'+i]=Object.assign({},st.ov[sid+'.'+i],{w:e?e[0]:0});
+    if(e) st.codes[sid+'.'+i]=e[1];
+  }
+  save(); refreshOpenViews(stId,true);
+  toast('הוחל מבנה '+presetName+' מהקטלוג: '+p.map(x=>x[0]+'%').join(' / '));
+}
+// קטלוג מלא לתצוגה וסינון (מקובץ "מספרי שאלונים")
+let catFilter='';
+const QREF=[
+ {s:'לשון',u:'2',rows:[[30,'11283','הערכה פנימית'],[70,'11281','בחינה חיצונית'],[70,'11241','שאלון מותאם'],[70,'11274 / 11284','לשון עולים']]},
+ {s:'היסטוריה',u:'2',rows:[[30,'29283','הערכה חלופית'],[35,'29215','בגרות חיצונית'],[35,'29211, 29212','משימות מבוקרות']]},
+ {s:'ספרות',u:'1',rows:[[30,'9183','הערכה פנימית'],[70,'9181','בחינה חיצונית'],[70,'9184','ספרות עולות'],[100,'9157','גלישת רוח — ממיר בגרות']]},
+ {s:'מחשבת ישראל',u:'1',rows:[[30,'38183','הערכה חלופית'],[50,'38115','בגרות חיצונית'],[20,'38111','משימה מבוקרת']]},
+ {s:'אזרחות',u:'2',rows:[[30,'34273','הערכה חלופית'],[70,'34281','בגרות חיצונית'],[null,'34224','עולים חדשים — בחינה'],[null,'34221, 34222','משימות מבוקרות — אם בשימוש']]},
+ {s:'אנגלית',u:'4-5',rows:[[26,'D-16483, F-16583','הערכה בית ספרית'],[27,'C-16382, G-16582','שאלון'],[27,'E-16471','שאלון'],[20,'16485 (4 יח"ל), 16585 (5 יח"ל)','בע"פ']]},
+ {s:'מתמטיקה',u:'3',rows:[[25,'35172','פנימי'],[35,'35371','שאלון ראשון'],[40,'35372','שאלון שני']]},
+ {s:'מתמטיקה',u:'4',rows:[[65,'35471','שאלון ראשון'],[35,'35472','שאלון שני']]},
+ {s:'מתמטיקה',u:'5',rows:[[60,'35571','שאלון ראשון'],[40,'35572','שאלון שני']]},
+ {s:'תנ"ך',u:'3 — כיתה י',rows:[[30,'2383','הערכה חלופית'],[35,'2325','בגרות חיצונית יא'],[35,'2321, 2322','משימות מבוקרות יב']]},
+ {s:'תנ"ך',u:'5 — כיתה י',rows:[[20,'2383','הערכה חלופית'],[20,'2525','בגרות חיצונית יא'],[20,'2521, 2522','משימות מבוקרות יב'],[24,'2551','מבחן הגבר'],[16,'2563','הערכה חלופית הגבר']]},
+ {s:'תנ"ך',u:'3 — כיתה יא',rows:[[30,'2383','הערכה חלופית'],[35,'2311, 2312','משימות מבוקרות יא'],[35,'2315','בגרות חיצונית יב']]},
+ {s:'תנ"ך',u:'5 — כיתה יא',rows:[[20,'2583','הערכה חלופית'],[20,'2511, 2512','משימות מבוקרות יא'],[20,'2515','בגרות חיצונית יב'],[24,'2351','מבחן הגבר'],[16,'2563','הערכה חלופית הגבר']]},
+ {s:'תושב"ע',u:'5',rows:[[18,'5383','דינים ומבוא — הערכה חלופית'],[21,'5316','משנה — בגרות חיצונית'],[21,'5311, 5312','בח"מ — משימות מבוקרות'],[28,'5281','לקט (עולים: 5284)'],[12,'5283','תפילה כמפגש']]},
+ {s:'תקשורת',u:'5',rows:[[30,'788283','פנימי'],[70,'788381','חיצוני']]},
+ {s:'תאטרון',u:'5',rows:[[15,'51283','פנימי'],[20,'51283','פנימי'],[15,'51283','פנימי'],[50,'51387','חיצוני']]},
+ {s:'פיזיקה',u:'5',rows:[[30,'36283','פנימי'],[30,'36361','חיצוני — ניגשות ביא (מכניקה)'],[25,'36371','חיצוני — ניגשות ביב (חשמל)'],[15,'36386','חיצוני — ניגשות ביב (מעבדה)']]},
+ {s:'ביולוגיה',u:'5',rows:[[30,'43283','פנימי'],[55,'43381','חיצוני — נבחנות ביא'],[15,'43386','חיצוני — נבחנות ביב']]},
+ {s:'לימודי א"י',u:'5',rows:[[50,'12362','פנימי'],[20,'12241','אקדמיה'],[30,'12281','חיצוני']]},
+];
+function catalogTable(){
+  const items=QREF.filter(q=>!catFilter||q.s===catFilter);
+  if(!items.length) return '<div class="note">לא נמצא</div>';
+  return `<table class="tbl"><thead><tr><th>מקצוע</th><th>יח"ל</th><th>משקל</th><th>סמל שאלון</th><th>אופן היבחנות</th></tr></thead><tbody>
+  ${items.map(q=>q.rows.map((r,i)=>`<tr${i===0?' style="border-top:2px solid var(--line);"':''}>
+    <td style="font-weight:${i===0?'800':'400'};">${i===0?esc(q.s):''}</td>
+    <td>${i===0?esc(q.u):''}</td>
+    <td>${r[0]===null?'—':`<b>${r[0]}%</b>`}</td>
+    <td style="font-family:monospace; direction:ltr; text-align:left;">${esc(r[1])}</td>
+    <td>${esc(r[2])}</td>
+  </tr>`).join('')).join('')}
+  </tbody></table>`;
+}
+
+// שמירת המבנה הישן (רכיב חיצוני אחד) לנתונים שנקלטו מקובצי הסימולטור הישנים
+function applyLegacyStructure(st){
+  st.ov=st.ov||{};
+  const setW=(k,w)=>{ st.ov[k]=Object.assign({},st.ov[k]); if(st.ov[k].w===undefined) st.ov[k].w=w; };
+  setW('history.1',70);   setW('history.2',0);
+  setW('machshevet.1',70); setW('machshevet.2',0);
+  setW('ezrachut.0',20);  setW('ezrachut.1',80);
+  if((st.units||{}).tanakh===5){ setW('tanakh.0',18); setW('tanakh.1',21); setW('tanakh.2',21); }
+  return st;
+}
+
+/* ============ מצב ושמירה ============ */
+const DEFAULT_STATE={classes:[], students:[], custom:{}, includeInternal:false, reqUnits:true, flipFav:true, logo:null, thresholds:{pass:54.5, excel:90, potential:85, gap:20}};
+/* ============ שכבת הניסוי של הסימולציה (חיה רק בלשונית הסימולציה, לא נוגעת במקור) ============ */
+function gradesOf(st,sim){
+  if(sim&&st.simg&&Object.keys(st.simg).length) return Object.assign({},st.grades||{},st.simg);
+  return st.grades||{};
+}
+function isSimKey(st,key){ return !!(st.simg&&st.simg[key]!==undefined); }
+function simCount(){ return state.students.reduce((a,s)=>a+(s.simg?Object.keys(s.simg).length:0),0); }
+function setGradeSim(id,key,val){
+  const st=state.students.find(s=>s.id===id); if(!st) return;
+  st.simg=st.simg||{};
+  if(val===''||val===null){ delete st.simg[key]; }
+  else{
+    const v=Math.max(0,Math.min(100,+val));
+    if((st.grades||{})[key]===v) delete st.simg[key]; // חזרה לערך האמיתי = ביטול השינוי
+    else st.simg[key]=v;
+  }
+  save(); render();
+}
+function clearSim(){
+  const n=simCount();
+  if(!n){ toast('אין שינויי ניסוי'); return; }
+  if(!confirm('למחוק את '+n+' שינויי הניסוי ולחזור לציונים האמיתיים?')) return;
+  state.students.forEach(s=>{ delete s.simg; });
+  save(); render(); toast('שינויי הניסוי נמחקו — חזרנו לציונים האמיתיים');
+}
+function commitSim(){
+  const n=simCount();
+  if(!n){ toast('אין שינויים בתרחיש'); return; }
+  if(!confirm('להעביר '+n+' ציונים מהניסוי אל טבלת הציונים האמיתית?')) return;
+  state.students.forEach(s=>{
+    if(!s.simg) return;
+    s.grades=s.grades||{};
+    Object.keys(s.simg).forEach(k=>{ s.grades[k]=s.simg[k]; });
+    delete s.simg;
+  });
+  save(); render(); toast(n+' ציונים הועברו לטבלה האמיתית');
+}
+const DEFAULT_LOGO='<svg viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;"><rect x="0" y="0" width="240" height="120" rx="16" fill="#ffffff"/><ellipse cx="120" cy="58" rx="112" ry="52" fill="none" stroke="#3db3e3" stroke-width="9"/><text x="196" y="38" text-anchor="middle" font-size="20" font-weight="900" font-style="italic" fill="#1b3a6b" font-family="Arial Black, Arial">ORT</text><text x="112" y="60" text-anchor="middle" font-size="44" font-weight="900" font-style="italic" fill="#1b3a6b" font-family="Arial Black, Arial" transform="skewX(-8)">אורט</text><text x="120" y="86" text-anchor="middle" font-size="21" font-weight="800" fill="#1b3a6b" font-family="Arial">אולפנת הראל</text><text x="120" y="105" text-anchor="middle" font-size="14" font-weight="700" fill="#3db3e3" font-family="Arial">נהריה</text></svg>';
+function logoHtml(size){
+  if(state.logo) return `<img src="${state.logo}" style="height:${size}px; max-width:${size*2.4}px; object-fit:contain; border-radius:10px; background:#fff; padding:2px;" alt="לוגו">`;
+  return `<span style="display:inline-block; width:${size*2}px; height:${size}px;">${DEFAULT_LOGO}</span>`;
+}
+function renderLogo(){ const s=document.getElementById('logoSlot'); if(s) s.innerHTML=logoHtml(54); }
+function uploadLogo(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    if(e.target.result.length>400000){ toast('התמונה גדולה מדי — נסי תמונה קטנה יותר'); return; }
+    state.logo=e.target.result; save(); renderLogo(); render(); toast('הלוגו עודכן');
+  };
+  reader.readAsDataURL(file);
+  input.value='';
+}
+/* ============ סימולטורים מרובים (שנתונים/כיתות) ============ */
+let profiles=[], currentProfileId='main';
+try{ profiles=JSON.parse(localStorage.getItem('bagrutProfiles'))||[]; }catch(e){ profiles=[]; }
+if(!profiles.length) profiles=[{id:'main',name:'',unnamed:1}];
+currentProfileId=localStorage.getItem('bagrutCurrentProfile')||profiles[0].id;
+if(!profiles.some(p=>p.id===currentProfileId)) currentProfileId=profiles[0].id;
+function profileKey(){ return currentProfileId==='main'?'bagrutSimPro':'bagrutSimPro:'+currentProfileId; }
+function saveProfiles(){ localStorage.setItem('bagrutProfiles',JSON.stringify(profiles)); localStorage.setItem('bagrutCurrentProfile',currentProfileId); }
+function renderProfileBar(){
+  const s=document.getElementById('profileSlot'); if(!s) return;
+  s.innerHTML=`<label style="color:#fff; font-size:12px; opacity:.85;">סימולטור:</label>
+  <select onchange="switchProfile(this.value)" style="border-radius:8px; padding:5px 8px; font-weight:700; max-width:170px;">
+    ${profiles.map(p=>`<option value="${p.id}" ${p.id===currentProfileId?'selected':''}>${esc(p.name||'(ללא שם)')}</option>`).join('')}
+  </select>
+  <button class="btn sm" style="background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4);" onclick="renameProfile()" title="שינוי שם הסימולטור">✏️</button>
+  <button class="btn sm" style="background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4);" onclick="newProfile()" title="יצירת סימולטור נפרד לשנתון או כיתה נוספת">➕ חדש</button>`;
+}
+function switchProfile(id){
+  if(!profiles.some(p=>p.id===id)) return;
+  currentProfileId=id; saveProfiles();
+  state=loadState(); renderProfileBar(); renderLogo(); render();
+  toast('עברת לסימולטור: '+profiles.find(p=>p.id===id).name);
+}
+function setProfileName(v){
+  const p=profiles.find(x=>x.id===currentProfileId); if(!p) return;
+  if(!v||!v.trim()){ toast('נא להזין שם'); return; }
+  p.name=v.trim(); delete p.unnamed; saveProfiles(); renderProfileBar(); render(); toast('שם הסימולטור: '+p.name);
+}
+function newProfile(){
+  const name=prompt('שם הסימולטור החדש (למשל: יב תשפ"ז, שכבת יא):');
+  if(!name||!name.trim()) return;
+  const nm=name.trim();
+  const id='p'+Date.now().toString(36);
+  profiles.push({id,name:nm}); currentProfileId=id; saveProfiles();
+  // סימולטור חדש מתחיל נקי לגמרי — בלי הכיתות של הסימולטור הקודם
+  state=JSON.parse(JSON.stringify(DEFAULT_STATE));
+  state.classes=[];
+  const first=prompt('שם הכיתה הראשונה בסימולטור "'+nm+'":', nm);
+  if(first&&first.trim()) state.classes.push(first.trim());
+  save();
+  renderProfileBar(); renderLogo(); setTab('students');
+  toast('נוצר סימולטור "'+nm+'"'+(state.classes.length?' עם כיתה "'+state.classes[0]+'"':'')+' — אפשר להוסיף תלמידות');
+}
+function renameProfile(){
+  const p=profiles.find(x=>x.id===currentProfileId);
+  const name=prompt('שם הסימולטור (למשל: יב תשפ"ו):',p.name||'');
+  if(name===null) return;
+  if(name.trim()){ p.name=name.trim(); delete p.unnamed; saveProfiles(); renderProfileBar(); render(); toast('השם עודכן'); }
+}
+function deleteProfile(){
+  if(profiles.length<=1){ toast('חייב להישאר לפחות סימולטור אחד'); return; }
+  const p=profiles.find(x=>x.id===currentProfileId);
+  if(!confirm(`למחוק לצמיתות את הסימולטור "${p.name}" על כל הנתונים שבו?`)) return;
+  localStorage.removeItem(profileKey());
+  profiles=profiles.filter(x=>x.id!==currentProfileId);
+  currentProfileId=profiles[0].id; saveProfiles();
+  state=loadState(); renderProfileBar(); renderLogo(); render();
+}
+let state=loadState();
+function loadState(){
+  try{const raw=localStorage.getItem(profileKey()); if(raw){const s=JSON.parse(raw); return Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)),s);}}catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_STATE));
+}
+let lastSaveAt=null, saveOk=null;
+function save(){
+  try{
+    const json=JSON.stringify(state);
+    localStorage.setItem(profileKey(),json);
+    // אימות אמיתי: קוראים בחזרה ומשווים
+    const back=localStorage.getItem(profileKey());
+    saveOk=(back===json);
+    lastSaveAt=new Date();
+    localStorage.setItem('bagrutLastSave:'+currentProfileId,lastSaveAt.toISOString());
+  }catch(e){
+    saveOk=false;
+    alert('⚠️ השמירה נכשלה! ייתכן שהדפדפן במצב גלישה בסתר או שהאחסון מלא.\nשגיאה: '+e.message+'\n\nמומלץ ללחוץ "💾 גיבוי" ולשמור את הקובץ מיד.');
+  }
+  renderSaveInd();
+}
+function storageBytes(){
+  let n=0;
+  try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf('bagrut')===0) n+=(k.length+(localStorage.getItem(k)||'').length)*2; } }catch(e){}
+  return n;
+}
+function renderSaveInd(){
+  const el=document.getElementById('saveInd'); if(!el) return;
+  if(!lastSaveAt){
+    try{ const t=localStorage.getItem('bagrutLastSave:'+currentProfileId); if(t) lastSaveAt=new Date(t); }catch(e){}
+  }
+  const n=state.students.length;
+  const t=lastSaveAt?lastSaveAt.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'}):'—';
+  if(saveOk===false){ el.innerHTML='<b style="color:#fecaca;">⚠️ השמירה נכשלה</b><br>לחצי כאן'; return; }
+  el.innerHTML=`<b>✓ נשמר ${t}</b><br>${n} תלמידות · ${Math.round(storageBytes()/1024)}KB`;
+}
+function uid(){ return 's'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
+
+/* ============ מנוע חישוב ============ */
+function getUnits(st,subj){
+  if(subj.opts.length===1) return subj.opts[0];
+  const u=(st.units||{})[subj.id];
+  return (u===0||u)?u:subj.opts[subj.opts.length-1];
+}
+function getComps(subj,u){
+  const base=subj.comps(u);
+  return base.map((c,i)=>{
+    const ov=state.custom[subj.id+'.'+u+'.'+i];
+    return ov?Object.assign({},c,ov):c;
+  });
+}
+// רכיבים אפקטיביים לתלמידה ספציפית: ברירת מחדל ← הגדרות גלובליות ← התאמה אישית לתלמידה
+function getCompsFor(st,subj,u){
+  const base=getComps(subj,u);
+  const stOv=st.ov||{};
+  return base.map((c,i)=>{
+    const po=stOv[subj.id+'.'+i];
+    if(!po) return c;
+    const merged=Object.assign({},c);
+    if(po.w!==undefined&&po.w!==null&&po.w!=='') merged.w=+po.w;
+    if(po.s!==undefined&&po.s!==null&&po.s!=='') merged.s=+po.s;
+    merged._custom=true;
+    return merged;
+  });
+}
+function hasOverrides(st,subj){
+  const stOv=st.ov||{};
+  return Object.keys(stOv).some(k=>k.startsWith(subj.id+'.')&&stOv[k]&&Object.keys(stOv[k]).length);
+}
+function num(v){ if(v===''||v===null||v===undefined) return null; const n=+v; return isNaN(n)?null:n; }
+// opts: {split: אחוז מגן גלובלי או null, predict:bool, bonus:number}
+function calcSubject(st,subj,opts){
+  opts=opts||{};
+  const u=getUnits(st,subj);
+  if(u===0) return {active:false,u:0};
+  const comps=getCompsFor(st,subj,u);
+  const g=gradesOf(st,opts.sim);
+  let sum=0, missing=0, gaps=[], flips=[], predictedUsed=false;
+  const details=[];
+  comps.forEach((c,i)=>{
+    if(!c.w){details.push(null); return;}
+    const key=subj.id+'.'+i;
+    let val=null;
+    if(c.t==='i'){
+      val=num(g[key]);
+      if(val===null) missing++;
+    }else{
+      let m=num(g[key+'.m']), e=num(g[key+'.e']);
+      if(opts.predict && e===null && m!==null){ e=m; predictedUsed=true; }
+      if(opts.bonus && e!==null){ e=Math.min(100,e+opts.bonus); }
+      let s=(opts.split!==null&&opts.split!==undefined)?opts.split:c.s;
+      // חוק ההיפוך: כשציון הבחינה גבוה מהמגן — המשקל הגדול עובר לבחינה
+      let flipped=false;
+      if(state.flipFav && s>0 && s<100 && m!==null && e!==null && e>m){
+        const lo=Math.min(s,100-s);
+        if(lo!==s){ s=lo; flipped=true; }
+      }
+      const needM=s>0, needE=s<100;
+      if((needM&&m===null)||(needE&&e===null)){ missing++; }
+      else{
+        // ציון הרכיב (מגן+בחינה) מעוגל לשלם לפי הכלל — 85.5 ← 86
+        val=Math.round((needM?m*s/100:0)+(needE?e*(100-s)/100:0));
+        if(flipped) flips.push({comp:c.n,m,e,s});
+        if(needM&&needE&&m-e>=state.thresholds.gap) gaps.push({comp:c.n,m,e});
+      }
+    }
+    if(val!==null) sum+=val*c.w/100;
+    details.push({comp:c,val:val===null?null:Math.round(val*10)/10});
+  });
+  const wSum=comps.reduce((a,c)=>a+(+c.w||0),0);
+  // נרמול: אם סך המשקלים שונה מ-100 (למשל אחרי הוספת עבודה נוספת) — האחוזים מתחלקים יחסית
+  // ציון סופי מעוגל לשלם: 85.5 ← 86 · 85.4 ← 85
+  const raw=(missing>0||wSum<=0)?null:sum/wSum*100;
+  const final=raw===null?null:Math.round(raw);
+  return {active:true,u,final,raw:raw===null?null:Math.round(raw*100)/100,missing,gaps,flips,details,predictedUsed,wSum,
+          internalOnly:!!subj.internalOnly,
+          blocker: final!==null&&final<state.thresholds.pass,
+          borderline: final!==null&&final>=state.thresholds.pass&&final<60};
+}
+function calcStudent(st,opts){
+  const per={}; let wsum=0, usum=0, blockers=[], missing=[], borderlines=[], gaps=[], flipList=[], anyFinal=false, predicted=false, predIn=[];
+  SUBJECTS.forEach(subj=>{
+    const r=calcSubject(st,subj,opts);
+    per[subj.id]=r;
+    if(!r.active) return;
+    if(subj.internalOnly&&!state.includeInternal) return; // מקצוע פנימי — לא נכלל בממוצע ובזכאות
+    if(r.final!==null){ wsum+=r.final*r.u; usum+=r.u; anyFinal=true; }
+    if(r.missing>0) missing.push(subj);
+    if(r.blocker) blockers.push(subj);
+    if(r.borderline) borderlines.push(subj);
+    if(r.gaps.length) gaps.push({subj,gaps:r.gaps});
+    if(r.flips&&r.flips.length) flipList.push({subj,flips:r.flips});
+    if(r.predictedUsed){ predicted=true; predIn.push(subj.name); }
+  });
+  const avg=usum>0?Math.round(wsum/usum*10)/10:null;
+  const totalUnits=SUBJECTS.reduce((a,s)=>{const r=per[s.id]; if(!r.active)return a; if(s.internalOnly&&!state.includeInternal)return a; return a+r.u;},0);
+  const complete=missing.length===0;
+  const eligible=complete&&blockers.length===0&&anyFinal;
+  // תנאי יח"ל להצטיינות: מתמטיקה 4-5 יח"ל + אנגלית 5 יח"ל
+  const uMath=per.math&&per.math.active?per.math.u:0;
+  const uEng=per.english&&per.english.active?per.english.u:0;
+  const unitsOk=!state.reqUnits||(uMath>=4&&uEng>=5);
+  let status, cls;
+  const T=state.thresholds;
+  if(!anyFinal){ status='אין נתונים'; cls='b-miss'; }
+  else if(blockers.length>0){ status='מעכבים: '+blockers.length; cls='b-bad'; }
+  else if(!complete){ status='חסר נתונים'; cls='b-miss'; }
+  else if(avg>T.excel&&unitsOk){ status='מצטיינת ⭐'; cls='b-exc'; }
+  else if(avg>=T.potential&&avg<=T.excel&&unitsOk){ status='פוטנציאל הצטיינות'; cls='b-pot'; }
+  else{ status='זכאית'; cls='b-ok'; }
+  return {per,avg,totalUnits,blockers,missing,borderlines,gaps,flipList,eligible,complete,status,cls,predicted,predIn,unitsOk,
+          excellent: eligible&&avg>T.excel&&unitsOk,
+          potential: complete&&blockers.length===0&&avg>=T.potential&&avg<=T.excel&&unitsOk};
+}
+function studentAlerts(st,r){
+  const A=[];
+  r.blockers.forEach(s=>A.push({sev:'bad',text:`${st.name}: ציון מעכב ב${s.name} (${r.per[s.id].final})`}));
+  r.borderlines.forEach(s=>A.push({sev:'warn',text:`${st.name}: ציון גבולי ב${s.name} (${r.per[s.id].final}) — מומלץ תגבור`}));
+  r.gaps.forEach(g=>g.gaps.forEach(x=>A.push({sev:'warn',text:`${st.name}: פער חריג ב${g.subj.name} · ${x.comp} — מגן ${x.m} מול בחינה ${x.e}`})));
+  if(r.complete&&r.blockers.length===0&&r.avg>=88&&r.avg<=state.thresholds.excel&&r.unitsOk)
+    A.push({sev:'pot',text:`${st.name}: ממוצע ${r.avg} — קרובה מאוד להצטיינות! נדרש ממוצע מעל ${state.thresholds.excel} (חסרות ${(state.thresholds.excel-r.avg+0.1).toFixed(1)} נק׳)`});
+  else if(r.potential) A.push({sev:'pot',text:`${st.name}: פוטנציאל הצטיינות (ממוצע ${r.avg})`});
+  if(r.complete&&r.blockers.length===0&&r.avg>=state.thresholds.potential&&!r.unitsOk)
+    A.push({sev:'pot',text:`${st.name}: ממוצע ${r.avg} אך אינה עומדת בתנאי היח"ל להצטיינות (נדרש: מתמטיקה 4-5 יח"ל + אנגלית 5 יח"ל)`});
+  const gs=st.gstat||{};
+  const nR=Object.values(gs).filter(v=>v==='r').length, nB=Object.values(gs).filter(v=>v==='b').length;
+  if(nR) A.push({sev:'warn',text:`${st.name}: ${nR} ציונים אמיתיים שטרם דווחו למשרד (מסומנים באדום)`});
+  if(nB) A.push({sev:'info',text:`${st.name}: ${nB} ציונים פיקטיביים/הערכות בשימוש (מסומנים בכחול) — לא ציונים סופיים`});
+  if(r.missing.length>0&&r.missing.length<=3) A.push({sev:'miss',text:`${st.name}: חסרים ציונים ב: ${r.missing.map(s=>s.name).join(', ')}`});
+  else if(r.missing.length>3) A.push({sev:'miss',text:`${st.name}: חסרים ציונים ב-${r.missing.length} מקצועות`});
+  return A;
+}
+function gradeClass(v){
+  if(v===null||v===undefined) return 'grade-miss';
+  if(v<state.thresholds.pass) return 'grade-bad';
+  if(v<60) return 'grade-warn';
+  if(v>state.thresholds.excel) return 'grade-exc';
+  return 'grade-ok';
+}
+function fmt(v){ return (v===null||v===undefined)?'—':(Math.round(v*10)/10); }
+
+/* ============ ניווט ============ */
+let currentTab='dash', charts={};
+function setTab(t){
+  currentTab=t;
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
+  render();
+}
+function destroyCharts(){ Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}}); charts={}; }
+function render(){
+  destroyCharts();
+  const m=document.getElementById('main');
+  if(currentTab==='dash') renderDash(m);
+  else if(currentTab==='students') renderStudents(m);
+  else if(currentTab==='entry') renderEntry(m);
+  else if(currentTab==='sim') renderSim(m);
+  else if(currentTab==='reports') renderReports(m);
+  else if(currentTab==='alerts') renderAlerts(m);
+  else if(currentTab==='settings') renderSettings(m);
+  else if(currentTab==='help') renderHelp(m);
+  renderSaveInd();
+}
+function classFilterHtml(id,val){
+  return `<select id="${id}" onchange="render()"><option value="">כל השכבה</option>${state.classes.map(c=>`<option ${val===c?'selected':''}>${c}</option>`).join('')}</select>`;
+}
+let dashClass='', entryClass='', entrySubj='lashon', reportClass='', alertClass='';
+function filteredStudents(cls){
+  return state.students.filter(s=>!cls||s.cls===cls);
+}
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ============ דשבורד ============ */
+function renderDash(m){
+  const cls=dashClass;
+  const studs=filteredStudents(cls);
+  const results=studs.map(st=>({st,r:calcStudent(st)}));
+  const n=studs.length;
+  const elig=results.filter(x=>x.r.eligible).length;
+  const exc=results.filter(x=>x.r.excellent).length;
+  const pot=results.filter(x=>x.r.potential).length;
+  const blocked=results.filter(x=>x.r.blockers.length>0).length;
+  const incomplete=results.filter(x=>!x.r.complete&&x.r.blockers.length===0).length;
+  const avgAll=avgOf(results.map(x=>x.r.avg).filter(v=>v!==null));
+  m.innerHTML=`
+  <div class="toolbar"><label>סינון כיתה:</label><select onchange="dashClass=this.value;render()">
+    <option value="">כל השכבה</option>${state.classes.map(c=>`<option ${dashClass===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+  </div>
+  ${state.students.length===0?`<div class="card" style="margin-bottom:16px; border:2px solid var(--brand); background:linear-gradient(135deg,#eef2ff,#fff);">
+    <h2 class="sec" style="font-size:17px;">👋 ברוכים הבאים — התוכנה ריקה ומוכנה</h2>
+    <div style="font-size:14px; line-height:1.9;">
+      <b>הדרך המהירה:</b> לחצי <b>📤 ייבוא מאקסל</b> בכותרת ובחרי את קובץ הסימולטור — כל התלמידות, הציונים, היח"ל, סמלי השאלונים וצבעי הדיווח ייקלטו אוטומטית, והכיתה תיווצר לבד.<br>
+      <b>או ידנית:</b> לשונית <b>👩‍🎓 תלמידות</b> ← יצירת כיתה ← הוספת שמות.<br>
+      <b>יש קובץ גיבוי?</b> לחצי <b>♻️ שחזור</b> בכותרת.
+    </div>
+    <div class="toolbar" style="margin-top:10px; margin-bottom:0; background:#fff; padding:8px 10px; border-radius:10px; border:1px solid var(--line);">
+      <label>שם הסימולטור:</label>
+      <input type="text" id="pfName" placeholder="למשל: יב תשפ&quot;ו" value="${esc((profiles.find(p=>p.id===currentProfileId)||{}).name||'')}" style="width:170px;">
+      <button class="btn ok sm" onclick="setProfileName(document.getElementById('pfName').value)">שמירת השם</button>
+    </div>
+    <div class="toolbar" style="margin-top:10px; margin-bottom:0;">
+      <button class="btn" onclick="document.getElementById('xlsxFile').click()">📤 ייבוא מאקסל</button>
+      <button class="btn sec" onclick="setTab('students')">👩‍🎓 הוספה ידנית</button>
+      <button class="btn sec" onclick="setTab('help')">❓ מדריך למשתמש</button>
+    </div>
+  </div>`:''}
+  <div class="kpis">
+    <div class="kpi k1"><div class="n">${n}</div><div class="t">תלמידות</div></div>
+    <div class="kpi k2"><div class="n">${elig}${n?` (${Math.round(elig/n*100)}%)`:''}</div><div class="t">זכאיות לבגרות</div></div>
+    <div class="kpi k3"><div class="n">${exc}</div><div class="t">מצטיינות (מעל ${state.thresholds.excel}) ⭐</div></div>
+    <div class="kpi k4"><div class="n">${pot}</div><div class="t">פוטנציאל (${state.thresholds.potential} עד ${state.thresholds.excel})</div></div>
+    <div class="kpi k5"><div class="n">${blocked}</div><div class="t">עם מקצועות מעכבים</div></div>
+    <div class="kpi k6"><div class="n">${avgAll===null?'—':avgAll}</div><div class="t">ממוצע שכבתי משוקלל</div></div>
+  </div>
+  ${(()=>{ let r=0,b=0; studs.forEach(s=>Object.values(s.gstat||{}).forEach(v=>{v==='r'?r++:v==='b'?b++:0;}));
+    return (r||b)?`<div class="card" style="padding:10px 14px; margin-bottom:14px;">${statusLegend()}
+      <div style="margin-top:6px; font-size:13px;">${r?`<span class="badge b-warn">🔴 ${r} ציונים אמיתיים שטרם דווחו למשרד</span> `:''}${b?`<span class="badge" style="background:#dbeafe; color:#1e40af;">🔵 ${b} ציונים פיקטיביים בשימוש</span>`:''}</div></div>`:''; })()}
+  <div class="grid2">
+    <div class="card"><h3 class="sec">התפלגות סטטוס</h3><div class="chartbox"><canvas id="chStatus"></canvas></div></div>
+    <div class="card"><h3 class="sec">ממוצע וזכאות לפי כיתה</h3><div class="chartbox"><canvas id="chClass"></canvas></div></div>
+    <div class="card"><h3 class="sec">ממוצע לפי מקצוע</h3><div class="chartbox"><canvas id="chSubj"></canvas></div></div>
+    <div class="card"><h3 class="sec">התפלגות ממוצעים</h3><div class="chartbox"><canvas id="chHist"></canvas></div></div>
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <h3 class="sec">🏆 מובילות השכבה — מצטיינות ופוטנציאל</h3>
+    <div class="scroll" style="max-height:400px;">${topTable(results)}</div>
+  </div>`;
+  if(n>0) drawDashCharts(results,cls);
+}
+function avgOf(arr){ return arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.length*10)/10:null; }
+function topTable(results){
+  const rows=results.filter(x=>x.r.avg!==null).sort((a,b)=>b.r.avg-a.r.avg).slice(0,15);
+  if(!rows.length) return '<div class="note">אין עדיין ציונים</div>';
+  return `<table class="tbl"><thead><tr><th>#</th><th>שם</th><th>כיתה</th><th>ממוצע משוקלל</th><th>יח"ל</th><th>סטטוס</th></tr></thead><tbody>
+  ${rows.map((x,i)=>`<tr><td>${i+1}</td><td><span class="name-link" onclick="openStudent('${x.st.id}')">${esc(x.st.name)}</span></td><td>${esc(x.st.cls)}</td>
+   <td class="${gradeClass(x.r.avg)}">${x.r.avg}</td><td>${x.r.totalUnits}</td><td class="status-cell"><span class="badge ${x.r.cls}">${x.r.status}</span></td></tr>`).join('')}
+  </tbody></table>`;
+}
+const PALETTE=['#f59e0b','#8b5cf6','#10b981','#f43f5e','#94a3b8','#64748b'];
+function drawDashCharts(results,cls){
+  const order=['מצטיינת','פוטנציאל','זכאית','מעכבים','חסר נתונים'];
+  const cnt=[results.filter(x=>x.r.excellent).length, results.filter(x=>x.r.potential).length,
+    results.filter(x=>x.r.eligible&&!x.r.excellent&&!x.r.potential).length,
+    results.filter(x=>x.r.blockers.length>0).length,
+    results.filter(x=>x.r.blockers.length===0&&!x.r.complete).length];
+  charts.st=new Chart(document.getElementById('chStatus'),{type:'doughnut',
+    data:{labels:order,datasets:[{data:cnt,backgroundColor:PALETTE}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'left',rtl:true,labels:{font:{family:'Segoe UI'}}}}}});
+  const classes=state.classes;
+  const cavg=classes.map(c=>{const rs=state.students.filter(s=>s.cls===c).map(s=>calcStudent(s).avg).filter(v=>v!==null); return avgOf(rs);});
+  const celig=classes.map(c=>{const ss=state.students.filter(s=>s.cls===c); if(!ss.length)return 0; return Math.round(ss.filter(s=>calcStudent(s).eligible).length/ss.length*100);});
+  charts.cl=new Chart(document.getElementById('chClass'),{type:'bar',
+    data:{labels:classes,datasets:[{label:'ממוצע משוקלל',data:cavg,backgroundColor:'#6366f1',borderRadius:6},{label:'% זכאות',data:celig,backgroundColor:'#10b981',borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100}},plugins:{legend:{rtl:true}}}});
+  const savg=SUBJECTS.map(sub=>{const vs=results.map(x=>x.r.per[sub.id]).filter(r=>r&&r.active&&r.final!==null).map(r=>r.final); return avgOf(vs);});
+  charts.sj=new Chart(document.getElementById('chSubj'),{type:'bar',
+    data:{labels:SUBJECTS.map(s=>s.name),datasets:[{label:'ממוצע',data:savg,backgroundColor:savg.map(v=>v===null?'#cbd5e1':v>=90?'#f59e0b':v>=75?'#6366f1':v>=55?'#f97316':'#ef4444'),borderRadius:6}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{min:0,max:100}},plugins:{legend:{display:false}}}});
+  const bins=[0,0,0,0,0,0]; const labels=['<55','55-64','65-74','75-84','85-89','90+'];
+  results.forEach(x=>{const v=x.r.avg; if(v===null)return; if(v<55)bins[0]++;else if(v<65)bins[1]++;else if(v<75)bins[2]++;else if(v<85)bins[3]++;else if(v<90)bins[4]++;else bins[5]++;});
+  charts.hi=new Chart(document.getElementById('chHist'),{type:'bar',
+    data:{labels,datasets:[{label:'תלמידות',data:bins,backgroundColor:['#ef4444','#f97316','#eab308','#6366f1','#8b5cf6','#f59e0b'],borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+}
+
+/* ============ תלמידות ============ */
+function renderStudents(m){
+  m.innerHTML=`
+  <div class="grid2">
+    <div class="card">
+      <h3 class="sec">הוספת תלמידה</h3>
+      ${state.classes.length?'':'<div class="alert-item al-info" style="margin-bottom:8px;">👈 שלב ראשון: צרי כיתה בחלונית "ניהול כיתות", ואז אפשר להוסיף תלמידות.</div>'}
+      <div class="toolbar">
+        <input type="text" id="newName" placeholder="שם התלמידה" style="width:180px;" ${state.classes.length?'':'disabled'}>
+        <select id="newCls" ${state.classes.length?'':'disabled'}>${state.classes.length?state.classes.map(c=>`<option>${esc(c)}</option>`).join(''):'<option value="">— אין כיתות —</option>'}</select>
+        <button class="btn ok" onclick="addStudent()" ${state.classes.length?'':'disabled style="opacity:.5;"'}>➕ הוספה</button>
+      </div>
+      <div class="note">אפשר גם להדביק רשימה: שם אחד בכל שורה</div>
+      <textarea id="bulkNames" rows="3" style="width:100%; margin-top:6px; border:1px solid #cbd5e1; border-radius:8px; padding:8px; font-family:inherit;" placeholder="שרה כהן&#10;רבקה לוי&#10;..."></textarea>
+      <button class="btn sec sm" style="margin-top:6px;" onclick="bulkAdd()">הוספת כל הרשימה</button>
+    </div>
+    <div class="card">
+      <h3 class="sec">ניהול כיתות</h3>
+      <div class="toolbar"><input type="text" id="newClsName" placeholder="למשל: יב-3" style="width:140px;"><button class="btn ok sm" onclick="addClass()">➕ כיתה</button></div>
+      <div>${state.classes.map(c=>`<span class="pill" style="margin:3px; display:inline-block;">${esc(c)} · ${state.students.filter(s=>s.cls===c).length} תלמידות
+        <a style="color:var(--bad); cursor:pointer; font-weight:800;" onclick="delClass('${esc(c)}')">✕</a></span>`).join('')||'<span class="note">אין כיתות — צרי כיתה למעלה, או ייבאי קובץ אקסל והכיתה תיווצר אוטומטית</span>'}</div>
+      <div style="margin-top:10px;"><button class="btn sec sm" onclick="loadDemo()" title="יוצר 24 תלמידות בדיוניות בכיתות יב-1/יב-2 — להתנסות בלבד">🎲 נתוני הדגמה (שמות בדיוניים)</button>
+      <button class="btn bad sm" onclick="if(confirm('למחוק את כל התלמידות (הכיתות יישארו)?')){state.students=[];save();render();}">🗑️ מחיקת כל התלמידות</button>
+      <button class="btn bad sm" onclick="if(confirm('למחוק את כל הכיתות ואת כל התלמידות בסימולטור הזה?')){state.students=[];state.classes=[];save();render();}">🧹 מחיקת כיתות + תלמידות</button></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <h3 class="sec">כל התלמידות (${state.students.length})</h3>
+    <div class="scroll">${allStudentsTable()}</div>
+  </div>`;
+}
+function allStudentsTable(){
+  if(!state.students.length) return '<div class="note">עדיין אין תלמידות</div>';
+  const rows=state.students.map(st=>({st,r:calcStudent(st)})).sort((a,b)=>a.st.cls.localeCompare(b.st.cls)||a.st.name.localeCompare(b.st.name));
+  return `<table class="tbl"><thead><tr><th>שם</th><th>כיתה</th><th>ממוצע</th><th>יח"ל</th><th>מעכבים</th><th>חסרים</th><th>סטטוס</th><th></th></tr></thead><tbody>
+  ${rows.map(x=>`<tr>
+    <td><span class="name-link" onclick="openStudent('${x.st.id}')">${esc(x.st.name)}</span></td>
+    <td><select onchange="setStudentClass('${x.st.id}',this.value)">${state.classes.map(c=>`<option ${x.st.cls===c?'selected':''}>${esc(c)}</option>`).join('')}</select></td>
+    <td class="${gradeClass(x.r.avg)}">${fmt(x.r.avg)}</td>
+    <td>${x.r.totalUnits}</td>
+    <td>${x.r.blockers.length?`<span class="badge b-bad">${x.r.blockers.map(s=>s.name).join(', ')}</span>`:'—'}</td>
+    <td>${x.r.missing.length||'—'}</td>
+    <td class="status-cell"><span class="badge ${x.r.cls}">${x.r.status}</span></td>
+    <td><button class="btn sec sm" onclick="openStudent('${x.st.id}')">✏️ ציונים</button>
+        <button class="btn bad sm" onclick="delStudent('${x.st.id}')">✕</button></td>
+  </tr>`).join('')}</tbody></table>`;
+}
+function addStudent(){
+  const name=document.getElementById('newName').value.trim();
+  const sel=document.getElementById('newCls');
+  const cls=sel?sel.value:'';
+  if(!name){toast('נא להזין שם');return;}
+  if(!cls){toast('קודם צרי כיתה — בחלונית "ניהול כיתות" משמאל');return;}
+  state.students.push({id:uid(),name,cls,units:{},mugbarNames:{},grades:{}});
+  save(); render(); toast('נוספה: '+name);
+}
+function bulkAdd(){
+  const sel=document.getElementById('newCls');
+  const cls=sel?sel.value:'';
+  if(!cls){toast('קודם צרי כיתה — בחלונית "ניהול כיתות" משמאל');return;}
+  const names=document.getElementById('bulkNames').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  if(!names.length){toast('לא הודבקו שמות');return;}
+  names.forEach(name=>state.students.push({id:uid(),name,cls,units:{},mugbarNames:{},grades:{}}));
+  save(); render(); toast(`נוספו ${names.length} תלמידות ל${cls}`);
+}
+function addClass(){
+  const c=document.getElementById('newClsName').value.trim();
+  if(!c||state.classes.includes(c)){toast('שם כיתה חסר או קיים');return;}
+  state.classes.push(c); save(); render();
+}
+function delClass(c){
+  const cnt=state.students.filter(s=>s.cls===c).length;
+  if(!confirm(`למחוק את כיתה ${c}${cnt?` יחד עם ${cnt} תלמידותיה`:''}?`)) return;
+  state.classes=state.classes.filter(x=>x!==c);
+  state.students=state.students.filter(s=>s.cls!==c);
+  save(); render();
+}
+function setStudentClass(id,val){
+  const st=state.students.find(s=>s.id===id); if(!st) return;
+  st.cls=val; save();
+  const modal=document.getElementById('studentModal');
+  if(modal.classList.contains('show')) openStudent(id); else render();
+}
+function delStudent(id){
+  const st=state.students.find(s=>s.id===id);
+  if(!confirm(`למחוק את ${st.name}?`)) return;
+  state.students=state.students.filter(s=>s.id!==id); save(); render();
+}
+
+/* ============ עורך תלמידה (מודאל) ============ */
+function openStudent(id){
+  const st=state.students.find(s=>s.id===id);
+  if(!st) return;
+  const box=document.getElementById('studentBox');
+  const r=calcStudent(st);
+  box.innerHTML=`
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+    <h2 class="sec" style="margin:0;">✏️ ${esc(st.name)}
+      <select onchange="setStudentClass('${st.id}',this.value)" style="margin-inline-start:4px;">${state.classes.map(c=>`<option ${st.cls===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+      <span class="badge ${r.cls}" style="margin-inline-start:8px;">${r.status}</span>
+      <span class="pill">ממוצע: ${fmt(r.avg)}</span><span class="pill">${r.totalUnits} יח"ל</span></h2>
+    <button class="btn sec sm" onclick="closeStudent()">סגירה ✕</button>
+  </div>
+  <div style="margin-bottom:10px;">${statusLegend()}</div>
+  ${SUBJECTS.map(subj=>studentSubjEditor(st,subj)).join('')}
+  <div style="text-align:left; margin-top:10px;"><button class="btn" onclick="closeStudent()">שמירה וסגירה</button></div>`;
+  document.getElementById('studentModal').classList.add('show');
+}
+function studentSubjEditor(st,subj){
+  const u=getUnits(st,subj);
+  const r=calcSubject(st,subj);
+  const unitsSel=subj.opts.length>1?`<select onchange="setUnits('${st.id}','${subj.id}',this.value)">${subj.opts.map(o=>`<option value="${o}" ${o===u?'selected':''}>${o===0?'לא נלמד':o+' יח"ל'}</option>`).join('')}</select>`:`<span class="pill">${u} יח"ל</span>`;
+  const nameInput=subj.named?`<input type="text" style="width:130px;" placeholder="שם המקצוע" value="${esc((st.mugbarNames||{})[subj.id]||'')}" onchange="setMugbarName('${st.id}','${subj.id}',this.value)">`:'';
+  const custom=hasOverrides(st,subj);
+  let body='';
+  if(u===0){ body='<div class="note">לא נלמד</div>'; }
+  else{
+    const baseComps=getComps(subj,u);
+    const comps=getCompsFor(st,subj,u);
+    const stOv=st.ov||{}, codes=st.codes||{};
+    body=`<div class="comp-grid">${comps.map((c,i)=>{
+      // במקצועות מוגברים וברכיב "עבודה נוספת" מציגים גם רכיבים במשקל 0 כדי לאפשר הפעלה; בשאר מסתירים
+      if(!c.w&&!subj.named&&!c.b) return '';
+      const key=subj.id+'.'+i, g=st.grades||{};
+      const po=stOv[key]||{};
+      const wOv=po.w!==undefined&&po.w!==null&&po.w!=='';
+      const sOv=po.s!==undefined&&po.s!==null&&po.s!=='';
+      const codeIn=`<div class="comp-inputs" style="margin-top:4px;">סמל ${codeSelect(st,key)}</div>`;
+      const wIn=`משקל <input type="number" min="0" max="100" style="width:52px; ${wOv?'border-color:var(--brand2); background:#f5f3ff; font-weight:700;':''}" value="${wOv?po.w:''}" placeholder="${baseComps[i].w}" title="ברירת מחדל: ${baseComps[i].w}% — הזנת ערך יוצרת התאמה אישית לתלמידה זו" onchange="setOv('${st.id}','${key}','w',this.value)">%`;
+      const stBtn=k=>{ const s=gstatOf(st,k); const ic=s?GSTAT[s].ic:'⚫';
+        return `<button class="btn sec sm" style="padding:2px 6px; font-size:11px;" onclick="cycleGstat('${st.id}','${k}')" title="${s?esc(GSTAT[s].lbl):'דווח למשרד'} — לחצי להחלפה">${ic}</button>`; };
+      if(c.t==='i'){
+        return `<div class="comp-box" ${wOv?'style="border-color:var(--brand2);"':c.b?'style="background:#f0fdf4; border-color:#86efac;"':''}><div class="cn">${esc(c.n)}${c.b&&!c.w?' <span class="pill" style="background:#dcfce7; color:#166534;">לשיפור ציון — הזיני משקל להפעלה</span>':''}</div>
+        <div class="comp-row"><span class="lbl">ציון</span><input type="number" min="0" max="100" class="${gstatCls(st,key).trim()}" value="${g[key]??''}" onchange="setGrade('${st.id}','${key}',this.value)">${stBtn(key)}
+        ${(()=>{const dv=(r.details||[])[i]; const v=dv&&dv.val!==null&&dv.val!==undefined?dv.val:null;
+          return (v!==null&&c.w)?`<span class="pill" title="תרומה לציון הסופי">= ${Math.round(v*c.w/100*10)/10} נק׳ מתוך ${c.w}</span>`:'';})()}</div>
+        <div class="comp-row"><span class="lbl">משקל</span>${wIn}</div>
+        <div class="comp-row"><span class="lbl">סמל</span>${codeSelect(st,key)}</div></div>`;
+      }
+      const fl=(r.flips||[]).find(f=>f.comp===c.n);
+      const flBadge=fl?` <span class="badge b-warn" title="ציון הבחינה (${fl.e}) גבוה מהמגן (${fl.m}) — המשקל הגדול עבר לבחינה: מגן ${fl.s}% / בחינה ${100-fl.s}%">🔀 היפוך לטובת הבחינה</span>`:'';
+      const sSel=`<select style="font-size:11px; ${sOv?'border-color:var(--brand2); background:#f5f3ff; font-weight:700;':''}" onchange="setOv('${st.id}','${key}','s',this.value)">
+        <option value="">מגן ${baseComps[i].s}/${100-baseComps[i].s} (רגיל)</option>
+        ${[70,60,50,40,30,20,0].map(s=>`<option value="${s}" ${sOv&&+po.s===s?'selected':''}>מגן ${s}% / בחינה ${100-s}%</option>`).join('')}</select>`;
+      const eff=c.s;  // אחוז המגן בפועל
+      const dv=(r.details||[])[i];
+      const cVal=dv&&dv.val!==null&&dv.val!==undefined?dv.val:null;
+      const contrib=cVal!==null&&c.w?Math.round(cVal*c.w/100*10)/10:null;
+      const rowFinal=`<div class="comp-row" style="background:#f8faff; border-top:2px solid var(--line); font-weight:800;">
+        <span class="lbl">ציון הרכיב</span>
+        <span class="${gradeClass(cVal)}" style="font-size:14px;">${cVal===null?'—':cVal}</span>
+        ${contrib!==null?`<span class="pill" title="תרומת הרכיב לציון הסופי במקצוע: ${cVal} × ${c.w}%">= ${contrib} נק׳ מתוך ${c.w}</span>`:''}
+      </div>`;
+      const rowM=eff>0?`<div class="comp-row"><span class="lbl">ציון מגן</span><input type="number" min="0" max="100" class="${gstatCls(st,key+'.m').trim()}" value="${g[key+'.m']??''}" onchange="setGrade('${st.id}','${key}.m',this.value)">${stBtn(key+'.m')}<span class="pill">${eff}%</span></div>`:'';
+      const rowE=eff<100?`<div class="comp-row"><span class="lbl">ציון בחינה</span><input type="number" min="0" max="100" class="${gstatCls(st,key+'.e').trim()}" value="${g[key+'.e']??''}" onchange="setGrade('${st.id}','${key}.e',this.value)">${stBtn(key+'.e')}<span class="pill">${100-eff}%</span>${eff===0?' <span class="pill" style="background:#e0e7ff; color:#3730a3;">ללא מגן — 100% בחינה</span>':''}</div>`:'';
+      return `<div class="comp-box" ${(wOv||sOv)?'style="border-color:var(--brand2); box-shadow:0 0 0 1px var(--brand2);"':''}><div class="cn">${esc(c.n)}${c.w?'':' <span class="pill">כבוי — הזיני משקל להפעלה</span>'}${flBadge}</div>
+      ${rowM}${rowE}${rowFinal}
+      <div class="comp-row"><span class="lbl">חלוקה</span>${sSel}</div>
+      <div class="comp-row"><span class="lbl">משקל</span>${wIn}</div>
+      <div class="comp-row"><span class="lbl">סמל</span>${codeSelect(st,key)}</div></div>`;
+    }).join('')}</div>`;
+    if(Math.round(r.wSum)!==100&&!subj.internalOnly) body+=`<div class="note" style="color:var(--warn); font-weight:700;">ℹ️ סה"כ משקלי הרכיבים: ${r.wSum}% — הציון הסופי מחושב בחלוקה יחסית (למשל אחרי הוספת עבודה נוספת)</div>`;
+  }
+  const finalHtml=u===0?'':`${subj.internalOnly&&!state.includeInternal?'<span class="pill">לא נכלל בממוצע</span> ':''}${custom?'<span class="badge b-pot">מותאם אישית</span> ':''}<span class="${gradeClass(r.final)}" style="font-size:15px; font-weight:800;" title="${r.raw!==null?'לפני עיגול: '+r.raw:''}">${fmt(r.final)}</span>${r.blocker&&!subj.internalOnly?' <span class="badge b-bad">מעכב</span>':''}${r.missing?' <span class="badge b-miss">חסר</span>':''}`;
+  const resetBtn=custom?`<button class="btn sec sm" onclick="event.stopPropagation();resetOv('${st.id}','${subj.id}')" title="ביטול ההתאמות האישיות במקצוע זה">↩️ איפוס התאמות</button>`:'';
+  const presetSel=subj.named?`<select onclick="event.stopPropagation()" onchange="applyMugbarPreset('${st.id}','${subj.id}',this.value)" style="font-size:11.5px;" title="החלת מבנה משקלים וסמלי שאלונים מקטלוג בית הספר">
+    <option value="">📋 מבנה מהקטלוג...</option>
+    ${Object.keys(MUGBAR_PRESETS).map(p=>`<option>${esc(p)}</option>`).join('')}</select>`:'';
+  return `<div class="subj-card open"><div class="subj-head"><span>${esc(subj.name)} ${nameInput} ${unitsSel} ${presetSel} ${resetBtn}</span><span>${finalHtml}</span></div>
+  <div class="subj-body">${body}</div></div>`;
+}
+function setOv(id,key,field,val){
+  const st=state.students.find(s=>s.id===id); if(!st) return;
+  st.ov=st.ov||{};
+  if(val===''||val===null){ if(st.ov[key]){ delete st.ov[key][field]; if(!Object.keys(st.ov[key]).length) delete st.ov[key]; } }
+  else{ st.ov[key]=st.ov[key]||{}; st.ov[key][field]=+val; }
+  save(); refreshOpenViews(id);
+}
+function resetOv(id,sid){
+  const st=state.students.find(s=>s.id===id); if(!st||!st.ov) return;
+  Object.keys(st.ov).filter(k=>k.startsWith(sid+'.')).forEach(k=>delete st.ov[k]);
+  save(); refreshOpenViews(id);
+}
+function setCode(id,key,val){
+  const st=state.students.find(s=>s.id===id); if(!st) return;
+  st.codes=st.codes||{};
+  if(!val.trim()) delete st.codes[key]; else st.codes[key]=val.trim();
+  save();
+}
+function setGrade(id,key,val){
+  const st=state.students.find(s=>s.id===id); if(!st) return;
+  st.grades=st.grades||{};
+  if(val===''||val===null) delete st.grades[key];
+  else st.grades[key]=Math.max(0,Math.min(100,+val));
+  save(); refreshOpenViews(id);
+}
+function setUnits(id,sid,val){
+  const st=state.students.find(s=>s.id===id); if(!st) return;
+  st.units=st.units||{}; st.units[sid]=+val;
+  save(); refreshOpenViews(id,true);
+}
+function setMugbarName(id,sid,val){
+  const st=state.students.find(s=>s.id===id); if(!st) return;
+  st.mugbarNames=st.mugbarNames||{}; st.mugbarNames[sid]=val.trim();
+  save();
+}
+function refreshOpenViews(id,full){
+  const modal=document.getElementById('studentModal');
+  if(modal.classList.contains('show')) openStudent(id);
+  else if(currentTab==='entry'&&full) render();
+}
+function closeStudent(){
+  document.getElementById('studentModal').classList.remove('show');
+  render();
+}
+/* ============ הזנת ציונים לפי מקצוע ============ */
+function renderEntry(m){
+  const subj=SUBJ_MAP[entrySubj]||SUBJECTS[0];
+  const studs=filteredStudents(entryClass).sort((a,b)=>a.name.localeCompare(b.name));
+  m.innerHTML=`
+  <div class="toolbar">
+    <label>מקצוע:</label><select onchange="entrySubj=this.value;render()">${SUBJECTS.map(s=>`<option value="${s.id}" ${s.id===entrySubj?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
+    <label>כיתה:</label><select onchange="entryClass=this.value;render()"><option value="">כל השכבה</option>${state.classes.map(c=>`<option ${entryClass===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+    <button class="btn ok sm" onclick="openGradeImport()">📋 ייבוא ציונים למקצוע (הדבקה / אקסל)</button>
+    <span class="pill">💡 לחיצה על שם תלמידה פותחת עריכה מלאה של כל המקצועות</span>
+  </div>
+  <div class="card" style="padding:10px 14px; margin-bottom:12px;">${statusLegend()}
+    <div class="toolbar" style="margin:8px 0 0; padding-top:8px; border-top:1px dashed var(--line);">
+      <label><b>🎨 צביעה גורפת לכל הכיתה במקצוע זה:</b></label>
+      <select id="ecScope" style="max-width:220px;">
+        <option value="all">כל הציונים במקצוע</option>
+        ${(()=>{const sj=SUBJ_MAP[entrySubj]||SUBJECTS[0]; const u=sj.opts[sj.opts.length-1];
+          return getComps(sj,u).map((c,i)=>{
+            if(!c.w&&!c.b) return '';
+            if(c.t==='i') return `<option value="${i}|g">${esc(c.n)}</option>`;
+            let o='';
+            if(c.s>0) o+=`<option value="${i}|m">${esc(c.n)} — ציון מגן</option>`;
+            if(c.s<100) o+=`<option value="${i}|e">${esc(c.n)} — ציון בחינה</option>`;
+            if(c.s>0&&c.s<100) o+=`<option value="${i}|b">${esc(c.n)} — מגן + בחינה</option>`;
+            return o;
+          }).join('');})()}
+      </select>
+      <select id="ecColor">
+        <option value="">⚫ שחור — דווח למשרד</option>
+        <option value="r">🔴 אדום — אמיתי, טרם דווח</option>
+        <option value="b">🔵 כחול — פיקטיבי / הערכה</option>
+      </select>
+      <button class="btn ok sm" onclick="applyEntryColor()">🎨 החל על ${filteredStudents(entryClass).length} תלמידות</button>
+    </div>
+  </div>
+  <div class="card"><div class="scroll">${entryGrid(subj,studs)}</div></div>`;
+}
+function entryGrid(subj,studs){
+  if(!studs.length) return '<div class="note">אין תלמידות — הוסיפי בלשונית "תלמידות"</div>';
+  // כותרות לפי יח"ל מקסימלי כדי לכלול את כל הרכיבים
+  const maxU=subj.opts[subj.opts.length-1];
+  const headComps=subj.comps(maxU);
+  let head=`<tr><th>שם</th>${subj.opts.length>1?'<th>יח"ל</th>':''}${subj.named?'<th>מקצוע</th>':''}`;
+  headComps.forEach((c,i)=>{
+    head+=c.t==='i'?`<th>${esc(c.n)}</th>`:`<th>${esc(c.n)}<br><small>${c.s===0?'100% בחינה':(c.s===100?'מגן בלבד':'מגן '+c.s+'% / בחינה '+(100-c.s)+'%')}</small></th>`;
+  });
+  head+='<th>ציון סופי</th><th>סטטוס</th></tr>';
+  const rows=studs.map(st=>{
+    const u=getUnits(st,subj);
+    const r=calcSubject(st,subj);
+    const comps=u===0?[]:getCompsFor(st,subj,u);
+    let tds=`<td><span class="name-link" onclick="openStudent('${st.id}')">${esc(st.name)}</span><br><small style="color:var(--muted)">${esc(st.cls)}</small></td>`;
+    if(subj.opts.length>1) tds+=`<td><select onchange="setUnits('${st.id}','${subj.id}',this.value)">${subj.opts.map(o=>`<option value="${o}" ${o===u?'selected':''}>${o===0?'—':o}</option>`).join('')}</select></td>`;
+    if(subj.named) tds+=`<td><input type="text" style="width:110px;" value="${esc((st.mugbarNames||{})[subj.id]||'')}" onchange="setMugbarName('${st.id}','${subj.id}',this.value)"></td>`;
+    headComps.forEach((hc,i)=>{
+      const c=comps[i];
+      if(u===0||!c||!c.w){ tds+='<td style="color:#cbd5e1;">—</td>'; return; }
+      const key=subj.id+'.'+i, g=st.grades||{};
+      const kc=k=>((g[k]==null?'cell-miss':'')+gstatCls(st,k));
+      const ct=k=>`oncontextmenu="event.preventDefault();cycleGstat('${st.id}','${k}')" title="לחיצה ימנית: שחור→אדום→כחול"`;
+      if(c.t==='i'){
+        tds+=`<td><input type="number" min="0" max="100" class="${kc(key)}" ${ct(key)} value="${g[key]??''}" onchange="setGrade('${st.id}','${key}',this.value)"></td>`;
+      }else{
+        const eff=c.s;
+        const rM=eff>0?`<div style="display:flex; gap:4px; align-items:center; justify-content:flex-end;"><small style="color:var(--muted);">מגן</small><input type="number" min="0" max="100" class="${kc(key+'.m')}" ${ct(key+'.m')} value="${g[key+'.m']??''}" onchange="setGrade('${st.id}','${key}.m',this.value)"></div>`:'';
+        const rE=eff<100?`<div style="display:flex; gap:4px; align-items:center; justify-content:flex-end; ${eff>0?'margin-top:3px;':''}"><small style="color:var(--muted);">בחינה</small><input type="number" min="0" max="100" class="${kc(key+'.e')}" ${ct(key+'.e')} value="${g[key+'.e']??''}" onchange="setGrade('${st.id}','${key}.e',this.value)"></div>`:'';
+        tds+=`<td>${rM}${rE}</td>`;
+      }
+    });
+    const flIc=(r.flips&&r.flips.length)?' <span title="היפוך אחוזים לטובת הבחינה ב: '+esc(r.flips.map(f=>f.comp).join(', '))+'">🔀</span>':'';
+    const stat=u===0?'—':r.blocker?'<span class="badge b-bad">מעכב</span>':r.missing?'<span class="badge b-miss">חסר</span>':r.borderline?'<span class="badge b-warn">גבולי</span>':(r.final>state.thresholds.excel?'<span class="badge b-exc">מצוין</span>':'<span class="badge b-ok">תקין</span>');
+    tds+=`<td class="${gradeClass(u===0?null:r.final)}" id="fin-${st.id}" style="font-weight:800;">${u===0?'—':fmt(r.final)}${flIc}</td><td>${stat}</td>`;
+    return `<tr>${tds}</tr>`;
+  }).join('');
+  return `<table class="tbl"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
+}
+
+/* ============ ייבוא ציונים למקצוע בודד (הדבקה מוורד/אקסל או קובץ) ============ */
+let gi={subj:'',comp:0,target:'e',rows:[],map:{},color:''};
+function normName(s){
+  return String(s||'').replace(/["'`׳״]/g,'').replace(/\s+/g,' ').trim();
+}
+function matchStudent(name,pool){
+  const n=normName(name);
+  if(!n) return null;
+  let f=pool.find(s=>normName(s.name)===n);
+  if(f) return f;
+  const rev=n.split(' ').reverse().join(' ');
+  f=pool.find(s=>normName(s.name)===rev);
+  if(f) return f;
+  const words=n.split(' ').filter(Boolean);
+  const cands=pool.filter(s=>{ const sw=normName(s.name).split(' '); return words.every(w=>sw.some(x=>x===w)); });
+  if(cands.length===1) return cands[0];
+  const part=pool.filter(s=>normName(s.name).indexOf(n)===0||n.indexOf(normName(s.name))===0);
+  return part.length===1?part[0]:null;
+}
+function openGradeImport(){
+  gi.subj=entrySubj; gi.comp=0; gi.target='e'; gi.rows=[]; gi.map={}; gi.color='';
+  renderGradeImport();
+  document.getElementById('giModal').classList.add('show');
+}
+function closeGradeImport(){ document.getElementById('giModal').classList.remove('show'); render(); }
+function giCompOptions(){
+  const subj=SUBJ_MAP[gi.subj]||SUBJECTS[0];
+  const u=subj.opts[subj.opts.length-1];
+  return getComps(subj,u).map((c,i)=>({i,n:c.n,t:c.t,s:c.s,w:c.w})).filter(c=>c.w||c.t==='e');
+}
+function renderGradeImport(){
+  const box=document.getElementById('giBox');
+  const subj=SUBJ_MAP[gi.subj]||SUBJECTS[0];
+  const comps=giCompOptions();
+  const cur=comps.find(c=>c.i===gi.comp)||comps[0]||{t:'i',s:0};
+  const isExt=cur.t==='e';
+  const pool=state.students.filter(s=>!entryClass||s.cls===entryClass);
+  let preview='';
+  if(gi.rows.length){
+    const rows=gi.rows.map((r,idx)=>{
+      const manual=gi.map[idx];
+      let st=null, how='';
+      if(manual==='__skip'){ st=null; how='skip'; }
+      else if(manual){ st=pool.find(s=>s.id===manual)||null; how='manual'; }
+      else { st=matchStudent(r.name,pool); how=st?'auto':''; }
+      return {...r,idx,st,how};
+    });
+    const okN=rows.filter(r=>r.st).length;
+    const unmatched=rows.filter(r=>!r.st&&r.how!=='skip').length;
+    const opts=pool.slice().sort((a,b)=>a.name.localeCompare(b.name));
+    preview=`<h3 class="sec" style="margin-top:12px;">תצוגה מקדימה — ${okN} מתוך ${rows.length} מוכנות להזנה${unmatched?` · <span style="color:var(--bad);">${unmatched} לא זוהו — אפשר לבחור ידנית</span>`:''}</h3>
+    <div class="note" style="margin-bottom:6px;">בעמודה "התלמידה במערכת" אפשר לאשר, לתקן זיהוי שגוי, או לבחור ידנית תלמידה שלא זוהתה אוטומטית.</div>
+    <div class="scroll" style="max-height:36vh;"><table class="tbl"><thead><tr><th>שם בקובץ</th><th>ציון</th><th>התלמידה במערכת</th><th>זיהוי</th></tr></thead><tbody>
+    ${rows.map(r=>`<tr ${!r.st&&r.how!=='skip'?'style="background:#fff1f2;"':''}>
+      <td>${esc(r.name)}</td>
+      <td class="${gi.color==='r'?'g-red':gi.color==='b'?'g-blue':''}" style="font-weight:800;">${r.grade}</td>
+      <td><select onchange="giSetMap(${r.idx},this.value)" style="max-width:190px; ${!r.st&&r.how!=='skip'?'border-color:var(--bad);':''}">
+        <option value="">— בחרי תלמידה —</option>
+        <option value="__skip" ${r.how==='skip'?'selected':''}>⏭️ לדלג על שורה זו</option>
+        ${opts.map(s=>`<option value="${s.id}" ${r.st&&r.st.id===s.id?'selected':''}>${esc(s.name)} · ${esc(s.cls)}</option>`).join('')}
+      </select></td>
+      <td>${r.how==='auto'?'<span class="badge b-ok">אוטומטי</span>':r.how==='manual'?'<span class="badge b-pot">אישור ידני</span>':r.how==='skip'?'<span class="badge b-miss">מדולגת</span>':'<span class="badge b-bad">לא זוהתה</span>'}</td>
+    </tr>`).join('')}
+    </tbody></table></div>
+    <div class="toolbar" style="margin-top:10px;">
+      <button class="btn ok" onclick="giApply()">✅ החלת ${okN} ציונים${gi.color?(gi.color==='r'?' 🔴':' 🔵'):''}</button>
+      <button class="btn sec" onclick="gi.rows=[];gi.map={};renderGradeImport()">ניקוי</button>
+    </div>`;
+  }
+  box.innerHTML=`
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+    <h2 class="sec" style="margin:0;">📋 ייבוא ציונים למקצוע</h2>
+    <button class="btn sec sm" onclick="closeGradeImport()">סגירה ✕</button>
+  </div>
+  <div class="note" style="margin-bottom:10px;">מעתיקים מוורד/אקסל את רשימת השמות והציונים (שתי עמודות) ומדביקים כאן — או בוחרים קובץ אקסל. המערכת מזהה כל תלמידה לפי השם ומראה תצוגה מקדימה לפני ההחלה.</div>
+  <div class="toolbar">
+    <label>מקצוע:</label><select onchange="gi.subj=this.value;gi.comp=0;renderGradeImport()">${SUBJECTS.filter(s=>!s.internalOnly).map(s=>`<option value="${s.id}" ${s.id===gi.subj?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
+    <label>רכיב:</label><select onchange="gi.comp=+this.value;renderGradeImport()">${comps.map(c=>`<option value="${c.i}" ${c.i===gi.comp?'selected':''}>${esc(c.n)}</option>`).join('')}</select>
+    ${isExt?`<label>סוג הציון:</label><select onchange="gi.target=this.value">
+      <option value="e" ${gi.target==='e'?'selected':''}>ציון בחינה</option>
+      <option value="m" ${gi.target==='m'?'selected':''}>ציון מגן</option></select>`:'<span class="pill">הערכה פנימית — ציון אחד</span>'}
+    <label>כיתה:</label><span class="pill">${esc(entryClass||'כל השכבה')}</span>
+  </div>
+  <div class="toolbar" style="background:#f8faff; padding:8px 10px; border-radius:10px; border:1px solid var(--line);">
+    <label><b>צבע הציונים שייכנסו (לכל הקבוצה):</b></label>
+    <select onchange="gi.color=this.value;renderGradeImport()">
+      <option value="" ${gi.color===''?'selected':''}>⚫ שחור — דווח למשרד</option>
+      <option value="r" ${gi.color==='r'?'selected':''}>🔴 אדום — אמיתי, טרם דווח</option>
+      <option value="b" ${gi.color==='b'?'selected':''}>🔵 כחול — פיקטיבי / הערכה</option>
+    </select>
+    <span class="pill ${gi.color==='r'?'g-red':gi.color==='b'?'g-blue':''}">כל הציונים בייבוא זה יסומנו בצבע שנבחר</span>
+  </div>
+  <div class="grid2" style="margin-top:10px;">
+    <div>
+      <label style="font-weight:700; font-size:13px;">הדבקה (שם + ציון בכל שורה):</label>
+      <textarea id="giText" rows="8" style="width:100%; margin-top:6px; border:1px solid #cbd5e1; border-radius:8px; padding:8px; font-family:inherit;" placeholder="שרה כהן	88&#10;רבקה לוי	92&#10;או: שרה כהן 88"></textarea>
+      <button class="btn sm" style="margin-top:6px;" onclick="giParseText()">🔍 בדיקה וזיהוי</button>
+    </div>
+    <div>
+      <label style="font-weight:700; font-size:13px;">או קובץ אקסל (עמודת שמות + עמודת ציונים):</label><br>
+      <button class="btn sec sm" style="margin-top:6px;" onclick="document.getElementById('giFile').click()">📂 בחירת קובץ אקסל</button>
+      <input type="file" id="giFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="giParseFile(this)">
+      <div class="note" style="margin-top:8px;">מוורד: סמנו את הטבלה ← העתקה ← הדבקה בשדה שמשמאל.</div>
+    </div>
+  </div>
+  ${preview}`;
+}
+function giSetMap(idx,val){
+  if(val==='') delete gi.map[idx]; else gi.map[idx]=val;
+  renderGradeImport();
+}
+function giParseText(){
+  const t=(document.getElementById('giText')||{}).value||'';
+  const rows=[];
+  t.split('\n').forEach(line=>{
+    const s=line.trim(); if(!s) return;
+    const m=s.match(/^(.+?)[\t,;]+\s*(\d{1,3}(?:\.\d+)?)\s*$/)||s.match(/^(.+?)\s+(\d{1,3}(?:\.\d+)?)\s*$/);
+    if(!m) return;
+    const g=+m[2];
+    if(g<0||g>100) return;
+    rows.push({name:m[1].trim(),grade:g});
+  });
+  if(!rows.length){ toast('לא זוהו שורות — ודאי שכל שורה היא: שם ואחריו ציון'); return; }
+  gi.rows=rows; gi.map={}; renderGradeImport();
+}
+function giParseFile(input){
+  const file=input.files[0]; if(!file) return;
+  const rd=new FileReader();
+  rd.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const aoa=XLSX.utils.sheet_to_json(ws,{header:1,blankrows:false});
+      // זיהוי עמודת שמות (טקסט) ועמודת ציונים (מספרים 0-100)
+      const width=Math.max(...aoa.map(r=>r.length));
+      const score=[],txt=[];
+      for(let c=0;c<width;c++){ let n=0,s=0;
+        aoa.forEach(r=>{ const v=r[c];
+          if(typeof v==='number'&&v>=0&&v<=100) n++;
+          else if(typeof v==='string'&&v.trim().length>1&&!/^\d+$/.test(v.trim())) s++; });
+        score[c]=n; txt[c]=s; }
+      const nameCol=txt.indexOf(Math.max(...txt));
+      let gCol=-1,best=-1;
+      for(let c=0;c<width;c++){ if(c!==nameCol&&score[c]>best){best=score[c];gCol=c;} }
+      if(nameCol<0||gCol<0){ toast('לא זוהו עמודות שם וציון בקובץ'); input.value=''; return; }
+      const rows=[];
+      aoa.forEach(r=>{ const nm=r[nameCol], g=r[gCol];
+        if(typeof nm!=='string'||!nm.trim()) return;
+        const gv=typeof g==='number'?g:(g!==undefined&&g!==''&&!isNaN(+g)?+g:null);
+        if(gv===null||gv<0||gv>100) return;
+        rows.push({name:nm.trim(),grade:Math.round(gv*10)/10}); });
+      if(!rows.length){ toast('לא נמצאו שורות עם שם וציון'); input.value=''; return; }
+      gi.rows=rows; gi.map={}; renderGradeImport(); toast(`נקראו ${rows.length} שורות מהקובץ`);
+    }catch(err){ toast('שגיאה בקריאת הקובץ: '+err.message); }
+    input.value='';
+  };
+  rd.readAsArrayBuffer(file);
+}
+function giApply(){
+  const subj=SUBJ_MAP[gi.subj]||SUBJECTS[0];
+  const comps=giCompOptions();
+  const cur=comps.find(c=>c.i===gi.comp)||comps[0];
+  const pool=state.students.filter(s=>!entryClass||s.cls===entryClass);
+  let n=0, skipped=[];
+  gi.rows.forEach((r,idx)=>{
+    const manual=gi.map[idx];
+    let st;
+    if(manual==='__skip'){ return; }
+    else if(manual) st=pool.find(s=>s.id===manual);
+    else st=matchStudent(r.name,pool);
+    if(!st){ skipped.push(r.name); return; }
+    const base=subj.id+'.'+cur.i;
+    const key=cur.t==='e'?base+'.'+gi.target:base;
+    st.grades=st.grades||{};
+    st.grades[key]=Math.max(0,Math.min(100,r.grade));
+    st.gstat=st.gstat||{};
+    if(gi.color) st.gstat[key]=gi.color; else delete st.gstat[key];
+    n++;
+  });
+  save();
+  const cTxt=gi.color==='r'?' (אדום — טרם דווח)':gi.color==='b'?' (כחול — פיקטיבי)':' (שחור — דווח)';
+  toast(`הוזנו ${n} ציונים ב${subj.name} · ${cur.n}${cTxt}`+(skipped.length?` · ${skipped.length} לא זוהו ודולגו`:''));
+  gi.rows=[]; closeGradeImport();
+}
+
+/* ============ צביעה גורפת בלשונית ההזנה ============ */
+function applyEntryColor(){
+  const subj=SUBJ_MAP[entrySubj]||SUBJECTS[0];
+  const scope=(document.getElementById('ecScope')||{}).value||'all';
+  const color=(document.getElementById('ecColor')||{}).value||'';
+  const studs=filteredStudents(entryClass);
+  if(!studs.length){ toast('אין תלמידות בבחירה'); return; }
+  const cTxt=color==='r'?'🔴 אדום (טרם דווח)':color==='b'?'🔵 כחול (פיקטיבי)':'⚫ שחור (דווח למשרד)';
+  const sTxt=scope==='all'?'כל הציונים במקצוע':'הרכיב שנבחר';
+  if(!confirm(`לצבוע ${sTxt} ב${subj.name} אצל ${studs.length} תלמידות בצבע ${cTxt}?\n(רק ציונים שהוזנו — תאים ריקים לא ישתנו)`)) return;
+  let n=0;
+  studs.forEach(st=>{
+    const u=getUnits(st,subj); if(u===0) return;
+    const comps=getCompsFor(st,subj,u);
+    st.gstat=st.gstat||{};
+    const mark=k=>{ if((st.grades||{})[k]===undefined) return;
+      if(color) st.gstat[k]=color; else delete st.gstat[k]; n++; };
+    if(scope==='all'){
+      comps.forEach((c,i)=>{ const base=subj.id+'.'+i;
+        if(c.t==='i') mark(base); else { mark(base+'.m'); mark(base+'.e'); } });
+    }else{
+      const [idxS,part]=String(scope).split('|');
+      const i=+idxS, base=subj.id+'.'+i;
+      if(part==='g') mark(base);
+      else if(part==='m') mark(base+'.m');
+      else if(part==='e') mark(base+'.e');
+      else { mark(base+'.m'); mark(base+'.e'); }
+    }
+  });
+  save(); render();
+  toast(`נצבעו ${n} ציונים ב${subj.name} — ${cTxt}`);
+}
+
+/* ============ סימולציה — סביבה עצמאית שלא נוגעת בציונים האמיתיים ============ */
+let simSplit='', simPredict=false, simBonus=0, simClass='', simSubj='lashon';
+function renderSim(m){
+  const opts={split:simSplit===''?null:+simSplit, predict:simPredict, bonus:+simBonus, sim:true};
+  const studs=filteredStudents(simClass);
+  const base=studs.map(st=>({st,r:calcStudent(st)}));           // המצב האמיתי
+  const sim=studs.map(st=>({st,r:calcStudent(st,opts)}));       // התרחיש
+  const bE=base.filter(x=>x.r.eligible).length, sE=sim.filter(x=>x.r.eligible).length;
+  const bX=base.filter(x=>x.r.excellent).length, sX=sim.filter(x=>x.r.excellent).length;
+  const bP=base.filter(x=>x.r.potential).length, sP=sim.filter(x=>x.r.potential).length;
+  const bB=base.filter(x=>x.r.blockers.length>0).length, sB=sim.filter(x=>x.r.blockers.length>0).length;
+  const delta=(a,b)=>b===a?'':(b>a?`<span class="delta-up"> ▲+${b-a}</span>`:`<span class="delta-dn"> ▼${b-a}</span>`);
+  const changed=[];
+  for(let i=0;i<studs.length;i++){
+    const b=base[i].r, s=sim[i].r;
+    if(b.status!==s.status||b.avg!==s.avg) changed.push({st:studs[i],b,s});
+  }
+  changed.sort((a,b)=>(b.s.avg||0)-(a.s.avg||0));
+  const nSim=simCount();
+  const simSubjObj=SUBJ_MAP[simSubj]||SUBJECTS[0];
+  m.innerHTML=`
+  <div class="card" style="margin-bottom:14px; background:linear-gradient(135deg,#fffbeb,#fff); border:2px solid #f59e0b;">
+    <h2 class="sec">🧪 סימולציה — איך זה עובד? פשוט:</h2>
+    <div style="font-size:13.5px; line-height:1.8;">
+      <b>1.</b> הטבלה למטה היא <b>העתק ניסוי</b> של הציונים האמיתיים — שני בה מה שתרצי. כל שינוי נצבע <span style="background:#fff7ed; border:1px solid #f59e0b; color:#b45309; padding:1px 6px; border-radius:6px; font-weight:700;">בכתום</span> ו<b>לא נוגע</b> בטבלת הציונים האמיתית.<br>
+      <b>2.</b> רוצה חיזוי אוטומטי? סמני 🔮 למטה — כל בחינה שחסרה תושלם לפי ציון המגן. (ברירת המחדל: ידני — את שולטת.)<br>
+      <b>3.</b> התוצאות למטה משוות תמיד: <b>מצב אמיתי ← מול ← התרחיש שלך.</b>
+    </div>
+    <div class="toolbar" style="margin-top:10px; margin-bottom:0;">
+      <span class="pill" style="${nSim?'background:#fff7ed; border-color:#f59e0b; color:#b45309; font-weight:700;':''}">${nSim} שינויי ניסוי</span>
+      <button class="btn warn sm" onclick="clearSim()">🧹 מחיקת השינויים</button>
+      <button class="btn ok sm" onclick="commitSim()">💾 העברת השינויים לטבלה האמיתית</button>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <h3 class="sec">✏️ טבלת הניסוי — שני ציונים חופשי</h3>
+    <div class="toolbar">
+      <label>מקצוע:</label><select onchange="simSubj=this.value;render()">${SUBJECTS.filter(s=>!s.internalOnly).map(s=>`<option value="${s.id}" ${s.id===simSubj?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
+      <label>כיתה:</label><select onchange="simClass=this.value;render()"><option value="">כל השכבה</option>${state.classes.map(c=>`<option ${simClass===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+    </div>
+    <div class="scroll" style="max-height:45vh;">${simGrid(simSubjObj,studs.slice().sort((a,b)=>a.name.localeCompare(b.name)))}</div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <h3 class="sec">⚙️ תרחישים כלליים (אופציונלי)</h3>
+    <div class="toolbar" style="margin-bottom:0;">
+      <label><input type="checkbox" ${simPredict?'checked':''} onchange="simPredict=this.checked;render()"> 🔮 חיזוי אוטומטי: בחינה חסרה = ציון המגן</label>
+      <label>חלוקת מגן/בחינה בכל הבחינות:</label>
+      <select onchange="simSplit=this.value;render()">
+        <option value="" ${simSplit===''?'selected':''}>לפי ההגדרות הקיימות</option>
+        <option value="70" ${simSplit==='70'?'selected':''}>מגן 70% / בחינה 30%</option>
+        <option value="60" ${simSplit==='60'?'selected':''}>מגן 60% / בחינה 40%</option>
+        <option value="50" ${simSplit==='50'?'selected':''}>מגן 50% / בחינה 50%</option>
+        <option value="40" ${simSplit==='40'?'selected':''}>מגן 40% / בחינה 60%</option>
+        <option value="30" ${simSplit==='30'?'selected':''}>מגן 30% / בחינה 70%</option>
+      </select>
+      <label>תוספת נק׳ לכל בחינה: <input type="number" min="0" max="15" value="${simBonus}" onchange="simBonus=this.value;render()"></label>
+    </div>
+  </div>
+  ${calcPanel(studs)}
+  ${simPredict?predictionPanel(studs):''}
+  <div class="kpis">
+    <div class="kpi k2"><div class="n">${sE}${delta(bE,sE)}</div><div class="t">זכאיות בתרחיש (אמיתי: ${bE})</div></div>
+    <div class="kpi k3"><div class="n">${sX}${delta(bX,sX)}</div><div class="t">מצטיינות בתרחיש (אמיתי: ${bX})</div></div>
+    <div class="kpi k4"><div class="n">${sP}${delta(bP,sP)}</div><div class="t">פוטנציאל בתרחיש (אמיתי: ${bP})</div></div>
+    <div class="kpi k5"><div class="n">${sB}${delta(bB,sB)}</div><div class="t">עם מעכבים בתרחיש (אמיתי: ${bB})</div></div>
+  </div>
+  <div class="card">
+    <h3 class="sec">תלמידות שהתרחיש משנה את מצבן (${changed.length})</h3>
+    <div class="scroll" style="max-height:55vh;">
+    ${changed.length?`<table class="tbl"><thead><tr><th>שם</th><th>כיתה</th><th>ממוצע אמיתי</th><th>ממוצע בתרחיש</th><th>סטטוס אמיתי</th><th>סטטוס בתרחיש</th></tr></thead><tbody>
+    ${changed.map(x=>`<tr><td><span class="name-link" onclick="openStudent('${x.st.id}')">${esc(x.st.name)}</span></td><td>${esc(x.st.cls)}</td>
+      <td>${fmt(x.b.avg)}</td><td class="${(x.s.avg||0)>(x.b.avg||0)?'delta-up':(x.s.avg||0)<(x.b.avg||0)?'delta-dn':''}">${fmt(x.s.avg)}</td>
+      <td><span class="badge ${x.b.cls}">${x.b.status}</span></td><td><span class="badge ${x.s.cls}">${x.s.status}</span></td></tr>`).join('')}
+    </tbody></table>`:'<div class="note">אין שינוי בין המצב האמיתי לתרחיש — שני ציון בטבלת הניסוי או בחרי תרחיש כללי</div>'}
+    </div>
+  </div>`;
+}
+// טבלת עריכה של הסימולציה: מציגה את הציונים האמיתיים, שינויים נשמרים בשכבת הניסוי בלבד
+function simGrid(subj,studs){
+  if(!studs.length) return '<div class="note">אין תלמידות</div>';
+  const maxU=subj.opts[subj.opts.length-1];
+  const headComps=subj.comps(maxU);
+  let head=`<tr><th>שם</th>${subj.opts.length>1?'<th>יח"ל</th>':''}`;
+  headComps.forEach(c=>{ head+=c.t==='i'?`<th>${esc(c.n)}</th>`:`<th>${esc(c.n)}<br><small>${c.s===0?'100% בחינה':'מגן '+c.s+'%'}</small></th>`; });
+  head+='<th>ציון אמיתי</th><th>ציון בניסוי</th></tr>';
+  const rows=studs.map(st=>{
+    const u=getUnits(st,subj);
+    const comps=u===0?[]:getCompsFor(st,subj,u);
+    const rReal=calcSubject(st,subj);
+    const rSim=calcSubject(st,subj,{sim:true});
+    const g=gradesOf(st,true);
+    let tds=`<td><span class="name-link" onclick="openStudent('${st.id}')">${esc(st.name)}</span><br><small style="color:var(--muted)">${esc(st.cls)}</small></td>`;
+    if(subj.opts.length>1) tds+=`<td>${u===0?'—':u}</td>`;
+    headComps.forEach((hc,i)=>{
+      const c=comps[i];
+      if(u===0||!c||!c.w){ tds+='<td style="color:#cbd5e1;">—</td>'; return; }
+      const key=subj.id+'.'+i;
+      const cls=k=>((g[k]==null?'cell-miss ':'')+(isSimKey(st,k)?'sim-cell':''));
+      if(c.t==='i'){
+        tds+=`<td><input type="number" min="0" max="100" class="${cls(key)}" value="${g[key]??''}" onchange="setGradeSim('${st.id}','${key}',this.value)"></td>`;
+      }else{
+        const eff=c.s;
+        const rM=eff>0?`<div style="display:flex; gap:4px; align-items:center; justify-content:flex-end;"><small style="color:var(--muted);">מגן</small><input type="number" min="0" max="100" class="${cls(key+'.m')}" value="${g[key+'.m']??''}" onchange="setGradeSim('${st.id}','${key}.m',this.value)"></div>`:'';
+        const rE=eff<100?`<div style="display:flex; gap:4px; align-items:center; justify-content:flex-end; ${eff>0?'margin-top:3px;':''}"><small style="color:var(--muted);">בחינה</small><input type="number" min="0" max="100" class="${cls(key+'.e')}" value="${g[key+'.e']??''}" onchange="setGradeSim('${st.id}','${key}.e',this.value)"></div>`:'';
+        tds+=`<td>${rM}${rE}</td>`;
+      }
+    });
+    const diff=u!==0&&rReal.final!==rSim.final;
+    tds+=`<td class="${gradeClass(u===0?null:rReal.final)}">${u===0?'—':fmt(rReal.final)}</td>
+    <td class="${gradeClass(u===0?null:rSim.final)}" style="font-weight:800; ${diff?'background:#fff7ed;':''}">${u===0?'—':fmt(rSim.final)}${diff?' 🔶':''}</td>`;
+    return `<tr>${tds}</tr>`;
+  }).join('');
+  return `<table class="tbl"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
+}
+
+/* ============ מחשבון "כמה צריך בהערכה הפנימית" ============ */
+// מאתר את רכיב ההערכה הפנימית שניתן לשחק בו
+function internalComp(st,subj){
+  const u=getUnits(st,subj); if(u===0) return null;
+  const comps=getCompsFor(st,subj,u);
+  for(let i=0;i<comps.length;i++){ if(comps[i].t==='i'&&comps[i].w>0) return {i,c:comps[i]}; }
+  return null;
+}
+// הציון המינימלי בהערכה הפנימית שיביא את ציון המקצוע ליעד (חיפוש מדויק, מכבד עיגול והיפוך)
+function neededInternalForSubject(st,subj,target){
+  const ic=internalComp(st,subj); if(!ic) return {ok:false,reason:'אין הערכה פנימית'};
+  const key=subj.id+'.'+ic.i;
+  st.grades=st.grades||{};
+  const orig=st.grades[key];
+  const start=orig===undefined?0:Math.max(0,Math.min(100,Math.ceil(orig)));
+  let found=null;
+  for(let x=start;x<=100;x++){   // רק העלאה — לא נציע להוריד ציון קיים
+    st.grades[key]=x;
+    const r=calcSubject(st,subj);
+    if(r.final!==null&&r.final>=target){ found=x; break; }
+  }
+  if(orig===undefined) delete st.grades[key]; else st.grades[key]=orig;
+  return found===null?{ok:false,reason:'לא ניתן להגיע ליעד'}:{ok:true,x:found,comp:ic.c.n,key,cur:orig===undefined?null:orig,w:ic.c.w};
+}
+// הציון המינימלי בהערכה פנימית של מקצוע כלשהו שיביא את הממוצע ליעד
+function neededInternalForAvg(st,target){
+  const best=[];
+  SUBJECTS.forEach(subj=>{
+    if(subj.internalOnly) return;
+    const ic=internalComp(st,subj); if(!ic) return;
+    const key=subj.id+'.'+ic.i;
+    st.grades=st.grades||{};
+    const orig=st.grades[key];
+    const start=orig===undefined?0:Math.max(0,Math.min(100,Math.ceil(orig)));
+    let found=null;
+    for(let x=start;x<=100;x++){   // רק העלאה
+      st.grades[key]=x;
+      const rr=calcStudent(st);
+      if(rr.avg!==null&&rr.avg>target){ found=x; break; }
+    }
+    if(orig===undefined) delete st.grades[key]; else st.grades[key]=orig;
+    if(found!==null) best.push({subj,x:found,cur:orig===undefined?null:orig,comp:ic.c.n,delta:found-(orig===undefined?0:orig)});
+  });
+  best.sort((a,b)=>a.delta-b.delta);
+  return best[0]||null;
+}
+// מסלול שני: העלאת כל ההערכות הפנימיות לרף אחיד X (רק אלה שמתחתיו)
+function neededInternalAll(st,target){
+  const keys=[];
+  SUBJECTS.forEach(subj=>{
+    if(subj.internalOnly) return;
+    const ic=internalComp(st,subj); if(!ic) return;
+    keys.push({key:subj.id+'.'+ic.i,name:subj.name});
+  });
+  if(!keys.length) return null;
+  st.grades=st.grades||{};
+  const orig={}; keys.forEach(k=>{ orig[k.key]=st.grades[k.key]; });
+  let found=null,changed=0;
+  for(let x=0;x<=100;x++){
+    let ch=0;
+    keys.forEach(k=>{ const cur=orig[k.key];
+      if(cur===undefined||cur<x){ st.grades[k.key]=x; ch++; } else st.grades[k.key]=cur; });
+    const rr=calcStudent(st);
+    if(rr.avg!==null&&rr.avg>target){ found=x; changed=ch; break; }
+  }
+  keys.forEach(k=>{ if(orig[k.key]===undefined) delete st.grades[k.key]; else st.grades[k.key]=orig[k.key]; });
+  return found===null?null:{x:found,changed,total:keys.length};
+}
+function calcPanel(studs){
+  const T=state.thresholds;
+  const passT=Math.ceil(T.pass); // ציון עובר בפועל (55)
+  const failRows=[];
+  studs.forEach(st=>{
+    SUBJECTS.forEach(subj=>{
+      if(subj.internalOnly) return;
+      const r=calcSubject(st,subj);
+      if(!r.active||r.final===null||r.final>=T.pass) return;
+      const need=neededInternalForSubject(st,subj,passT);
+      failRows.push({st,subj,cur:r.final,need});
+    });
+  });
+  const excRows=[];
+  studs.forEach(st=>{
+    const r=calcStudent(st);
+    if(r.avg===null||r.blockers.length||!r.complete) return;
+    if(r.avg>T.excel) return;                 // כבר מצטיינת
+    if(r.avg<T.excel-12) return;              // רחוקה מדי — לא רלוונטי
+    const n=neededInternalForAvg(st,T.excel);
+    const nAll=n?null:neededInternalAll(st,T.excel);
+    excRows.push({st,avg:r.avg,n,nAll,unitsOk:r.unitsOk});
+  });
+  excRows.sort((a,b)=>b.avg-a.avg);
+  if(!failRows.length&&!excRows.length) return '';
+  return `<div class="card" style="margin-bottom:14px; border:2px solid var(--ok);">
+    <h3 class="sec">🎯 מחשבון: כמה צריך בהערכה הפנימית?</h3>
+    <div class="note" style="margin-bottom:10px;">החישוב מבוסס על הציונים <b>האמיתיים</b> ומחפש את הציון המינימלי בהערכה הפנימית שמביא ליעד (מכבד עיגול, משקלים והיפוך אחוזים). זו המלצה לצורך שיקול דעת — ההזנה בפועל נעשית בטבלת הניסוי או בכרטיס התלמידה.</div>
+    ${failRows.length?`<h3 class="sec" style="font-size:14px; color:var(--bad);">🔴 כדי לעבור (${passT}) — ${failRows.length} מקצועות מעכבים</h3>
+    <div class="scroll" style="max-height:34vh; margin-bottom:12px;"><table class="tbl">
+    <thead><tr><th>תלמידה</th><th>מקצוע</th><th>ציון נוכחי</th><th>רכיב ההערכה</th><th>ציון נוכחי ברכיב</th><th>נדרש</th></tr></thead><tbody>
+    ${failRows.map(f=>`<tr><td><span class="name-link" onclick="openStudent('${f.st.id}')">${esc(f.st.name)}</span></td>
+      <td>${esc(f.subj.name)}</td><td class="grade-bad" style="font-weight:800;">${f.cur}</td>
+      <td>${f.need.ok?esc(f.need.comp)+' <span class="pill">'+f.need.w+'%</span>':'—'}</td>
+      <td>${f.need.ok?(f.need.cur===null?'<span class="badge b-miss">לא הוזן</span>':f.need.cur):'—'}</td>
+      <td>${f.need.ok?`<b style="color:var(--ok); font-size:15px;">${f.need.x}</b>${f.need.cur!==null&&f.need.x>f.need.cur?` <span class="pill">+${f.need.x-f.need.cur}</span>`:''}`:`<span class="badge b-bad">${esc(f.need.reason)}</span>`}</td>
+    </tr>`).join('')}</tbody></table></div>`:''}
+    ${excRows.length?`<h3 class="sec" style="font-size:14px; color:var(--gold);">⭐ כדי להצטיין (ממוצע מעל ${T.excel}) — ${excRows.length} תלמידות בטווח</h3>
+    <div class="scroll" style="max-height:34vh;"><table class="tbl">
+    <thead><tr><th>תלמידה</th><th>ממוצע נוכחי</th><th>הדרך הקצרה ביותר</th><th>ציון נדרש בהערכה הפנימית</th><th>תנאי יח"ל</th></tr></thead><tbody>
+    ${excRows.map(x=>`<tr><td><span class="name-link" onclick="openStudent('${x.st.id}')">${esc(x.st.name)}</span></td>
+      <td class="${gradeClass(x.avg)}" style="font-weight:800;">${x.avg}</td>
+      <td>${x.n?esc(x.n.subj.name)+' · '+esc(x.n.comp)
+            :(x.nAll?`<b>העלאת כל ההערכות הפנימיות</b> <span class="pill">${x.nAll.changed} מתוך ${x.nAll.total} רכיבים</span>`
+                    :'<span class="badge b-bad">לא ניתן להגיע דרך ההערכות הפנימיות</span>')}</td>
+      <td>${x.n?`<b style="color:var(--ok); font-size:15px;">${x.n.x}</b>${x.n.cur!==null?` <span class="pill">כרגע ${x.n.cur}${x.n.delta>0?' · +'+x.n.delta:''}</span>`:''}`
+             :(x.nAll?`<b style="color:var(--ok); font-size:15px;">${x.nAll.x}</b> <span class="pill">לכל רכיב שמתחת לרף</span>`:'—')}</td>
+      <td>${x.unitsOk?'✓':'<span class="badge b-warn">✗ לא עומדת</span>'}</td>
+    </tr>`).join('')}</tbody></table></div>`:''}
+  </div>`;
+}
+
+/* ============ חיזוי מצטיינות סוף שנה ============ */
+function predictionPanel(studs){
+  const T=state.thresholds;
+  const pOpts={split:simSplit===''?null:+simSplit, predict:true, bonus:+simBonus, sim:true};
+  const res=studs.map(st=>({st,r:calcStudent(st,pOpts)})).filter(x=>x.r.avg!==null);
+  if(!res.length) return '';
+  res.sort((a,b)=>b.r.avg-a.r.avg);
+  const exc=res.filter(x=>x.r.excellent);
+  const pot=res.filter(x=>x.r.potential);
+  const close=res.filter(x=>x.r.complete&&x.r.blockers.length===0&&x.r.unitsOk&&x.r.avg>=87&&x.r.avg<=T.excel);
+  const noUnits=res.filter(x=>x.r.complete&&x.r.blockers.length===0&&!x.r.unitsOk&&x.r.avg>=T.potential);
+  const gapCell=v=>{
+    const d=Math.round((v-T.excel)*10)/10;
+    if(d>0) return `<span class="delta-up">+${d} ✓</span>`;
+    return `<span class="${d>=-3?'grade-warn':'grade-bad'}" style="font-weight:800;">${d===0?'0 (לא מספיק — נדרש מעל)':d}</span>`;
+  };
+  return `<div class="card" style="margin-bottom:14px; border:2px solid var(--brand2);">
+    <h3 class="sec">🔮 חיזוי סוף שנה — מי צפויה להיות מצטיינת</h3>
+    <div class="note" style="margin-bottom:10px;">בתחילת השנה מזינים לכל רכיב את ציון המגן / הערכת המורה — והחיזוי משלים אוטומטית כל בחינה חסרה לפי המגן. ככל שמוזנים ציונים אמיתיים במהלך השנה, החיזוי מתעדכן ומתדייק.</div>
+    <div class="kpis">
+      <div class="kpi k3"><div class="n">${exc.length}</div><div class="t">מצטיינות צפויות ⭐</div></div>
+      <div class="kpi k4"><div class="n">${pot.length}</div><div class="t">פוטנציאל צפוי (${T.potential} עד ${T.excel})</div></div>
+      <div class="kpi k1"><div class="n">${close.length}</div><div class="t">במרחק נגיעה (87+)</div></div>
+      <div class="kpi k6"><div class="n">${noUnits.length}</div><div class="t">ממוצע גבוה בלי תנאי היח"ל</div></div>
+    </div>
+    <div class="scroll" style="max-height:50vh;">
+    <table class="tbl"><thead><tr><th>#</th><th>שם</th><th>כיתה</th><th>ממוצע חזוי</th><th>פער מהסף (מעל ${T.excel})</th><th>מבוסס חיזוי ב...</th><th>תנאי יח"ל</th><th>סטטוס חזוי</th></tr></thead><tbody>
+    ${res.slice(0,60).map((x,i)=>`<tr ${x.r.excellent?'style="background:#fffbeb;"':x.r.potential?'style="background:#f5f3ff;"':''}>
+      <td>${i+1}</td>
+      <td><span class="name-link" onclick="openStudent('${x.st.id}')">${esc(x.st.name)}</span></td>
+      <td>${esc(x.st.cls)}</td>
+      <td class="${gradeClass(x.r.avg)}" style="font-weight:800; font-size:14px;">${x.r.avg}</td>
+      <td>${gapCell(x.r.avg)}</td>
+      <td>${x.r.predIn.length?`<span class="pill" title="${esc(x.r.predIn.join(', '))}">${x.r.predIn.length} מקצועות</span>`:'<span class="badge b-ok">נתונים מלאים</span>'}</td>
+      <td>${x.r.unitsOk?'✓':'<span class="badge b-warn" title="נדרש: מתמטיקה 4-5 ואנגלית 5 יח&quot;ל">✗</span>'}</td>
+      <td><span class="badge ${x.r.cls}">${x.r.status}</span></td>
+    </tr>`).join('')}
+    </tbody></table></div>
+  </div>`;
+}
+
+/* ============ התראות ============ */
+function renderAlerts(m){
+  const studs=filteredStudents(alertClass);
+  let all=[];
+  studs.forEach(st=>{ all=all.concat(studentAlerts(st,calcStudent(st)).map(a=>({...a,st}))); });
+  const sevOrder={bad:0,warn:1,pot:2,info:3,miss:4};
+  all.sort((a,b)=>sevOrder[a.sev]-sevOrder[b.sev]);
+  const groups=[['bad','🔴 מעכבים — טיפול דחוף'],['warn','🟠 גבוליים, פערים חריגים וציונים שטרם דווחו'],['pot','🟣 פוטנציאל הצטיינות'],['info','🔵 ציונים פיקטיביים בשימוש'],['miss','⚪ ציונים חסרים']];
+  m.innerHTML=`
+  <div class="toolbar"><label>כיתה:</label><select onchange="alertClass=this.value;render()"><option value="">כל השכבה</option>${state.classes.map(c=>`<option ${alertClass===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+  <span class="pill">${all.length} התראות</span></div>
+  ${groups.map(([sev,title])=>{
+    const items=all.filter(a=>a.sev===sev);
+    if(!items.length) return '';
+    return `<div class="card" style="margin-bottom:14px;"><h3 class="sec">${title} (${items.length})</h3>
+    ${items.map(a=>`<div class="alert-item al-${a.sev}"><span class="name-link" onclick="openStudent('${a.st.id}')">${esc(a.st.name)}</span> · ${esc(a.text.replace(a.st.name+': ',''))}</div>`).join('')}</div>`;
+  }).join('')||'<div class="card"><div class="note">אין התראות 🎉</div></div>'}`;
+}
+
+/* ============ דוחות ============ */
+function renderReports(m){
+  m.innerHTML=`
+  <div class="toolbar">
+    <label>דוח עבור:</label><select onchange="reportClass=this.value;render()"><option value="">כל השכבה</option>${state.classes.map(c=>`<option ${reportClass===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+    <button class="btn" onclick="printReport()">🖨️ הדפסה / PDF</button>
+    <button class="btn ok" onclick="emailReport()">📧 שליחה במייל</button>
+    <button class="btn sec" onclick="copyReport()">📋 העתקת סיכום</button>
+    <button class="btn sec" onclick="exportExcel(reportClass)">📥 אקסל של הדוח</button>
+  </div>
+  <div class="card" id="reportBody">${buildReportHtml(reportClass)}</div>`;
+}
+function buildReportHtml(cls){
+  const studs=filteredStudents(cls).sort((a,b)=>a.cls.localeCompare(b.cls)||a.name.localeCompare(b.name));
+  const results=studs.map(st=>({st,r:calcStudent(st)}));
+  const n=studs.length;
+  if(!n) return '<div class="note">אין תלמידות</div>';
+  const elig=results.filter(x=>x.r.eligible).length;
+  const exc=results.filter(x=>x.r.excellent);
+  const pot=results.filter(x=>x.r.potential);
+  const blocked=results.filter(x=>x.r.blockers.length>0);
+  const avgAll=avgOf(results.map(x=>x.r.avg).filter(v=>v!==null));
+  const today=new Date().toLocaleDateString('he-IL');
+  const subjAvgs=SUBJECTS.map(sub=>{const vs=results.map(x=>x.r.per[sub.id]).filter(r=>r&&r.active&&r.final!==null).map(r=>r.final); return {name:sub.name,avg:avgOf(vs)};}).filter(x=>x.avg!==null);
+  let alerts=[];
+  results.forEach(x=>{ alerts=alerts.concat(studentAlerts(x.st,x.r).filter(a=>a.sev==='bad'||a.sev==='warn')); });
+  return `
+  <div style="display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:14px;">
+    ${logoHtml(48)}
+    <div style="text-align:center;">
+      <h2 style="font-size:20px;">אולפנת הראל · דוח מצב בגרות — ${cls?esc(cls):'כל השכבה'}</h2>
+      <div class="note">הופק בתאריך ${today} · סימולטור אולפנת הראל</div>
+    </div>
+  </div>
+  <div class="kpis">
+    <div class="kpi k1"><div class="n">${n}</div><div class="t">תלמידות</div></div>
+    <div class="kpi k2"><div class="n">${elig} (${Math.round(elig/n*100)}%)</div><div class="t">זכאיות</div></div>
+    <div class="kpi k3"><div class="n">${exc.length}</div><div class="t">מצטיינות</div></div>
+    <div class="kpi k4"><div class="n">${pot.length}</div><div class="t">פוטנציאל</div></div>
+    <div class="kpi k5"><div class="n">${blocked.length}</div><div class="t">עם מעכבים</div></div>
+    <div class="kpi k6"><div class="n">${avgAll===null?'—':avgAll}</div><div class="t">ממוצע</div></div>
+  </div>
+  <h3 class="sec">טבלת תלמידות מפורטת</h3>
+  <div class="scroll" style="max-height:none;">
+  <table class="tbl"><thead><tr><th>שם</th><th>כיתה</th>${SUBJECTS.map(s=>`<th>${esc(s.name)}</th>`).join('')}<th>ממוצע</th><th>סטטוס</th></tr></thead><tbody>
+  ${results.map(x=>`<tr><td style="font-weight:700;">${esc(x.st.name)}</td><td>${esc(x.st.cls)}</td>
+    ${SUBJECTS.map(s=>{const r=x.r.per[s.id]; if(!r||!r.active)return '<td style="color:#cbd5e1;">—</td>'; return `<td class="${gradeClass(r.final)}">${fmt(r.final)}</td>`;}).join('')}
+    <td class="${gradeClass(x.r.avg)}" style="font-weight:800;">${fmt(x.r.avg)}</td>
+    <td><span class="badge ${x.r.cls}">${x.r.status}</span></td></tr>`).join('')}
+  </tbody></table></div>
+  <div class="grid2" style="margin-top:16px;">
+    <div>
+      <h3 class="sec">⭐ מצטיינות (${exc.length})</h3>
+      ${exc.length?exc.sort((a,b)=>b.r.avg-a.r.avg).map(x=>`<div class="alert-item al-pot">${esc(x.st.name)} · ${esc(x.st.cls)} · ממוצע ${x.r.avg}</div>`).join(''):'<div class="note">אין עדיין</div>'}
+      <h3 class="sec" style="margin-top:12px;">💜 פוטנציאל הצטיינות (${pot.length})</h3>
+      ${pot.length?pot.sort((a,b)=>b.r.avg-a.r.avg).map(x=>`<div class="alert-item al-info">${esc(x.st.name)} · ${esc(x.st.cls)} · ממוצע ${x.r.avg} · נדרש מעל ${state.thresholds.excel}</div>`).join(''):'<div class="note">אין</div>'}
+    </div>
+    <div>
+      <h3 class="sec">🚨 דורשות התייחסות (${alerts.length})</h3>
+      ${alerts.slice(0,30).map(a=>`<div class="alert-item al-${a.sev}">${esc(a.text)}</div>`).join('')||'<div class="note">אין התראות</div>'}
+      ${alerts.length>30?`<div class="note">ועוד ${alerts.length-30} התראות — ראי לשונית התראות</div>`:''}
+      <h3 class="sec" style="margin-top:12px;">📚 ממוצע לפי מקצוע</h3>
+      <table class="tbl">${subjAvgs.map(x=>`<tr><td>${esc(x.name)}</td><td class="${gradeClass(x.avg)}" style="font-weight:700;">${x.avg}</td></tr>`).join('')}</table>
+    </div>
+  </div>`;
+}
+function printReport(){
+  document.getElementById('printArea').innerHTML='<div class="card" style="border:none; box-shadow:none;">'+buildReportHtml(reportClass)+'</div>';
+  document.body.classList.add('print-mode');
+  setTimeout(()=>{ window.print(); document.body.classList.remove('print-mode'); },100);
+}
+function reportText(cls){
+  const studs=filteredStudents(cls);
+  const results=studs.map(st=>({st,r:calcStudent(st)}));
+  const n=studs.length; if(!n) return 'אין נתונים';
+  const elig=results.filter(x=>x.r.eligible).length;
+  const exc=results.filter(x=>x.r.excellent);
+  const pot=results.filter(x=>x.r.potential);
+  const blocked=results.filter(x=>x.r.blockers.length>0);
+  const avgAll=avgOf(results.map(x=>x.r.avg).filter(v=>v!==null));
+  let t=`אולפנת הראל · דוח מצב בגרות — ${cls||'כל השכבה'} (${new Date().toLocaleDateString('he-IL')})\n`;
+  t+=`תלמידות: ${n} | זכאיות: ${elig} (${Math.round(elig/n*100)}%) | מצטיינות: ${exc.length} | פוטנציאל: ${pot.length} | עם מעכבים: ${blocked.length} | ממוצע: ${avgAll??'—'}\n\n`;
+  if(exc.length) t+='⭐ מצטיינות:\n'+exc.sort((a,b)=>b.r.avg-a.r.avg).map(x=>`  ${x.st.name} (${x.st.cls}) — ${x.r.avg}`).join('\n')+'\n\n';
+  if(pot.length) t+='💜 פוטנציאל הצטיינות:\n'+pot.sort((a,b)=>b.r.avg-a.r.avg).map(x=>`  ${x.st.name} (${x.st.cls}) — ${x.r.avg}`).join('\n')+'\n\n';
+  if(blocked.length) t+='🚨 עם מקצועות מעכבים:\n'+blocked.map(x=>`  ${x.st.name} (${x.st.cls}) — ${x.r.blockers.map(s=>s.name).join(', ')}`).join('\n')+'\n';
+  return t;
+}
+function emailReport(){
+  const t=reportText(reportClass);
+  const subj=encodeURIComponent(`אולפנת הראל · דוח מצב בגרות — ${reportClass||'כל השכבה'} — ${new Date().toLocaleDateString('he-IL')}`);
+  window.location.href=`mailto:?subject=${subj}&body=${encodeURIComponent(t)}`;
+}
+function copyReport(){
+  navigator.clipboard.writeText(reportText(reportClass)).then(()=>toast('הסיכום הועתק — אפשר להדביק במייל או בוואטסאפ'));
+}
+/* ============ הגדרות ============ */
+function renderSettings(m){
+  const T=state.thresholds;
+  m.innerHTML=`
+  <div class="card" style="margin-bottom:14px; border:2px solid var(--ok);">
+    <h2 class="sec">💾 מצב השמירה — האם הנתונים שלי בטוחים?</h2>
+    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>1.0</b> · 31.08.2026</span>
+    <span class="note">אחרי העלאת גרסה חדשה — רעננו את הדף (Ctrl+F5) וּודאו שהמספר כאן התעדכן.</span></div>
+    <div id="storageBox">${storageStatusHtml()}</div>
+    ${(()=>{const b=lastBackupInfo(); const cur=countAllStudents();
+      if(!b) return `<div class="alert-item al-bad" style="margin-top:10px;"><b>⚠️ עדיין לא נעשה גיבוי!</b> הנתונים קיימים רק בדפדפן הזה. לחצי "💾 גיבוי לקובץ" ושמרי אותו בדרייב.</div>`;
+      const days=Math.floor((Date.now()-new Date(b.at).getTime())/86400000);
+      const diff=cur-(b.n||0);
+      const stale=days>=7||diff!==0;
+      return `<div class="alert-item ${stale?'al-warn':'al-info'}" style="margin-top:10px;">
+        <b>גיבוי אחרון:</b> ${new Date(b.at).toLocaleString('he-IL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}
+        (לפני ${days===0?'פחות מיום':days+' ימים'}) · ${b.n} תלמידות
+        ${diff!==0?` · <b>מאז נוספו/הוסרו ${Math.abs(diff)} תלמידות — כדאי לגבות שוב</b>`:''}
+        ${days>=7&&diff===0?' · <b>עבר שבוע — כדאי לגבות שוב</b>':''}</div>`;})()}
+    <div class="toolbar" style="margin-top:10px; margin-bottom:0;">
+      <button class="btn ok sm" onclick="testSave()">🧪 בדיקת שמירה עכשיו</button>
+      <button class="btn sm" onclick="exportJSON()">💾 גיבוי לקובץ</button>
+      <button class="btn sec sm" onclick="document.getElementById('jsonFile').click()">♻️ שחזור מגיבוי</button>
+      <button class="btn bad sm" onclick="factoryReset()" title="מוחק את כל הסימולטורים, הכיתות והתלמידות במכשיר הזה ומחזיר את התוכנה למצב חדש">🗑️ איפוס מלא — התחלה מאפס</button>
+    </div>
+    <div class="note">"איפוס מלא" מוחק את כל הנתונים ששמורים בדפדפן במכשיר הזה ומחזיר תוכנה נקייה לגמרי. מומלץ ללחוץ "💾 גיבוי" קודם.</div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <h2 class="sec">🗂️ ניהול סימולטורים</h2>
+    <div class="toolbar">
+      <span class="pill">סימולטור נוכחי: <b>${esc((profiles.find(p=>p.id===currentProfileId)||{}).name||'(ללא שם)')}</b></span>
+      <button class="btn ok sm" onclick="newProfile()">➕ סימולטור חדש לשנתון/כיתה</button>
+      <button class="btn sec sm" onclick="renameProfile()">✏️ שינוי שם</button>
+      <button class="btn bad sm" onclick="deleteProfile()">🗑️ מחיקת הסימולטור הנוכחי</button>
+    </div>
+    <div class="note">כל סימולטור הוא סביבה נפרדת לחלוטין — תלמידות, כיתות, ציונים והגדרות משלו. מעבר בין סימולטורים דרך התפריט בכותרת העליונה. כך אפשר לנהל במקביל את יב, יא, ושנתונים קודמים.</div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <h2 class="sec">🏫 לוגו בית הספר</h2>
+    <div class="toolbar">
+      ${logoHtml(48)}
+      <button class="btn sec sm" onclick="document.getElementById('logoFile').click()">📷 העלאת לוגו</button>
+      ${state.logo?'<button class="btn bad sm" onclick="state.logo=null;save();renderLogo();render();">חזרה ללוגו המובנה</button>':'<span class="note">מוצג לוגו אורט אולפנת הראל המובנה — להחלפה בקובץ התמונה המקורי לחצי על "העלאת לוגו"</span>'}
+      <input type="file" id="logoFile" accept="image/*" style="display:none" onchange="uploadLogo(this)">
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <h2 class="sec">⭐ תנאי הצטיינות</h2>
+    <div class="toolbar">
+      <label><input type="checkbox" ${state.reqUnits?'checked':''} onchange="state.reqUnits=this.checked;save();render();">
+      "מצטיינת" ו"פוטנציאל הצטיינות" רק לתלמידות עם מתמטיקה 4/5 יח"ל <b>וגם</b> אנגלית 5 יח"ל</label>
+    </div>
+    <div class="note"><b>תנאי ההצטיינות המלאים:</b> אנגלית 5 יח"ל · מתמטיקה 4 או 5 יח"ל · ממוצע משוקלל <b>מעל 90</b> (90.0 בדיוק אינו מספיק) · ללא מקצועות מעכבים.<br>
+    תלמידה עם ממוצע גבוה שאינה עומדת בתנאי היח"ל תסומן "זכאית" ותקבל התראה מתאימה בלשונית ההתראות.</div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <h2 class="sec">⚙️ ספי חישוב</h2>
+    <div class="toolbar">
+      <label>ציון מעכב מתחת ל: <input type="number" value="${T.pass}" step="0.5" onchange="T_set('pass',this.value)"></label>
+      <label>סף הצטיינות (נדרש ממוצע <b>מעל</b> הערך): <input type="number" value="${T.excel}" onchange="T_set('excel',this.value)"></label>
+      <label>סף פוטנציאל: <input type="number" value="${T.potential}" onchange="T_set('potential',this.value)"></label>
+      <label>התראת פער מגן-בחינה מעל: <input type="number" value="${T.gap}" onchange="T_set('gap',this.value)"></label>
+    </div>
+    <div class="note"><b>עיגול:</b> הציון הסופי בכל מקצוע מעוגל למספר שלם — 85.5 ← 86, 85.4 ← 85. הממוצע המשוקלל מחושב מהציונים המעוגלים ומוצג בדיוק של ספרה אחת.</div>
+    <div class="note">ברירת המחדל למעכב היא 54.5 (כלומר ציון סופי 55 ומעלה נחשב עובר) — כפי שמוגדר בסימולטור המקורי.</div>
+    <div class="toolbar" style="margin-top:8px; background:#fffbeb; padding:8px 10px; border-radius:10px; border:1px solid #fcd34d;">
+      <label><input type="checkbox" ${state.flipFav?'checked':''} onchange="state.flipFav=this.checked;save();render();">
+      <b>🔀 היפוך אחוזים לטובת הבחינה</b> — כשציון הבחינה גבוה מציון המגן, המשקל הגדול עובר לבחינה</label>
+    </div>
+    <div class="note">למשל: ברירת מחדל מגן 60% / בחינה 40%; תלמידה קיבלה מגן 70 ובחינה 90 ← החישוב יהיה מגן 40% / בחינה 60% = 82 (במקום 78). כשהמגן גבוה מהבחינה — נשמרת חלוקת ברירת המחדל. ההיפוך מסומן 🔀 בכרטיס התלמידה.</div>
+    <div class="toolbar" style="margin-top:8px;">
+      <label><input type="checkbox" ${state.includeInternal?'checked':''} onchange="state.includeInternal=this.checked;save();render();">
+      לכלול מקצועות פנימיים (חנ"ג, מבוא למדעים, של"ח, חינוך תעבורתי) בממוצע, ביח"ל ובבדיקת מעכבים</label>
+    </div>
+    <div class="note">בקובץ המקורי מקצועות אלה מוזנים אך אינם נכללים בממוצע המשוקלל — לכן ברירת המחדל כבויה.</div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <h2 class="sec">📖 קטלוג שאלונים — בגרות גמישה (מהקובץ הבית-ספרי)</h2>
+    <div class="note" style="margin-bottom:8px;">המבנים והסמלים מוטמעים כברירת מחדל בכל המקצועות. במגמות — בחלון עריכת תלמידה יש "📋 מבנה מהקטלוג" שמחיל משקלים וסמלים בקליק.</div>
+    <div class="toolbar"><label>סינון לפי מקצוע:</label>
+      <select onchange="catFilter=this.value;render()">
+        <option value="">כל המקצועות</option>
+        ${[...new Set(QREF.map(q=>q.s))].map(s=>`<option ${catFilter===s?'selected':''}>${esc(s)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="scroll" style="max-height:55vh;">${catalogTable()}</div>
+  </div>
+  <div class="card" style="margin-bottom:14px; border:2px solid var(--brand2);">
+    <h2 class="sec">🔧 שינוי גורף — מקצוע שלם, כל התלמידות בבת אחת</h2>
+    <div class="note" style="margin-bottom:10px;">כאן משנים <b>לכל התלמידות בבת אחת</b>: סמלי שאלונים, חלוקת מגן/בחינה ומשקלים. בחרי מקצוע, מלאי בשורות הרלוונטיות ולחצי "החל" (או "🏷️ החלת כל הסמלים" לכל השורות יחד). השינוי <b>דורס גם התאמות אישיות קיימות</b>, כולל כאלה שנקלטו מהאקסל.</div>
+    <div class="toolbar">
+      <label>מקצוע:</label>
+      <select id="bkSubj" onchange="bulkSubj=this.value;render()">${SUBJECTS.filter(s=>!s.internalOnly).map(s=>`<option value="${s.id}" ${bulkSubj===s.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
+      <label>כיתה:</label>
+      <select id="bkCls"><option value="">כל הכיתות</option>${state.classes.map(c=>`<option>${esc(c)}</option>`).join('')}</select>
+    </div>
+    ${bulkRows()}
+    <div class="toolbar" style="margin-top:8px;">
+      <button class="btn ok" onclick="bulkCodesAll()">🏷️ החלת כל סמלי השאלונים שנבחרו — לכל התלמידות בבת אחת</button>
+    </div>
+    <div class="note" style="margin-top:8px;">💡 להחזרת מקצוע לברירת המחדל אצל כולן: <button class="btn sec sm" onclick="bulkClear()">↩️ ניקוי כל ההתאמות האישיות במקצוע זה</button></div>
+  </div>
+  <div class="card">
+    <h2 class="sec">📚 משקולות מקצועות — ברירת מחדל (חלה על תלמידות בלי התאמה אישית)</h2>
+    <div class="note" style="margin-bottom:10px;">כאן משנים את חלוקת האחוזים בין המגן לבחינה (30/70, 50/50, 40/60 וכו׳) ואת משקל כל רכיב בציון הסופי. השינוי חל על כל התלמידות. סה"כ משקלי הרכיבים בכל מקצוע צריך להיות 100.</div>
+    ${SUBJECTS.map(subj=>settingsSubj(subj)).join('')}
+    <button class="btn warn" onclick="if(confirm('לאפס את כל המשקולות לברירת המחדל?')){state.custom={};save();render();}">↩️ איפוס לברירות מחדל</button>
+  </div>`;
+}
+function T_set(k,v){ state.thresholds[k]=+v; save(); toast('נשמר'); }
+let bulkSubj='lashon';
+function bulkTargets(){
+  const cls=(document.getElementById('bkCls')||{}).value||'';
+  return state.students.filter(s=>!cls||s.cls===cls);
+}
+function bulkRows(){
+  const subj=SUBJ_MAP[bulkSubj]||SUBJECTS[0];
+  const u=subj.opts[subj.opts.length-1];
+  const comps=getComps(subj,u);
+  return `<div class="scroll" style="max-height:40vh;"><table class="tbl">
+  <thead><tr><th>רכיב</th><th>ברירת מחדל</th><th>סמל שאלון לכולן</th><th>חלוקת מגן/בחינה חדשה</th><th>משקל חדש</th><th></th></tr></thead><tbody>
+  ${comps.map((c,i)=>{
+    const key=subj.id+'.'+i;
+    const nOv=state.students.filter(s=>(s.ov||{})[key]).length;
+    return `<tr>
+      <td>${esc(c.n)}${c.b?' <span class="pill" style="background:#dcfce7;color:#166534;">עבודה נוספת</span>':''}</td>
+      <td>${c.w}%${c.t==='e'?(c.s===0?' · 100% בחינה':` · מגן ${c.s}/${100-c.s}`):''}</td>
+      <td>${(()=>{const opts=codeOptions(key);
+        const nC=state.students.filter(s=>(s.codes||{})[key]).length;
+        return `<select id="bc_${i}" style="font-size:11px; max-width:145px;"><option value="">— ללא שינוי —</option>${opts.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')}<option value="__c">אחר — הקלדה…</option></select>${nC?`<br><span class="pill">${nC} עם סמל</span>`:''}`;})()}</td>
+      <td>${c.t==='e'?`<select id="bs_${i}"><option value="">— ללא שינוי —</option>${[70,60,50,40,30,20,0].map(s=>`<option value="${s}">מגן ${s}% / בחינה ${100-s}%</option>`).join('')}</select>`:'<span class="note">הערכה פנימית</span>'}</td>
+      <td><input type="number" id="bw_${i}" min="0" max="100" placeholder="ללא" style="width:60px;"></td>
+      <td><button class="btn ok sm" onclick="bulkApply(${i})">החל</button>${nOv?`<br><span class="pill" title="לתלמידות אלה יש התאמה אישית שתידרס">${nOv} מותאמות</span>`:''}</td>
+    </tr>`;
+  }).join('')}
+  </tbody></table></div>`;
+}
+function bulkApply(i){
+  const subj=SUBJ_MAP[bulkSubj]||SUBJECTS[0];
+  const key=subj.id+'.'+i;
+  const sEl=document.getElementById('bs_'+i), wEl=document.getElementById('bw_'+i), cEl=document.getElementById('bc_'+i);
+  const sVal=sEl?sEl.value:'', wVal=wEl?wEl.value:'';
+  let cVal=cEl?cEl.value:'';
+  if(cVal==='__c'){ const t=prompt('הקלידי סמל שאלון להחלה על כל התלמידות:',''); if(t===null) return; cVal=t.trim(); }
+  if(sVal===''&&wVal===''&&cVal===''){ toast('בחרי סמל שאלון, חלוקה או משקל'); return; }
+  const targets=bulkTargets();
+  if(!targets.length){ toast('אין תלמידות בבחירה'); return; }
+  const what=[cVal?`סמל ${cVal}`:'',sVal!==''?`מגן ${sVal}%/בחינה ${100-sVal}%`:'',wVal!==''?`משקל ${wVal}%`:''].filter(Boolean).join(' · ');
+  if(!confirm(`להחיל על ${targets.length} תלמידות ב${esc(subj.name)} — ${esc(String(what))}?`)) return;
+  targets.forEach(st=>{
+    if(cVal){ st.codes=st.codes||{}; st.codes[key]=cVal; }
+    if(sVal!==''||wVal!==''){
+      st.ov=st.ov||{}; st.ov[key]=Object.assign({},st.ov[key]);
+      if(sVal!=='') st.ov[key].s=+sVal;
+      if(wVal!=='') st.ov[key].w=+wVal;
+    }
+  });
+  save(); render(); toast(`הוחל על ${targets.length} תלמידות`);
+}
+function bulkCodesAll(){
+  const subj=SUBJ_MAP[bulkSubj]||SUBJECTS[0];
+  const u=subj.opts[subj.opts.length-1];
+  const comps=getComps(subj,u);
+  const targets=bulkTargets();
+  if(!targets.length){ toast('אין תלמידות בבחירה'); return; }
+  const picks=[];
+  comps.forEach((c,i)=>{
+    const el=document.getElementById('bc_'+i);
+    if(el&&el.value&&el.value!=='__c') picks.push([subj.id+'.'+i,el.value,c.n]);
+  });
+  if(!picks.length){ toast('בחרי סמלים בעמודת "סמל שאלון לכולן"'); return; }
+  if(!confirm(`להחיל ${picks.length} סמלי שאלון על ${targets.length} תלמידות ב${subj.name}?\n\n`+picks.map(x=>'• '+x[2]+' ← '+x[1]).join('\n'))) return;
+  targets.forEach(st=>{ st.codes=st.codes||{}; picks.forEach(([k,v])=>{ st.codes[k]=v; }); });
+  save(); render(); toast(`הוחלו ${picks.length} סמלים על ${targets.length} תלמידות`);
+}
+function bulkClear(){
+  const subj=SUBJ_MAP[bulkSubj]||SUBJECTS[0];
+  const targets=bulkTargets();
+  const n=targets.filter(s=>Object.keys(s.ov||{}).some(k=>k.indexOf(subj.id+'.')===0)).length;
+  if(!n){ toast('אין התאמות אישיות במקצוע זה'); return; }
+  if(!confirm(`לנקות את ההתאמות האישיות ב${subj.name} אצל ${n} תלמידות ולחזור לברירת המחדל?`)) return;
+  targets.forEach(st=>{ if(!st.ov)return; Object.keys(st.ov).filter(k=>k.indexOf(subj.id+'.')===0).forEach(k=>delete st.ov[k]); });
+  save(); render(); toast('נוקו התאמות אצל '+n+' תלמידות');
+}
+function settingsSubj(subj){
+  return `<div class="subj-card" onclick="void 0;"><div class="subj-head" onclick="this.parentElement.classList.toggle('open')"><span>${esc(subj.name)}</span><span class="pill">לחצי לפתיחה</span></div>
+  <div class="subj-body">
+  ${subj.opts.filter(u=>u>0).map(u=>{
+    const comps=getComps(subj,u);
+    const tot=comps.reduce((a,c)=>a+(+c.w||0),0);
+    return `<div style="margin-bottom:10px;">
+    <b>${u} יח"ל</b> ${Math.round(tot)!==100?`<span class="badge b-bad">סה"כ משקלים: ${tot}% (צריך 100)</span>`:`<span class="badge b-ok">סה"כ 100% ✓</span>`}
+    <table class="tbl" style="margin-top:6px;"><thead><tr><th>רכיב</th><th>משקל בציון הסופי %</th><th>חלוקת מגן/בחינה</th></tr></thead><tbody>
+    ${comps.map((c,i)=>`<tr><td>${esc(c.n)}</td>
+      <td><input type="number" min="0" max="100" value="${c.w}" onchange="setCustom('${subj.id}',${u},${i},'w',this.value)"></td>
+      <td>${c.t==='e'?`<select onchange="setCustom('${subj.id}',${u},${i},'s',this.value)">
+        ${[70,60,50,40,30,20,0].map(s=>`<option value="${s}" ${c.s===s?'selected':''}>מגן ${s}% / בחינה ${100-s}%</option>`).join('')}
+      </select>`:'<span class="note">הערכה פנימית — ציון אחד</span>'}</td></tr>`).join('')}
+    </tbody></table></div>`;
+  }).join('')}
+  </div></div>`;
+}
+function setCustom(sid,u,i,field,val){
+  const key=sid+'.'+u+'.'+i;
+  state.custom[key]=state.custom[key]||{};
+  state.custom[key][field]=+val;
+  save(); toast('נשמר — החישובים עודכנו'); render();
+}
+
+/* ============ אקסל ============ */
+function exportExcel(cls){
+  cls=typeof cls==='string'?cls:'';
+  const studs=filteredStudents(cls);
+  if(!studs.length){toast('אין נתונים לייצוא');return;}
+  const wb=XLSX.utils.book_new();
+  // גיליון סיכום
+  const sumRows=studs.map(st=>{
+    const r=calcStudent(st);
+    const row={'שם':st.name,'כיתה':st.cls};
+    SUBJECTS.forEach(s=>{const p=r.per[s.id]; row[s.name]=p&&p.active?(p.final??'חסר'):'';});
+    row['ממוצע משוקלל']=r.avg??'';
+    row['סה"כ יח"ל']=r.totalUnits;
+    row['מעכבים']=r.blockers.map(s=>s.name).join(', ');
+    row['סטטוס']=r.status;
+    return row;
+  });
+  const ws1=XLSX.utils.json_to_sheet(sumRows);
+  ws1['!cols']=Object.keys(sumRows[0]).map(()=>({wch:13}));
+  XLSX.utils.book_append_sheet(wb,ws1,'סיכום');
+  // גיליון גולמי (לייבוא חוזר)
+  const rawRows=studs.map(st=>{
+    const row={'שם':st.name,'כיתה':st.cls};
+    SUBJECTS.forEach(subj=>{
+      if(subj.opts.length>1) row[subj.name+' - יח"ל']=getUnits(st,subj);
+      if(subj.named) row[subj.name+' - שם מקצוע']=(st.mugbarNames||{})[subj.id]||'';
+      const maxU=subj.opts[subj.opts.length-1];
+      subj.comps(maxU).forEach((c,i)=>{
+        const key=subj.id+'.'+i, g=st.grades||{}, codes=st.codes||{}, ov=(st.ov||{})[key]||{};
+        if(c.t==='i') row[subj.name+' | '+c.n]=g[key]??'';
+        else{ row[subj.name+' | '+c.n+' | מגן']=g[key+'.m']??''; row[subj.name+' | '+c.n+' | בחינה']=g[key+'.e']??''; }
+        const gstat=st.gstat||{};
+        const stTxt=k=>gstat[k]==='r'?'אדום — טרם דווח':gstat[k]==='b'?'כחול — פיקטיבי':'';
+        const sTxt=c.t==='i'?stTxt(key):[stTxt(key+'.m'),stTxt(key+'.e')].filter(Boolean).join(' / ');
+        if(sTxt) row[subj.name+' | '+c.n+' | סימון']=sTxt;
+        if(codes[key]) row[subj.name+' | '+c.n+' | סמל שאלון']=codes[key];
+        if(ov.w!==undefined||ov.s!==undefined) row[subj.name+' | '+c.n+' | התאמה אישית']=(ov.w!==undefined?'משקל '+ov.w+'%':'')+(ov.s!==undefined?' מגן '+ov.s+'%':'');
+      });
+    });
+    return row;
+  });
+  const ws2=XLSX.utils.json_to_sheet(rawRows);
+  XLSX.utils.book_append_sheet(wb,ws2,'נתונים גולמיים');
+  // ניתוח כיתתי
+  const anRows=state.classes.map(c=>{
+    const ss=state.students.filter(s=>s.cls===c);
+    const rs=ss.map(s=>calcStudent(s));
+    return {'כיתה':c,'תלמידות':ss.length,
+      'זכאיות':rs.filter(r=>r.eligible).length,
+      'מצטיינות':rs.filter(r=>r.excellent).length,
+      'פוטנציאל':rs.filter(r=>r.potential).length,
+      'עם מעכבים':rs.filter(r=>r.blockers.length>0).length,
+      'ממוצע':avgOf(rs.map(r=>r.avg).filter(v=>v!==null))??''};
+  });
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(anRows),'ניתוח כיתתי');
+  XLSX.writeFile(wb,`דוח-בגרות-${cls||'שכבה'}-${new Date().toISOString().slice(0,10)}.xlsx`);
+  toast('הקובץ ירד למחשב');
+}
+/* ייבוא חכם של קובץ הסימולטור המקורי (אקסל) — מזהה את המבנה וממלא את כל הציונים */
+function parseSimulatorWorkbook(wb){
+  const ws=wb.Sheets['סימולטור למגזר ממלכתי דתי'];
+  const COLORS=sheetFontColors(wb,'סימולטור למגזר ממלכתי דתי')||{};
+  const DC=XLSX.utils.decode_col, EC=XLSX.utils.encode_col;
+  const cell=(col,row)=>ws[col+row];
+  const val=(col,row)=>{const c=cell(col,row); return c?c.v:undefined;};
+  // זיהוי גרסת הפריסה: בקובץ יב יש עמודות H,I נוספות (יח"ל וממוצע) ולשון מתחילה ב-J; בקובץ יא לשון מתחילה ב-H
+  const h8=String(val('H',8)||'');
+  const off=h8.indexOf('הזנת ציון')===0||h8.includes('הזנת ציון  הערכה')?-2:0;
+  const S=c=>EC(DC(c)+off);
+  const num=v=>{ if(v===undefined||v===null||v==='')return null; const n=+v; return isNaN(n)?null:Math.round(n*10)/10; };
+  const wnum=v=>{ const n=+v; return isNaN(n)?null:n; };
+  const fSplit=(col,row)=>{ const c=cell(col,row); if(!c||!c.f)return null; const m=String(c.f).match(/\*\s*0?\.(\d+)\)\s*\+/); return m?Math.round(('0.'+m[1])*100):null; };
+  const tSplit=v=>{ v=String(v||''); if(v.includes('מגן 50'))return 50; if(v.includes('מגן 30'))return 30; return null; };
+  const DEF={'lashon.1':50,'history.1':30,'sifrut.1':30,'machshevet.1':30,'ezrachut.1':30,'english.1':30,'english.2':60,'english.3':30,'math.1':50,'math.2':60,'tanakh.1':30,'tanakh.2':30,'tanakh.4':30,'toshba.1':30,'toshba.2':30,'toshba.3':30};
+  const SPLIT_COLS={'lashon.1':'N','history.1':'V','sifrut.1':'AD','machshevet.1':'AL','ezrachut.1':'AT','english.1':'BE','english.2':'BJ','english.3':'BN','math.1':'BW','math.2':'CA','tanakh.1':'CJ','tanakh.2':'CN','tanakh.4':'CT','toshba.1':'DC','toshba.2':'DG','toshba.3':'DK'};
+  const out=[];
+  for(let r=9;r<400;r++){
+    let name=val('B',r);
+    if(name===undefined||name===null||String(name).trim()==='') continue;
+    if(typeof name==='number') continue;
+    name=String(name).split(/\s+/).join(' ').trim();
+    if(!name) continue;
+    const st={name,units:{},mugbarNames:{},grades:{},codes:{},ov:{},gstat:{}};
+    const setg=(key,col)=>{ const v=num(val(col,r)); if(v===null) return;
+      st.grades[key]=Math.max(0,Math.min(100,v));
+      const c=classifyColor(COLORS[col+r]); if(c) st.gstat[key]=c; };
+    setg('hng.0','C'); setg('mada.0','D'); setg('shelach.0','E'); setg('taavura.0','F');
+    const core={lashon:['J','L','M'],history:['R','T','U'],sifrut:['Z','AB','AC'],machshevet:['AH','AJ','AK'],ezrachut:['AP','AR','AS']};
+    Object.keys(core).forEach(sid=>{ const[i_,m_,e_]=core[sid]; setg(sid+'.0',S(i_)); setg(sid+'.1.m',S(m_)); setg(sid+'.1.e',S(e_)); });
+    st.units.english=num(val(S('AX'),r))||5;
+    setg('english.0',S('AZ')); setg('english.1.m',S('BC')); setg('english.1.e',S('BD'));
+    setg('english.2.m',S('BH')); setg('english.2.e',S('BI')); setg('english.3.m',S('BL')); setg('english.3.e',S('BM'));
+    [['english.0','AY'],['english.1','BB'],['english.2','BG']].forEach(([k,c])=>{ const v=val(S(c),r); if(v&&!String(v).includes('בחר')) st.codes[k]=String(v).trim(); });
+    st.units.math=num(val(S('BR'),r))||5;
+    if(st.units.math===3) setg('math.0',S('BS'));
+    setg('math.1.m',S('BU')); setg('math.1.e',S('BV')); setg('math.2.m',S('BY')); setg('math.2.e',S('BZ'));
+    st.units.tanakh=num(val(S('CE'),r))||3;
+    setg('tanakh.0',S('CF')); setg('tanakh.1.m',S('CH')); setg('tanakh.1.e',S('CI')); setg('tanakh.2.m',S('CL')); setg('tanakh.2.e',S('CM'));
+    if(st.units.tanakh===5){ setg('tanakh.3',S('CP')); setg('tanakh.4.m',S('CR')); setg('tanakh.4.e',S('CS')); }
+    st.units.toshba=num(val(S('CX'),r))||5;
+    setg('toshba.0',S('CY')); setg('toshba.1.m',S('DA')); setg('toshba.1.e',S('DB')); setg('toshba.2.m',S('DE')); setg('toshba.2.e',S('DF'));
+    if(st.units.toshba===5){ setg('toshba.3.m',S('DI')); setg('toshba.3.e',S('DJ')); setg('toshba.4',S('DM')); }
+    Object.keys(SPLIT_COLS).forEach(key=>{ const s=fSplit(S(SPLIT_COLS[key]),r); if(s!==null&&s!==DEF[key]) st.ov[key]={s}; });
+    const mug=[['mugbar1',{name:'DQ',u:null,code0:'DR',w0:'DS',g0:'DT',ext:[[1,'EB','EC','ED','EE','EF',70],[2,'EH','EI','EJ','EK','EL',0],[3,'EN','EO','EP','EQ','ER',0]]}],
+               ['mugbar2',{name:'EW',u:'EV',code0:'EX',w0:'EY',g0:'EZ',ext:[[1,'FH','FI','FJ','FK','FL',70],[2,'FN','FO','FP','FQ','FR',0],[3,'FT','FU','FV','FW','FX',0]]}]];
+    mug.forEach(([sid,cols])=>{
+      const mname=val(S(cols.name),r);
+      if(mname&&!String(mname).includes('בחר')){
+        st.units[sid]=(cols.u?num(val(S(cols.u),r)):5)||5;
+        st.mugbarNames[sid]=String(mname).trim();
+        setg(sid+'.0',S(cols.g0));
+        const c0=val(S(cols.code0),r);
+        if(c0&&!String(c0).includes('בחר')) st.codes[sid+'.0']=String(c0).trim();
+        const wi=wnum(val(S(cols.w0),r));
+        if(wi!==null&&Math.round(wi*100)!==30) st.ov[sid+'.0']={w:Math.round(wi*100)};
+        cols.ext.forEach(([idx,cCode,cW,cM,cE,cS,defW])=>{
+          const w=wnum(val(S(cW),r))||0;
+          if(!w) return;
+          const w100=Math.round(w*100), key=sid+'.'+idx;
+          setg(key+'.m',S(cM)); setg(key+'.e',S(cE));
+          const code=val(S(cCode),r);
+          if(code&&!String(code).includes('בחר')) st.codes[key]=String(code).trim();
+          const ov={};
+          if(w100!==defW) ov.w=w100;
+          const s=tSplit(val(S(cS),r));
+          if(s!==null&&s!==30) ov.s=s;
+          if(Object.keys(ov).length) st.ov[key]=Object.assign(st.ov[key]||{},ov);
+        });
+      } else st.units[sid]=0;
+    });
+    st.units.mugbar3=0;
+    out.push(st);
+  }
+  return out;
+}
+function importSimulator(wb){
+  const parsed=parseSimulatorWorkbook(wb);
+  if(!parsed.length){ toast('לא נמצאו תלמידות בקובץ'); return; }
+  let cls=prompt(`זוהה קובץ סימולטור מקורי עם ${parsed.length} תלמידות.\nלאיזו כיתה לשייך אותן?`, state.classes[0]||'יב');
+  if(cls===null) return;
+  cls=cls.trim()||state.classes[0]||'יב';
+  if(!state.classes.includes(cls)) state.classes.push(cls);
+  const pf=profiles.find(x=>x.id===currentProfileId);
+  if(pf&&(pf.unnamed||!pf.name)){ pf.name=cls; delete pf.unnamed; saveProfiles(); renderProfileBar(); }
+  let added=0, updated=0;
+  const seen={};
+  parsed.forEach(p=>{
+    applyLegacyStructure(p);
+    if(seen[p.name]){ p.name=p.name+' ('+(++seen[p.name])+')'; toast('שימי לב: שם כפול בקובץ — '+p.name); }
+    else seen[p.name]=1;
+    let st=state.students.find(s=>s.name===p.name&&s.cls===cls);
+    if(st){ Object.assign(st,{units:p.units,mugbarNames:p.mugbarNames,grades:p.grades,codes:p.codes,ov:p.ov,gstat:p.gstat}); updated++; }
+    else{ state.students.push(Object.assign({id:uid(),cls},p)); added++; }
+  });
+  let nr=0,nb=0;
+  parsed.forEach(p=>{ Object.values(p.gstat||{}).forEach(v=>{ if(v==='r')nr++; else if(v==='b')nb++; }); });
+  save(); render();
+  toast(`הקובץ נקלט! ${added} חדשות, ${updated} עודכנו` + (nr+nb?` · זוהו ${nr} ציונים אדומים (לא דווחו) ו-${nb} כחולים (פיקטיביים)`:''));
+}
+function importExcel(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array',bookFiles:true});
+      if(wb.SheetNames.includes('סימולטור למגזר ממלכתי דתי')){ importSimulator(wb); input.value=''; return; }
+      const wsName=wb.SheetNames.includes('נתונים גולמיים')?'נתונים גולמיים':wb.SheetNames[0];
+      const rows=XLSX.utils.sheet_to_json(wb.Sheets[wsName]);
+      if(!rows.length){toast('הגיליון ריק');return;}
+      let added=0, updated=0;
+      rows.forEach(row=>{
+        const name=String(row['שם']||'').trim(); if(!name) return;
+        const cls=String(row['כיתה']||state.classes[0]||'כיתה א').trim();
+        if(!state.classes.includes(cls)) state.classes.push(cls);
+        let st=state.students.find(s=>s.name===name&&s.cls===cls);
+        if(!st){ st={id:uid(),name,cls,units:{},mugbarNames:{},grades:{}}; state.students.push(st); added++; }
+        else updated++;
+        SUBJECTS.forEach(subj=>{
+          const uKey=subj.name+' - יח"ל';
+          if(row[uKey]!==undefined&&row[uKey]!=='') st.units[subj.id]=+row[uKey];
+          const nKey=subj.name+' - שם מקצוע';
+          if(row[nKey]) st.mugbarNames[subj.id]=String(row[nKey]);
+          const maxU=subj.opts[subj.opts.length-1];
+          subj.comps(maxU).forEach((c,i)=>{
+            const key=subj.id+'.'+i;
+            const set=(k,v)=>{ if(v!==undefined&&v!=='') st.grades[k]=+v; };
+            if(c.t==='i') set(key,row[subj.name+' | '+c.n]);
+            else{ set(key+'.m',row[subj.name+' | '+c.n+' | מגן']); set(key+'.e',row[subj.name+' | '+c.n+' | בחינה']); }
+          });
+        });
+      });
+      save(); render(); toast(`ייבוא הושלם: ${added} חדשות, ${updated} עודכנו`);
+    }catch(err){ toast('שגיאה בקריאת הקובץ: '+err.message); }
+    input.value='';
+  };
+  reader.readAsArrayBuffer(file);
+}
+function exportJSON(){
+  // גיבוי מלא: כל הסימולטורים יחד — כדי שאפשר יהיה לשחזר הכול במכשיר אחר
+  const all={_type:'bagrut-backup',_ver:2,_at:new Date().toISOString(),profiles:profiles,current:currentProfileId,data:{}};
+  profiles.forEach(pr=>{
+    const key=pr.id==='main'?'bagrutSimPro':'bagrutSimPro:'+pr.id;
+    try{ const raw=localStorage.getItem(key); if(raw) all.data[pr.id]=JSON.parse(raw); }catch(e){}
+  });
+  all.data[currentProfileId]=state;   // המצב הפעיל, מעודכן לרגע זה
+  const blob=new Blob([JSON.stringify(all)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  const d=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  a.download=`גיבוי-סימולטור-הראל-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.json`;
+  a.click();
+  try{ localStorage.setItem('bagrutLastBackup',JSON.stringify({at:d.toISOString(),n:countAllStudents()})); }catch(e){}
+  const n=Object.keys(all.data).length;
+  toast(`גיבוי מלא ירד למחשב — ${n} סימולטורים, ${countAllStudents()} תלמידות. שמרי אותו בדרייב!`);
+  render();
+}
+function countAllStudents(){
+  let n=0;
+  profiles.forEach(pr=>{
+    const key=pr.id==='main'?'bagrutSimPro':'bagrutSimPro:'+pr.id;
+    try{ if(pr.id===currentProfileId){ n+=state.students.length; return; }
+      const raw=localStorage.getItem(key); if(raw) n+=(JSON.parse(raw).students||[]).length; }catch(e){}
+  });
+  return n;
+}
+function lastBackupInfo(){
+  try{ const r=localStorage.getItem('bagrutLastBackup'); if(!r) return null; return JSON.parse(r); }catch(e){ return null; }
+}
+function importJSON(input){
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      if(d&&d._type==='bagrut-backup'&&d.data){
+        // גיבוי מלא — כל הסימולטורים
+        let tot=0; Object.values(d.data).forEach(s=>tot+=((s&&s.students)||[]).length);
+        const when=d._at?new Date(d._at).toLocaleString('he-IL',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'לא ידוע';
+        const names=(d.profiles||[]).map(p=>p.name||'(ללא שם)').join(', ');
+        if(!confirm(`שחזור גיבוי מלא\n\nתאריך הגיבוי: ${when}\nסימולטורים: ${names}\nסך תלמידות: ${tot}\n\n⚠️ הנתונים הקיימים במכשיר זה יוחלפו. להמשיך?`)){ input.value=''; return; }
+        (d.profiles||[]).forEach(pr=>{
+          const key=pr.id==='main'?'bagrutSimPro':'bagrutSimPro:'+pr.id;
+          if(d.data[pr.id]) localStorage.setItem(key,JSON.stringify(d.data[pr.id]));
+        });
+        profiles=(d.profiles&&d.profiles.length)?d.profiles:[{id:'main',name:'',unnamed:1}];
+        currentProfileId=(d.current&&profiles.some(p=>p.id===d.current))?d.current:profiles[0].id;
+        saveProfiles();
+        state=loadState();
+        renderProfileBar(); renderLogo(); setTab('dash');
+        toast(`שוחזרו ${profiles.length} סימולטורים · ${tot} תלמידות`);
+      }else{
+        // גיבוי בפורמט הישן — סימולטור בודד
+        const n=((d&&d.students)||[]).length;
+        if(!confirm(`שחזור גיבוי לסימולטור הנוכחי\n\nתלמידות בקובץ: ${n}\n\n⚠️ הנתונים בסימולטור הנוכחי יוחלפו. להמשיך?`)){ input.value=''; return; }
+        state=Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)),d);
+        save(); render(); toast(`שוחזרו ${n} תלמידות`);
+      }
+    }
+    catch(err){ toast('קובץ גיבוי לא תקין: '+err.message); }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+/* ============ נתוני יב תשפ"ו (מהקובץ האמיתי) ============ */
+const EXAMPLE_DATA=[];
+function loadDataset(data,cls,label){
+  if(state.students.length&&!confirm('לטעון את נתוני '+label+' בנוסף לנתונים הקיימים בסימולטור הנוכחי?')) return;
+  if(!state.classes.includes(cls)) state.classes.push(cls);
+  data.forEach(d=>{
+    state.students.push(applyLegacyStructure(Object.assign({id:uid(),cls,units:{},mugbarNames:{},grades:{},codes:{},ov:{}},JSON.parse(JSON.stringify(d)))));
+  });
+  save(); render();
+  toast('נטענו '+data.length+' תלמידות '+label+' (כולל התאמות אישיות וסמלי שאלונים)');
+}
+const EXAMPLE_YA=[];
+
+/* ============ נתוני דוגמה ============ */
+function loadDemo(){
+  if(state.students.length&&!confirm('לטעון נתוני דוגמה בנוסף לנתונים הקיימים?')) return;
+  const names=['שירה כהן','נעמה לוי','אביגיל פרץ','תהילה מזרחי','הודיה ביטון','רננה דהן','אמונה אזולאי','יעל אוחיון','מוריה חדד','אילה גבאי','צופיה עמר','בת-אל אלבז','נועה שלום','רוני ממן','הדס אטיאס','תמר בן-דוד','אוריה סבן','שקד יוסף','ליאור אברהם','מיכל נחום','אסתר קדוש','חנה טל','רות פנחס','דבורה שרעבי'];
+  const classes=['יב-1','יב-2'];
+  classes.forEach(c=>{ if(!state.classes.includes(c)) state.classes.push(c); });
+  const rnd=(a,b)=>Math.round(a+Math.random()*(b-a));
+  const clamp=v=>Math.max(40,Math.min(100,Math.round(v)));
+  names.forEach((name,idx)=>{
+    const cls=classes[idx%2];
+    const ability=idx<5?rnd(88,97):idx<10?rnd(80,90):idx<20?rnd(65,85):rnd(50,68);
+    const st={id:uid(),name,cls,units:{math:[3,4,5][idx%3],english:idx%2?4:5,tanakh:idx%4===0?5:3,toshba:3,mugbar2:idx%3===0?5:0,mugbar3:0},mugbarNames:{mugbar1:['ביולוגיה','פיזיקה','מדעי המחשב','כימיה'][idx%4],mugbar2:'אומנות'},grades:{}};
+    SUBJECTS.forEach(subj=>{
+      const u=getUnits(st,subj); if(u===0) return;
+      getComps(subj,u).forEach((c,i)=>{
+        if(!c.w) return;
+        const key=subj.id+'.'+i;
+        if(c.t==='i'){ st.grades[key]=clamp(ability+rnd(-6,8)); }
+        else{
+          const magen=clamp(ability+rnd(-4,10));
+          st.grades[key+'.m']=magen;
+          if(Math.random()<0.9) st.grades[key+'.e']=clamp(magen+rnd(-14,6));
+        }
+      });
+    });
+    // כמה חריגות מכוונות לדוגמה
+    if(idx===21){ st.grades['math.1.e']=38; }
+    if(idx===7){ st.grades['lashon.1.m']=95; st.grades['lashon.1.e']=62; }
+    state.students.push(st);
+  });
+  save(); render(); toast('נטענו '+names.length+' תלמידות לדוגמה');
+}
+
+/* ============ מצב שמירה ============ */
+function storageStatusHtml(){
+  const rows=profiles.map(pr=>{
+    const key=pr.id==='main'?'bagrutSimPro':'bagrutSimPro:'+pr.id;
+    let n=0,kb=0,t='—';
+    try{
+      const raw=localStorage.getItem(key);
+      if(raw){ kb=Math.round(raw.length*2/1024); const d=JSON.parse(raw); n=(d.students||[]).length; }
+      const ts=localStorage.getItem('bagrutLastSave:'+pr.id);
+      if(ts) t=new Date(ts).toLocaleString('he-IL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    }catch(e){}
+    return `<tr ${pr.id===currentProfileId?'style="background:#f0fdf4; font-weight:700;"':''}>
+      <td>${esc(pr.name)}${pr.id===currentProfileId?' <span class="badge b-ok">פעיל</span>':''}</td>
+      <td>${n}</td><td>${kb} KB</td><td>${t}</td></tr>`;
+  }).join('');
+  const total=Math.round(storageBytes()/1024);
+  return `<div style="font-size:13.5px; line-height:1.8; margin-bottom:10px;">
+    הנתונים נשמרים <b>אוטומטית בכל שינוי</b> — בזיכרון של הדפדפן במחשב הזה. אין צורך ללחוץ "שמור".<br>
+    החיווי בכותרת (<b>✓ נשמר</b>) מציג את שעת השמירה האחרונה ומספר התלמידות — כך רואים בוודאות שהשמירה עבדה.
+  </div>
+  <table class="tbl"><thead><tr><th>סימולטור</th><th>תלמידות</th><th>גודל</th><th>שמירה אחרונה</th></tr></thead>
+  <tbody>${rows}</tbody>
+  <tfoot><tr><th>סה"כ בדפדפן</th><th colspan="3">${total} KB</th></tr></tfoot></table>
+  <div class="alert-item al-warn" style="margin-top:10px;">
+    <b>⚠️ שתי דרכים לאבד נתונים — ואיך למנוע:</b><br>
+    1. <b>ניקוי היסטוריית גלישה / "נתוני אתרים"</b> בדפדפן ימחק את הנתונים. 2. <b>מכשיר או דפדפן אחר</b> לא יראה אותם (הם מקומיים).<br>
+    הפתרון לשניהם: <b>אחת לשבוע לחצי "💾 גיבוי"</b> ושמרי את הקובץ בדרייב/מייל. שחזור בכל מכשיר עם "♻️ שחזור".
+  </div>`;
+}
+function factoryReset(){
+  const n=state.students.length, np=profiles.length;
+  if(!confirm(`⚠️ איפוס מלא\n\nפעולה זו תמחק לצמיתות ${np} סימולטורים וכל הכיתות והתלמידות שבהם (${n} תלמידות בסימולטור הנוכחי) מהדפדפן במכשיר הזה.\n\nלהמשיך?`)) return;
+  if(!confirm('אישור אחרון: הנתונים יימחקו ואי אפשר לשחזר אותם — אלא מקובץ גיבוי.\n\nלמחוק?')) return;
+  try{
+    const keys=[];
+    for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf('bagrut')===0) keys.push(k); }
+    keys.forEach(k=>localStorage.removeItem(k));
+  }catch(e){}
+  profiles=[{id:'main',name:'',unnamed:1}];
+  currentProfileId='main';
+  saveProfiles();
+  state=JSON.parse(JSON.stringify(DEFAULT_STATE));
+  lastSaveAt=null; saveOk=null;
+  save();
+  renderProfileBar(); renderLogo(); setTab('dash');
+  toast('התוכנה אופסה — נקייה לגמרי');
+}
+function testSave(){
+  const before=state.students.length;
+  save();
+  let ok=false, msg='';
+  try{
+    const raw=localStorage.getItem(profileKey());
+    const d=JSON.parse(raw);
+    ok=(d.students||[]).length===before;
+    msg=ok?`✅ השמירה עובדת מצוין!\n\nנבדק עכשיו: ${before} תלמידות נשמרו ונקראו בחזרה בהצלחה.\nשעת השמירה: ${new Date().toLocaleTimeString('he-IL')}\n\nגם אם תסגרי את הדפדפן — הנתונים יחזרו בפתיחה הבאה במכשיר הזה.\nלגיבוי חיצוני (מומלץ שבועי): כפתור "💾 גיבוי".`
+             :'⚠️ אי-התאמה בין מה שנשמר למה שנקרא. מומלץ ללחוץ "💾 גיבוי" מיד.';
+  }catch(e){ msg='❌ השמירה נכשלה: '+e.message+'\n\nייתכן מצב גלישה בסתר. מומלץ "💾 גיבוי" מיד.'; }
+  alert(msg);
+  render();
+}
+
+/* ============ מדריך למשתמש ============ */
+function renderHelp(m){
+  const step=(n,t,body)=>`<div class="card" style="margin-bottom:12px;"><h3 class="sec" style="font-size:15px;">${n} ${t}</h3><div style="font-size:13.5px; line-height:1.9;">${body}</div></div>`;
+  m.innerHTML=`
+  <div class="card" style="margin-bottom:14px; background:linear-gradient(135deg,#eef2ff,#fff); border:2px solid var(--brand);">
+    <h2 class="sec" style="font-size:18px;">❓ מדריך למשתמש — סימולטור אולפנת הראל</h2>
+    <div style="font-size:14px; line-height:1.8;">הכלי מחשב זכאות לבגרות וממוצע משוקלל לפי מבנה הבגרות הגמישה, מאתר מצטיינות ותלמידות בסיכון, ומאפשר סימולציות בלי לגעת בציונים האמיתיים. <b>הכול נשמר אוטומטית בדפדפן של המחשב הזה.</b></div>
+  </div>
+  ${step('1️⃣','מתחילים — פעם אחת',`
+    בפינה העליונה בוחרים סימולטור (או יוצרים חדש ב-<b>➕ חדש</b> — למשל "יב תשפ"ז"). כל סימולטור הוא סביבה נפרדת לגמרי לשנתון: <b>נוצר ריק</b>, בלי הכיתות והתלמידות של הסימולטור הקודם, והוא מבקש מיד שם לכיתה הראשונה.<br>
+    בלשונית <b>👩‍🎓 תלמידות</b> יוצרים כיתות ומוסיפים תלמידות — אחת-אחת, בהדבקת רשימת שמות, או הכי מהר: <b>📤 ייבוא מאקסל</b> בכותרת עם קובץ הסימולטור הישן — הכול נקלט אוטומטית: ציונים, יח"ל, מגמות וסמלי שאלונים.`)}
+  ${step('2️⃣','מזינים ציונים',`
+    בלשונית <b>✏️ הזנת ציונים</b> בוחרים מקצוע וכיתה ומזינים בטבלה — מגן ובחינה לכל שאלון.<br>
+    לחיצה על <b>שם תלמידה</b> (בכל מקום באפליקציה) פותחת כרטיס מלא: כל המקצועות, יח"ל, סמלי שאלונים מרשימה נפתחת, ומשקלים.<br>
+    <b>צבעים:</b> <span class="grade-bad">אדום = מעכב (מתחת ל-55)</span> · <span class="grade-warn">כתום = גבולי</span> · <span class="grade-exc">זהב = 90+</span> · משבצת מקווקוות = ציון חסר.`)}
+  ${step('🎯','כמה צריך בהערכה הפנימית? (מחשבון בסימולציה)',`
+    בלשונית <b>🧪 סימולציה</b> יש כרטיס <b>🎯 מחשבון: כמה צריך בהערכה הפנימית</b> — הוא עושה את החשבון במקומך:<br>
+    <b>🔴 כדי לעבור:</b> לכל תלמידה עם ציון מעכב מוצג בדיוק איזה ציון בהערכה הפנימית יביא את המקצוע ל-55. דוגמה: מגן 85 ובחינה 24 → ציון המקצוע 39; המחשבון יראה ש<b>נדרש 54</b> בהערכה הפנימית כדי להגיע ל-55 (ועם 53 היא עוד נכשלת).<br>
+    <b>⭐ כדי להצטיין:</b> לתלמידות בטווח הרלוונטי מוצגת <b>הדרך הקצרה ביותר</b> לממוצע מעל 90 — באיזה מקצוע להעלות ובכמה. אם רכיב אחד לא מספיק, מוצג הרף האחיד להעלאת כל ההערכות הפנימיות.<br>
+    המחשבון תמיד מציע <b>רק העלאה</b> (לא הורדה), מכבד עיגול, משקלים והיפוך אחוזים, ומזהה מקרים שבהם אי אפשר להגיע ליעד.`)}
+  ${step('📋','ייבוא ציונים למקצוע — מוורד או מאקסל',`
+    יש לך קובץ ציונים של מקצוע אחד (למשל כל ציוני הבחינה בלשון)? בלשונית <b>✏️ הזנת ציונים</b> יש כפתור <b>📋 ייבוא ציונים למקצוע</b>.<br>
+    <b>מוורד:</b> סמני את הטבלה ← העתקה ← הדבקה בשדה. <b>מאקסל:</b> אותו דבר, או בחירת הקובץ ישירות.<br>
+    בוחרים מקצוע, רכיב (איזו בחינה) ואם זה ציון בחינה או מגן — ומקבלים <b>תצוגה מקדימה</b>: מי זוהתה, מי לא, ורק אז מאשרים.<br>
+    הזיהוי חכם: מסתדר עם רווחים כפולים, גרשיים, וגם עם שם הפוך ("שרה כהן" מול "כהן שרה").<br>
+    <b>שם שלא זוהה?</b> בתצוגה המקדימה יש תפריט "התלמידה במערכת" בכל שורה — אפשר לבחור ידנית את התלמידה הנכונה, לתקן זיהוי שגוי, או לסמן "⏭️ לדלג".<br>
+    <b>צבע גורף:</b> לפני ההחלה בוחרים באיזה צבע ייכנסו כל הציונים — ⚫ שחור (דווח), 🔴 אדום (טרם דווח) או 🔵 כחול (פיקטיבי).`)}
+  ${step('🔢','עיגול ציונים ובחינות ללא מגן',`
+    <b>עיגול:</b> הציון הסופי בכל מקצוע מעוגל למספר שלם — 85.5 ← <b>86</b>, 85.4 ← <b>85</b>. במעבר עכבר על הציון רואים את הערך המדויק לפני העיגול.<br>
+    <b>בחינות ללא מגן:</b> במקצועות רבי-המלל (היסטוריה, מחשבת ישראל, אזרחות, תנ"ך, תושב"ע) הבחינות והמשימות המבוקרות הן <b>100% ציון הבחינה</b> — אין ציון מגן, ולכן מוצגת שורת "ציון בחינה" בלבד. אם במקצוע מסוים כן יש מגן, אפשר לשנות את החלוקה בשורת "חלוקה" (או גורף לכל הכיתה בהגדרות).`)}
+  ${step('🔀','היפוך אחוזים לטובת הבחינה',`
+    כשציון הבחינה <b>גבוה</b> מציון המגן — המשקל הגדול עובר אוטומטית לבחינה, לטובת התלמידה.<br>
+    <b>דוגמה:</b> ברירת המחדל מגן 60% / בחינה 40%. תלמידה קיבלה מגן 70 ובחינה 90 ← החישוב נעשה מגן 40% / בחינה 60% והציון הוא <b>82</b> במקום 78.<br>
+    כשהמגן גבוה מהבחינה — נשמרת החלוקה המקורית. ההיפוך מסומן 🔀 בכרטיס התלמידה ובטבלת ההזנה, וניתן לכבות אותו בהגדרות.`)}
+  ${step('🎨','צבעי הציונים — מה דווח ומה לא',`
+    הכלי קורא את <b>צבעי הגופן מקובץ האקסל</b> בייבוא, ושומר על המשמעות שלכם:<br>
+    <span style="color:#111; font-weight:800;">■ שחור</span> — ציון שכבר דווח למשרד החינוך · <span style="color:#dc2626; font-weight:800;">■ אדום</span> — ציון אמיתי ונכון שטרם דווח · <span style="color:#1d4ed8; font-weight:800;">■ כחול</span> — ציון פיקטיבי / הערכה.<br>
+    הצבעים מוצגים בטבלת ההזנה ובכרטיס התלמידה. לשינוי: <b>לחיצה ימנית</b> על הציון בטבלה, או כפתור העיגול הצבעוני בכרטיס התלמידה (⚫→🔴→🔵).<br>
+    בלשונית ההתראות תקבלי סיכום: כמה ציונים טרם דווחו וכמה פיקטיביים — וגם בייצוא לאקסל יש עמודת "סימון".`)}
+  ${step('💜','התאמה אישית לתלמידה',`
+    בכרטיס התלמידה אפשר לשנות <b>רק אצלה</b>: חלוקת מגן/בחינה (למשל נבחנה בשנה אחרת), משקל כל רכיב, וסמל שאלון. רכיב מותאם נצבע סגול, ותג "מותאם אישית" מופיע במקצוע. <b>↩️ איפוס התאמות</b> מחזיר לרגיל.<br>
+    במגמות (פיזיקה, ביולוגיה...) — <b>📋 מבנה מהקטלוג</b> מחיל בקליק את כל המשקלים והסמלים הנכונים.`)}
+  ${step('🟢','עבודה נוספת לשיפור ציון',`
+    בכל מקצוע יש רכיב ירוק "עבודה נוספת / הערכה חלופית". נותנים לו משקל (למשל 20%) וציון — והאחוזים של שאר הרכיבים מתחלקים מחדש יחסית, אוטומטית. שימושי לתת לתלמידה הזדמנות לשפר ציון.`)}
+  ${step('🧪','סימולציה — בלי לקלקל כלום',`
+    לשונית הסימולציה היא <b>העתק ניסוי</b>: משנים שם ציונים חופשי, כל שינוי נצבע כתום 🔶, והטבלה האמיתית לא נפגעת.<br>
+    סימון <b>🔮 חיזוי אוטומטי</b> משלים כל בחינה חסרה לפי ציון המגן — כך כבר בתחילת השנה, אחרי הזנת מגינים או הערכות מורים בלבד, רואים מי צפויה להיות מצטיינת בסוף השנה.<br>
+    בסיום: <b>🧹 מחיקת השינויים</b> או <b>💾 העברתם לטבלה האמיתית</b> אם התרחיש התממש.`)}
+  ${step('📊','דשבורד, התראות ודוחות',`
+    <b>📊 דשבורד</b> — תמונת מצב: זכאות, מצטיינות, פוטנציאל, גרפים ומובילות.<br>
+    <b>תנאי הצטיינות:</b> ממוצע <b>מעל 90</b> (לא כולל 90) + אנגלית 5 יח"ל + מתמטיקה 4/5 יח"ל + בלי מעכבים.<br>
+    <b>🚨 התראות</b> — אוטומטיות: מעכבים, גבוליים, פערי מגן-בחינה חריגים, חסרים, וקרובות להצטיינות.<br>
+    <b>📄 דוחות</b> — דוח כיתתי מעוצב: הדפסה/PDF, שליחה במייל, העתקה, וייצוא לאקסל.`)}
+  ${step('💾','גיבוי — ההרגל החשוב ביותר',`
+    <b>לעבוד מכמה מכשירים (מחשב + בית + טלפון):</b> הכלי שומר את הנתונים בדפדפן של כל מכשיר בנפרד, ולכן העברה נעשית דרך קובץ גיבוי:<br>
+    1. במכשיר שעבדת בו: <b>💾 גיבוי</b> ← הקובץ יורד ← שומרים אותו בגוגל דרייב (או שולחים לעצמכם במייל).<br>
+    2. במכשיר האחר: פותחים את אותו קישור ← <b>♻️ שחזור</b> ← בוחרים את הקובץ מהדרייב. הגיבוי כולל <b>את כל הסימולטורים יחד</b>, כך שהכול עובר בפעולה אחת.<br>
+    <b>כלל זהב:</b> עובדים במכשיר אחד בכל פעם ומגבים בסוף — אחרת השחזור האחרון "ידרוס" את מה שנעשה במקום אחר.<br><br>
+    השמירה <b>אוטומטית בכל שינוי</b> — אין כפתור "שמור". בכותרת יש חיווי <b>✓ נשמר [שעה]</b> עם מספר התלמידות, וכך רואים בוודאות שהכול נקלט. בהגדרות ← "💾 מצב השמירה" יש טבלה של כל הסימולטורים עם שעת השמירה האחרונה, וכפתור <b>🧪 בדיקת שמירה</b> שמאמת בזמן אמת.<br>
+    אבל: הנתונים יושבים <b>בדפדפן של המכשיר הזה בלבד</b>. ניקוי היסטוריית גלישה מוחק אותם!<br>
+    לכן: אחת לשבוע לוחצים <b>💾 גיבוי</b> בכותרת ושומרים את הקובץ בדרייב. שחזור בכל מכשיר עם <b>♻️ שחזור</b>. זו גם הדרך להעביר נתונים בין מחשב לטלפון.<br>
+    שיתוף עם מישהו אחר? שולחים לו את הקישור לאפליקציה — הוא מתחיל ריק ועובד על נתונים משלו. הציונים שלך לא נשלחים ולא גלויים לאיש.`)}
+  <div class="card">
+    <h3 class="sec" style="font-size:15px;">🔧 בעיות נפוצות</h3>
+    <div style="font-size:13.5px; line-height:1.9;">
+    <b>"הנתונים נעלמו!"</b> — כנראה נפתח בדפדפן אחר או במכשיר אחר (הנתונים לא עוברים לבד), או שנוקתה היסטוריית הדפדפן. פתרון: ♻️ שחזור מקובץ הגיבוי האחרון.<br>
+    <b>"הציון לא מתעדכן"</b> — כנראה חסר רכיב: משבצת מקווקוות = ציון חסר, והציון הסופי יחושב רק כשהכול מלא (או בסימולציה עם 🔮).<br>
+    <b>"תלמידה עם 92 לא מסומנת מצטיינת"</b> — בדקי את תנאי היח"ל: נדרש מתמטיקה 4-5 ואנגלית 5. אפשר לשנות בהגדרות.<br>
+    <b>"אני רוצה להתחיל מאפס"</b> — הגדרות ← "💾 מצב השמירה" ← <b>🗑️ איפוס מלא</b>. מוחק הכול מהדפדפן במכשיר הזה ומחזיר תוכנה נקייה (כדאי לגבות קודם).<br>
+    <b>אנדרואיד</b> — פותחים את הקישור בכרום ← ⋮ ← "הוספה למסך הבית" ומקבלים אייקון כמו אפליקציה.</div>
+  </div>`;
+}
+
+/* ============ אתחול ============ */
+renderProfileBar();
+renderLogo();
+renderSaveInd();
+render();
+// אזהרה אם הדפדפן לא מאפשר שמירה בכלל (גלישה בסתר / חסימה)
+try{ localStorage.setItem('bagrutTest','1'); localStorage.removeItem('bagrutTest'); }
+catch(e){ setTimeout(()=>alert('⚠️ הדפדפן חוסם שמירת נתונים (ייתכן מצב גלישה בסתר).\nהנתונים לא יישמרו בין פתיחות! פתחי בחלון דפדפן רגיל.'),400); }
+
+</script>
+</body>
+</html>
