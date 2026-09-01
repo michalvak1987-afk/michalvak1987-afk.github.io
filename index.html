@@ -359,7 +359,7 @@ body.print-mode #printArea{display:block; padding:20px; background:#fff;}
   <div class="hint"><span><kbd>↑</kbd><kbd>↓</kbd> ניווט</span><span><kbd>Enter</kbd> פתיחה</span><span><kbd>Esc</kbd> סגירה</span><span style="margin-inline-start:auto;">Ctrl+K</span></div>
 </div></div>
 <div class="toast" id="toast"></div>
-<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 3.3</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
+<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 3.4</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
 <script>
 "use strict";
 /* ============ מודל המקצועות ============ */
@@ -897,6 +897,10 @@ function renderSaveInd(){
 }
 function uid(){ return 's'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
+
+/* ============ אזורים מתקפלים ============ */
+let openBoxes={};
+function toggleBox(k){ openBoxes[k]=!openBoxes[k]; renderKeepScroll(); }
 
 /* ============ הערות (לכל קובייה ולכל מקצוע) ============ */
 function noteOf(st,key){ return ((st.notes||{})[key]||'').trim(); }
@@ -2066,8 +2070,10 @@ function renderEntry(m){
     <span class="pill">💡 לחיצה על שם תלמידה פותחת עריכה מלאה של כל המקצועות</span>
   </div>
   <div class="card" style="padding:10px 14px; margin-bottom:12px;">${statusLegend()}
-    <div class="toolbar" style="margin:8px 0 0; padding-top:8px; border-top:1px dashed var(--line);">
-      <label><b>🎨 צביעה גורפת לכל הכיתה במקצוע זה:</b></label>
+    <div style="margin:8px 0 0; padding-top:8px; border-top:1px dashed var(--line);">
+      <button class="btn sec sm" onclick="toggleBox('paint')" style="font-size:12px;">🎨 צביעה גורפת לכל הכיתה ${openBoxes.paint?'▴':'▾'}</button>
+    </div>
+    <div class="toolbar" style="margin:8px 0 0; ${openBoxes.paint?'':'display:none;'}">
       <select id="ecScope" style="max-width:220px;">
         <option value="all">כל הציונים במקצוע</option>
         ${(()=>{const sj=SUBJ_MAP[entrySubj]||SUBJECTS[0]; const u=sj.opts[sj.opts.length-1];
@@ -2901,7 +2907,7 @@ function renderSettings(m){
   m.innerHTML=`
   <div class="card" style="margin-bottom:14px; border:2px solid var(--ok);">
     <h2 class="sec">${ic('save',19)}מצב השמירה — האם הנתונים שלי בטוחים?</h2>
-    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>3.3</b> · 01.09.2026</span>
+    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>3.4</b> · 01.09.2026</span>
     <span class="note">אחרי העלאת גרסה חדשה — רעננו את הדף (Ctrl+F5) וּודאו שהמספר כאן התעדכן.</span></div>
     <div id="storageBox">${storageStatusHtml()}</div>
     ${(()=>{const b=lastBackupInfo(); const cur=countAllStudents();
@@ -3019,19 +3025,28 @@ function renderSettings(m){
     </div>
     <div class="note">בקובץ המקורי מקצועות אלה מוזנים אך אינם נכללים בממוצע המשוקלל — לכן ברירת המחדל כבויה.</div>
   </div>
-  <div class="card" style="margin-bottom:14px;">
-    <h2 class="sec">${ic('file',19)}קטלוג שאלונים — בגרות גמישה (מהקובץ הבית-ספרי)</h2>
-    <div class="note" style="margin-bottom:8px;">המבנים והסמלים מוטמעים כברירת מחדל בכל המקצועות. במגמות — בחלון עריכת תלמידה יש "📋 מבנה מהקטלוג" שמחיל משקלים וסמלים בקליק.</div>
+  <div class="card" style="margin-bottom:14px; padding:${openBoxes.cat?'17px':'11px 17px'};">
+    <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="toggleBox('cat')">
+      <h2 class="sec" style="margin:0; font-size:15px;">${ic('file',18)}קטלוג שאלונים — בגרות גמישה</h2>
+      <span class="pill">לעיון בלבד</span>
+      <span style="margin-inline-start:auto; font-size:16px; color:var(--muted);">${openBoxes.cat?'▴':'▾'}</span>
+    </div>
+    ${openBoxes.cat?`
+    <div class="note" style="margin:10px 0 8px;">המבנים והסמלים מוטמעים כברירת מחדל בכל המקצועות. במגמות — בחלון עריכת תלמידה יש "📋 מבנה מהקטלוג" שמחיל משקלים וסמלים בקליק.</div>
     <div class="toolbar"><label>סינון לפי מקצוע:</label>
-      <select onchange="catFilter=this.value;render()">
+      <select onclick="event.stopPropagation()" onchange="catFilter=this.value;render()">
         <option value="">כל המקצועות</option>
         ${[...new Set(QREF.map(q=>q.s))].map(s=>`<option ${catFilter===s?'selected':''}>${esc(s)}</option>`).join('')}
       </select>
     </div>
-    <div class="scroll" style="max-height:55vh;">${catalogTable()}</div>
+    <div class="scroll" style="max-height:55vh;">${catalogTable()}</div>`:''}
   </div>
-  <div class="card" style="margin-bottom:14px; border:2px solid var(--brand2);">
-    <h2 class="sec">${ic('gear',19)}שינוי גורף — מקצוע שלם, כל התלמידות בבת אחת</h2>
+  <div class="card" style="margin-bottom:14px; border:2px solid var(--brand2); padding:${openBoxes.bulk?'17px':'11px 17px'};">
+    <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="toggleBox('bulk')">
+      <h2 class="sec" style="margin:0; font-size:15px;">${ic('gear',18)}שינוי גורף — מקצוע שלם, כל התלמידות</h2>
+      <span style="margin-inline-start:auto; font-size:16px; color:var(--muted);">${openBoxes.bulk?'▴':'▾'}</span>
+    </div>
+    ${openBoxes.bulk?`
     <div class="note" style="margin-bottom:10px;">כאן משנים <b>לכל התלמידות בבת אחת</b>: סמלי שאלונים, חלוקת מגן/בחינה ומשקלים. בחרי מקצוע, מלאי בשורות הרלוונטיות ולחצי "החל" (או "🏷️ החלת כל הסמלים" לכל השורות יחד). השינוי <b>דורס גם התאמות אישיות קיימות</b>, כולל כאלה שנקלטו מהאקסל.</div>
     <div class="toolbar">
       <label>מקצוע:</label>
@@ -3043,7 +3058,7 @@ function renderSettings(m){
     <div class="toolbar" style="margin-top:8px;">
       <button class="btn ok" onclick="bulkCodesAll()">🏷️ החלת כל סמלי השאלונים שנבחרו — לכל התלמידות בבת אחת</button>
     </div>
-    <div class="note" style="margin-top:8px;">💡 להחזרת מקצוע לברירת המחדל אצל כולן: <button class="btn sec sm" onclick="bulkClear()">↩️ ניקוי כל ההתאמות האישיות במקצוע זה</button></div>
+    <div class="note" style="margin-top:8px;">💡 להחזרת מקצוע לברירת המחדל אצל כולן: <button class="btn sec sm" onclick="bulkClear()">↩️ ניקוי כל ההתאמות האישיות במקצוע זה</button></div>`:''}
   </div>
   <div class="card">
     <h2 class="sec">📚 משקולות מקצועות — ברירת מחדל (חלה על תלמידות בלי התאמה אישית)</h2>
