@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>סימולטור בגרות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -16,6 +19,18 @@
 @keyframes fadeUp{from{opacity:0; transform:translateY(10px);}to{opacity:1; transform:none;}}
 @keyframes pop{from{transform:scale(.94); opacity:0;}to{transform:scale(1); opacity:1;}}
 @keyframes shimmer{0%{background-position:-500px 0;}100%{background-position:500px 0;}}
+h1,h2,h3,.kpi .n,.ring .rn,table.tbl th,button.btn,.badge{font-family:'Rubik','Assistant',sans-serif;}
+/* ===== מספרים: שחור מודגש כברירת מחדל ===== */
+input[type=number]{font-family:'Rubik',sans-serif; font-weight:800; color:#0b1220; font-size:14px; letter-spacing:-.2px;}
+.grade-ok,.grade-exc,.grade-warn,.grade-bad{font-family:'Rubik',sans-serif; font-weight:800;}
+.grade-ok{color:#0b1220;}
+table.tbl td{font-weight:600;}
+table.tbl td .grade-ok,table.tbl td.grade-ok{font-weight:800; color:#0b1220;}
+/* גופן נעים גם לתפריטים ולשדות טקסט */
+select,input[type=text],textarea{font-family:'Assistant',sans-serif; font-weight:600;}
+nav.tabs button{font-family:'Rubik',sans-serif; font-weight:600;}
+.name-link{font-family:'Assistant',sans-serif; font-weight:800;}
+td,th{font-variant-numeric:tabular-nums;}
 @keyframes sheetUp{from{transform:translateY(40px) scale(.97); opacity:0;}to{transform:none; opacity:1;}}
 @keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
 @keyframes ringIn{from{stroke-dashoffset:var(--circ);}}
@@ -59,7 +74,7 @@ label:has(input[type=checkbox]){display:inline-flex; align-items:center; gap:9px
 #cmdk .hint{padding:9px 16px; font-size:11.5px; color:var(--muted); border-top:1px solid var(--line); background:#fafbfe; display:flex; gap:14px;}
 kbd{background:#fff; border:1px solid #d6deec; border-bottom-width:2px; border-radius:6px; padding:1px 6px; font-size:11px; font-family:inherit; font-weight:700;}
 *{box-sizing:border-box; margin:0; padding:0;}
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI','Heebo','Assistant',Arial,sans-serif; color:var(--ink); font-size:14px;
+body{font-family:'Assistant','Rubik',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif; font-weight:600; letter-spacing:-.1px; color:var(--ink); font-size:14px;
   background:var(--bg);
   background-image:radial-gradient(1200px 500px at 100% -80px,rgba(147,51,234,.10),transparent 60%),radial-gradient(900px 400px at -10% 0,rgba(79,70,229,.10),transparent 55%);
   background-attachment:fixed;}
@@ -167,10 +182,17 @@ button.btn.sm{padding:5px 10px; font-size:12px; border-radius:8px;}
 .comp-box:hover{transform:translateY(-2px); box-shadow:0 6px 18px rgba(30,41,80,.1);}
 .comp-box .cn{font-size:11.5px; color:var(--muted); font-weight:600; margin-bottom:5px; min-height:28px;}
 .comp-inputs{display:flex; gap:6px; align-items:center; font-size:11.5px; flex-wrap:wrap;}
-.comp-row{display:flex; gap:6px; align-items:center; font-size:11.5px; padding:3px 0; border-top:1px dashed #e2e8f0;}
+.comp-row{display:flex; gap:6px; align-items:center; font-size:11.5px; padding:4px 0; border-top:1px dashed #e2e8f0;}
 .comp-row:first-of-type{border-top:none;}
 .comp-row .lbl{min-width:54px; color:var(--muted); font-weight:700;}
-.comp-row input[type=number]{width:58px;}
+.comp-row input[type=number]{width:62px;}
+/* תא ציון ממורכז — בטבלאות ההזנה והסימולציה */
+.gcell{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-width:74px;}
+.gcell small{color:var(--muted); font-weight:700; font-size:10.5px; letter-spacing:.2px;}
+.gcell input[type=number]{width:64px; height:34px; text-align:center; border-radius:10px; font-size:15px;}
+.gcell+.gcell{margin-top:5px; padding-top:5px; border-top:1px dashed #e6eaf4;}
+.needbadge{background:linear-gradient(135deg,#059669,#10b981); color:#fff; font-weight:800; font-size:12px;
+  padding:2px 9px; border-radius:99px; box-shadow:0 2px 8px rgba(5,150,105,.35); font-family:'Rubik',sans-serif; white-space:nowrap;}
 .comp-box .cn{min-height:auto;}
 footer{padding:18px; text-align:center; color:var(--muted); font-size:12px; border-top:1px solid var(--line); margin-top:20px; background:rgba(255,255,255,.5);}
 @media print{
@@ -241,7 +263,7 @@ body.print-mode #printArea{display:block; padding:20px; background:#fff;}
   <div class="hint"><span><kbd>↑</kbd><kbd>↓</kbd> ניווט</span><span><kbd>Enter</kbd> פתיחה</span><span><kbd>Esc</kbd> סגירה</span><span style="margin-inline-start:auto;">Ctrl+K</span></div>
 </div></div>
 <div class="toast" id="toast"></div>
-<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 1.4</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
+<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 1.5</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
 <script>
 "use strict";
 /* ============ מודל המקצועות ============ */
@@ -1526,11 +1548,11 @@ function entryGrid(subj,studs){
       const kc=k=>((g[k]==null?'cell-miss':'')+gstatCls(st,k));
       const ct=k=>`oncontextmenu="event.preventDefault();cycleGstat('${st.id}','${k}')" title="לחיצה ימנית: שחור→אדום→כחול"`;
       if(c.t==='i'){
-        tds+=`<td><input type="number" min="0" max="100" class="${kc(key)}" ${ct(key)} value="${g[key]??''}" onchange="setGrade('${st.id}','${key}',this.value)"></td>`;
+        tds+=`<td><div class="gcell"><input type="number" min="0" max="100" class="${kc(key)}" ${ct(key)} value="${g[key]??''}" onchange="setGrade('${st.id}','${key}',this.value)"></div></td>`;
       }else{
         const eff=c.s;
-        const rM=eff>0?`<div style="display:flex; gap:4px; align-items:center; justify-content:flex-end;"><small style="color:var(--muted);">מגן</small><input type="number" min="0" max="100" class="${kc(key+'.m')}" ${ct(key+'.m')} value="${g[key+'.m']??''}" onchange="setGrade('${st.id}','${key}.m',this.value)"></div>`:'';
-        const rE=eff<100?`<div style="display:flex; gap:4px; align-items:center; justify-content:flex-end; ${eff>0?'margin-top:3px;':''}"><small style="color:var(--muted);">בחינה</small><input type="number" min="0" max="100" class="${kc(key+'.e')}" ${ct(key+'.e')} value="${g[key+'.e']??''}" onchange="setGrade('${st.id}','${key}.e',this.value)"></div>`:'';
+        const rM=eff>0?`<div class="gcell"><small>מגן</small><input type="number" min="0" max="100" class="${kc(key+'.m')}" ${ct(key+'.m')} value="${g[key+'.m']??''}" onchange="setGrade('${st.id}','${key}.m',this.value)"></div>`:'';
+        const rE=eff<100?`<div class="gcell"><small>בחינה</small><input type="number" min="0" max="100" class="${kc(key+'.e')}" ${ct(key+'.e')} value="${g[key+'.e']??''}" onchange="setGrade('${st.id}','${key}.e',this.value)"></div>`:'';
         tds+=`<td>${rM}${rE}</td>`;
       }
     });
@@ -1850,6 +1872,7 @@ function simGrid(subj,studs){
     const comps=u===0?[]:getCompsFor(st,subj,u);
     const rReal=calcSubject(st,subj);
     const rSim=calcSubject(st,subj,{sim:true});
+    const ic=internalComp(st,subj); const intIdx=ic?ic.i:-1;
     const g=gradesOf(st,true);
     let tds=`<td><span class="name-link" onclick="openStudent('${st.id}')">${esc(st.name)}</span><br><small style="color:var(--muted)">${esc(st.cls)}</small></td>`;
     if(subj.opts.length>1) tds+=`<td>${u===0?'—':u}</td>`;
@@ -1859,11 +1882,18 @@ function simGrid(subj,studs){
       const key=subj.id+'.'+i;
       const cls=k=>((g[k]==null?'cell-miss ':'')+(isSimKey(st,k)?'sim-cell':''));
       if(c.t==='i'){
-        tds+=`<td><input type="number" min="0" max="100" class="${cls(key)}" value="${g[key]??''}" onchange="setGradeSim('${st.id}','${key}',this.value)"></td>`;
+        // תג "צריך X" — הציון המינימלי בהערכה הפנימית שיביא את המקצוע לציון עובר
+        let need='';
+        if(i===intIdx&&rReal.final!==null&&rReal.final<state.thresholds.pass){
+          const nd=neededInternalForSubject(st,subj,Math.ceil(state.thresholds.pass));
+          need=nd.ok?`<span class="needbadge" title="הזיני ציון זה כדי שהמקצוע יעבור">צריך ${nd.x}</span>`
+                    :`<span class="badge b-bad" style="font-size:11px;">לא ניתן</span>`;
+        }
+        tds+=`<td><div class="gcell"><input type="number" min="0" max="100" class="${cls(key)}" value="${g[key]??''}" onchange="setGradeSim('${st.id}','${key}',this.value)">${need}</div></td>`;
       }else{
         const eff=c.s;
-        const rM=eff>0?`<div style="display:flex; gap:4px; align-items:center; justify-content:flex-end;"><small style="color:var(--muted);">מגן</small><input type="number" min="0" max="100" class="${cls(key+'.m')}" value="${g[key+'.m']??''}" onchange="setGradeSim('${st.id}','${key}.m',this.value)"></div>`:'';
-        const rE=eff<100?`<div style="display:flex; gap:4px; align-items:center; justify-content:flex-end; ${eff>0?'margin-top:3px;':''}"><small style="color:var(--muted);">בחינה</small><input type="number" min="0" max="100" class="${cls(key+'.e')}" value="${g[key+'.e']??''}" onchange="setGradeSim('${st.id}','${key}.e',this.value)"></div>`:'';
+        const rM=eff>0?`<div class="gcell"><small>מגן</small><input type="number" min="0" max="100" class="${cls(key+'.m')}" value="${g[key+'.m']??''}" onchange="setGradeSim('${st.id}','${key}.m',this.value)"></div>`:'';
+        const rE=eff<100?`<div class="gcell"><small>בחינה</small><input type="number" min="0" max="100" class="${cls(key+'.e')}" value="${g[key+'.e']??''}" onchange="setGradeSim('${st.id}','${key}.e',this.value)"></div>`:'';
         tds+=`<td>${rM}${rE}</td>`;
       }
     });
@@ -1970,26 +2000,25 @@ function calcPanel(studs){
   if(!failRows.length&&!excRows.length) return '';
   return `<div class="card" style="margin-bottom:14px; border:2px solid var(--ok);">
     <h3 class="sec">🎯 מחשבון: כמה צריך בהערכה הפנימית?</h3>
-    <div class="note" style="margin-bottom:10px;">החישוב מבוסס על הציונים <b>האמיתיים</b> ומחפש את הציון המינימלי בהערכה הפנימית שמביא ליעד (מכבד עיגול, משקלים והיפוך אחוזים). זו המלצה לצורך שיקול דעת — ההזנה בפועל נעשית בטבלת הניסוי או בכרטיס התלמידה.</div>
+    <div class="note" style="margin-bottom:10px;">המספר הירוק = <b>בדיוק מה שצריך להזין</b> בהערכה הפנימית. הוא מופיע גם כתג ירוק צמוד לשדה עצמו בטבלת הניסוי למטה.</div>
     ${failRows.length?`<h3 class="sec" style="font-size:14px; color:var(--bad);">🔴 כדי לעבור (${passT}) — ${failRows.length} מקצועות מעכבים</h3>
     <div class="scroll" style="max-height:34vh; margin-bottom:12px;"><table class="tbl">
-    <thead><tr><th>תלמידה</th><th>מקצוע</th><th>ציון נוכחי</th><th>רכיב ההערכה</th><th>ציון נוכחי ברכיב</th><th>נדרש</th></tr></thead><tbody>
+    <thead><tr><th>תלמידה</th><th>מקצוע</th><th>ציון המקצוע</th><th>להזין בהערכה הפנימית</th></tr></thead><tbody>
     ${failRows.map(f=>`<tr><td><span class="name-link" onclick="openStudent('${f.st.id}')">${esc(f.st.name)}</span></td>
-      <td>${esc(f.subj.name)}</td><td class="grade-bad" style="font-weight:800;">${f.cur}</td>
-      <td>${f.need.ok?esc(f.need.comp)+' <span class="pill">'+f.need.w+'%</span>':'—'}</td>
-      <td>${f.need.ok?(f.need.cur===null?'<span class="badge b-miss">לא הוזן</span>':f.need.cur):'—'}</td>
-      <td>${f.need.ok?`<b style="color:var(--ok); font-size:15px;">${f.need.x}</b>${f.need.cur!==null&&f.need.x>f.need.cur?` <span class="pill">+${f.need.x-f.need.cur}</span>`:''}`:`<span class="badge b-bad">${esc(f.need.reason)}</span>`}</td>
+      <td>${esc(f.subj.name)}${f.need.ok?` <span class="pill">${esc(f.need.comp)}</span>`:''}</td>
+      <td class="grade-bad">${f.cur}</td>
+      <td>${f.need.ok?`<span style="font-size:22px; font-weight:900; color:var(--ok); font-family:'Rubik',sans-serif;">${f.need.x}</span>`:`<span class="badge b-bad">${esc(f.need.reason)}</span>`}</td>
     </tr>`).join('')}</tbody></table></div>`:''}
     ${excRows.length?`<h3 class="sec" style="font-size:14px; color:var(--gold);">⭐ כדי להצטיין (ממוצע מעל ${T.excel}) — ${excRows.length} תלמידות בטווח</h3>
     <div class="scroll" style="max-height:34vh;"><table class="tbl">
-    <thead><tr><th>תלמידה</th><th>ממוצע נוכחי</th><th>הדרך הקצרה ביותר</th><th>ציון נדרש בהערכה הפנימית</th><th>תנאי יח"ל</th></tr></thead><tbody>
+    <thead><tr><th>תלמידה</th><th>ממוצע</th><th>איפה להעלות</th><th>להזין</th><th>יח"ל</th></tr></thead><tbody>
     ${excRows.map(x=>`<tr><td><span class="name-link" onclick="openStudent('${x.st.id}')">${esc(x.st.name)}</span></td>
       <td class="${gradeClass(x.avg)}" style="font-weight:800;">${x.avg}</td>
       <td>${x.n?esc(x.n.subj.name)+' · '+esc(x.n.comp)
             :(x.nAll?`<b>העלאת כל ההערכות הפנימיות</b> <span class="pill">${x.nAll.changed} מתוך ${x.nAll.total} רכיבים</span>`
                     :'<span class="badge b-bad">לא ניתן להגיע דרך ההערכות הפנימיות</span>')}</td>
-      <td>${x.n?`<b style="color:var(--ok); font-size:15px;">${x.n.x}</b>${x.n.cur!==null?` <span class="pill">כרגע ${x.n.cur}${x.n.delta>0?' · +'+x.n.delta:''}</span>`:''}`
-             :(x.nAll?`<b style="color:var(--ok); font-size:15px;">${x.nAll.x}</b> <span class="pill">לכל רכיב שמתחת לרף</span>`:'—')}</td>
+      <td>${x.n?`<span style="font-size:22px; font-weight:900; color:var(--ok); font-family:'Rubik',sans-serif;">${x.n.x}</span>`
+             :(x.nAll?`<span style="font-size:22px; font-weight:900; color:var(--ok); font-family:'Rubik',sans-serif;">${x.nAll.x}</span>`:'—')}</td>
       <td>${x.unitsOk?'✓':'<span class="badge b-warn">✗ לא עומדת</span>'}</td>
     </tr>`).join('')}</tbody></table></div>`:''}
   </div>`;
@@ -2158,7 +2187,7 @@ function renderSettings(m){
   m.innerHTML=`
   <div class="card" style="margin-bottom:14px; border:2px solid var(--ok);">
     <h2 class="sec">💾 מצב השמירה — האם הנתונים שלי בטוחים?</h2>
-    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>1.4</b> · 01.09.2026</span>
+    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>1.5</b> · 01.09.2026</span>
     <span class="note">אחרי העלאת גרסה חדשה — רעננו את הדף (Ctrl+F5) וּודאו שהמספר כאן התעדכן.</span></div>
     <div id="storageBox">${storageStatusHtml()}</div>
     ${(()=>{const b=lastBackupInfo(); const cur=countAllStudents();
