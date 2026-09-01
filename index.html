@@ -359,7 +359,7 @@ body.print-mode #printArea{display:block; padding:20px; background:#fff;}
   <div class="hint"><span><kbd>↑</kbd><kbd>↓</kbd> ניווט</span><span><kbd>Enter</kbd> פתיחה</span><span><kbd>Esc</kbd> סגירה</span><span style="margin-inline-start:auto;">Ctrl+K</span></div>
 </div></div>
 <div class="toast" id="toast"></div>
-<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 3.4</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
+<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 3.5</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
 <script>
 "use strict";
 /* ============ מודל המקצועות ============ */
@@ -2907,7 +2907,7 @@ function renderSettings(m){
   m.innerHTML=`
   <div class="card" style="margin-bottom:14px; border:2px solid var(--ok);">
     <h2 class="sec">${ic('save',19)}מצב השמירה — האם הנתונים שלי בטוחים?</h2>
-    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>3.4</b> · 01.09.2026</span>
+    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>3.5</b> · 01.09.2026</span>
     <span class="note">אחרי העלאת גרסה חדשה — רעננו את הדף (Ctrl+F5) וּודאו שהמספר כאן התעדכן.</span></div>
     <div id="storageBox">${storageStatusHtml()}</div>
     ${(()=>{const b=lastBackupInfo(); const cur=countAllStudents();
@@ -2938,9 +2938,15 @@ function renderSettings(m){
     </div>
     <div class="note">כל סימולטור הוא סביבה נפרדת לחלוטין — תלמידות, כיתות, ציונים והגדרות משלו. מעבר בין סימולטורים דרך התפריט בכותרת העליונה. כך אפשר לנהל במקביל את יב, יא, ושנתונים קודמים.</div>
   </div>
-  <div class="card" style="margin-bottom:14px;">
-    <h2 class="sec">${ic('lock',19)}נעילת הקובץ (אופציונלי)</h2>
-    <div class="toolbar" style="margin-bottom:6px;">
+  <div class="card" style="margin-bottom:14px; padding:${openBoxes.lock?'17px':'11px 17px'};">
+    <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="toggleBox('lock')">
+      <h2 class="sec" style="margin:0; font-size:15px;">${ic('lock',18)}נעילת הקובץ</h2>
+      <span class="badge ${lockHash?'b-ok':'b-miss'}">${lockHash?'🔒 פעילה':'🔓 כבויה'}</span>
+      <span class="pill">אופציונלי</span>
+      <span style="margin-inline-start:auto; font-size:16px; color:var(--muted);">${openBoxes.lock?'▴':'▾'}</span>
+    </div>
+    ${openBoxes.lock?`
+    <div class="toolbar" style="margin:10px 0 6px;">
       ${lockHash?`<span class="badge b-ok">🔒 נעילה פעילה</span>
         <button class="btn sec sm" onclick="changeLock()">שינוי סיסמה</button>
         <button class="btn sec sm" onclick="showRecCode()">🔑 הצגת קוד השחזור</button>
@@ -2949,7 +2955,9 @@ function renderSettings(m){
         <button class="btn ok sm" onclick="setLock()">🔒 הפעלת נעילה בסיסמה</button>`}
     </div>
     <div class="note" style="margin-bottom:14px;">מסך כניסה שמונע פתיחה מזדמנת של הקובץ במחשב משותף. <b>אינה הצפנה</b> — משתמש מקצועי יוכל לעקוף אותה.<br>
-    <b>סיסמה שנשכחה לעולם לא תגרום לאובדן נתונים:</b> בעת ההפעלה נוצר <b>קוד שחזור</b> שיורד כקובץ ונשמר גם בכל גיבוי. במסך הנעילה יש "שכחתי סיסמה" שמסיר את הנעילה בעזרתו.</div>
+    <b>סיסמה שנשכחה לעולם לא תגרום לאובדן נתונים:</b> בעת ההפעלה נוצר <b>קוד שחזור</b> שיורד כקובץ ונשמר גם בכל גיבוי. במסך הנעילה יש "שכחתי סיסמה" שמסיר את הנעילה בעזרתו.</div>`:''}
+  </div>
+  <div class="card" style="margin-bottom:14px;">
     <h2 class="sec">${ic('type',19)}גופן</h2>
     <div class="note" style="margin-bottom:8px;">בחרי גופן — התצוגה מתעדכנת מיד. כל דוגמה מוצגת בגופן עצמו.</div>
     <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; margin-bottom:16px;">
@@ -2999,9 +3007,17 @@ function renderSettings(m){
     <div class="note"><b>תנאי ההצטיינות המלאים:</b> אנגלית 5 יח"ל · מתמטיקה 4 או 5 יח"ל · ממוצע משוקלל <b>מעל 90</b> (90.0 בדיוק אינו מספיק) · ללא מקצועות מעכבים.<br>
     תלמידה עם ממוצע גבוה שאינה עומדת בתנאי היח"ל תסומן "זכאית" ותקבל התראה מתאימה בלשונית ההתראות.</div>
   </div>
-  <div class="card" style="margin-bottom:14px;">
-    <h2 class="sec">${ic('target',19)}ספי חישוב</h2>
-    <div class="toolbar">
+  <div class="card" style="margin-bottom:14px; padding:${openBoxes.thr?'17px':'11px 17px'};">
+    <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="toggleBox('thr')">
+      <h2 class="sec" style="margin:0; font-size:15px;">${ic('target',18)}ספי חישוב וכללי חישוב</h2>
+      <span class="pill">מעכב ${T.pass} · הצטיינות מעל ${T.excel}</span>
+      ${state.flipFav?'<span class="pill">🔀 היפוך פעיל</span>':''}
+      ${state.countBlue===false?'<span class="pill">כחול מוחרג</span>':''}
+      ${state.includeInternal?'<span class="pill">כולל פנימיים</span>':''}
+      <span style="margin-inline-start:auto; font-size:16px; color:var(--muted);">${openBoxes.thr?'▴':'▾'}</span>
+    </div>
+    ${openBoxes.thr?`
+    <div class="toolbar" style="margin-top:10px;">
       <label>ציון מעכב מתחת ל: <input type="number" value="${T.pass}" step="0.5" onchange="T_set('pass',this.value)"></label>
       <label>סף הצטיינות (נדרש ממוצע <b>מעל</b> הערך): <input type="number" value="${T.excel}" onchange="T_set('excel',this.value)"></label>
       <label>סף פוטנציאל: <input type="number" value="${T.potential}" onchange="T_set('potential',this.value)"></label>
@@ -3023,7 +3039,7 @@ function renderSettings(m){
       <label><input type="checkbox" ${state.includeInternal?'checked':''} onchange="state.includeInternal=this.checked;save();render();">
       לכלול מקצועות פנימיים (חנ"ג, מבוא למדעים, של"ח, חינוך תעבורתי) בממוצע, ביח"ל ובבדיקת מעכבים</label>
     </div>
-    <div class="note">בקובץ המקורי מקצועות אלה מוזנים אך אינם נכללים בממוצע המשוקלל — לכן ברירת המחדל כבויה.</div>
+    <div class="note">בקובץ המקורי מקצועות אלה מוזנים אך אינם נכללים בממוצע המשוקלל — לכן ברירת המחדל כבויה.</div>`:''}
   </div>
   <div class="card" style="margin-bottom:14px; padding:${openBoxes.cat?'17px':'11px 17px'};">
     <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="toggleBox('cat')">
@@ -3060,11 +3076,16 @@ function renderSettings(m){
     </div>
     <div class="note" style="margin-top:8px;">💡 להחזרת מקצוע לברירת המחדל אצל כולן: <button class="btn sec sm" onclick="bulkClear()">↩️ ניקוי כל ההתאמות האישיות במקצוע זה</button></div>`:''}
   </div>
-  <div class="card">
-    <h2 class="sec">📚 משקולות מקצועות — ברירת מחדל (חלה על תלמידות בלי התאמה אישית)</h2>
-    <div class="note" style="margin-bottom:10px;">כאן משנים את חלוקת האחוזים בין המגן לבחינה (30/70, 50/50, 40/60 וכו׳) ואת משקל כל רכיב בציון הסופי. השינוי חל על כל התלמידות. סה"כ משקלי הרכיבים בכל מקצוע צריך להיות 100.</div>
+  <div class="card" style="padding:${openBoxes.wts?'17px':'11px 17px'};">
+    <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="toggleBox('wts')">
+      <h2 class="sec" style="margin:0; font-size:15px;">📚 משקולות מקצועות — ברירת מחדל</h2>
+      <span class="pill">חלה על תלמידות בלי התאמה אישית</span>
+      <span style="margin-inline-start:auto; font-size:16px; color:var(--muted);">${openBoxes.wts?'▴':'▾'}</span>
+    </div>
+    ${openBoxes.wts?`
+    <div class="note" style="margin:10px 0;">כאן משנים את חלוקת האחוזים בין המגן לבחינה (30/70, 50/50, 40/60 וכו׳) ואת משקל כל רכיב בציון הסופי. השינוי חל על כל התלמידות. סה"כ משקלי הרכיבים בכל מקצוע צריך להיות 100.</div>
     ${SUBJECTS.map(subj=>settingsSubj(subj)).join('')}
-    <button class="btn warn" onclick="if(confirm('לאפס את כל המשקולות לברירת המחדל?')){state.custom={};save();render();}">↩️ איפוס לברירות מחדל</button>
+    <button class="btn warn" onclick="if(confirm('לאפס את כל המשקולות לברירת המחדל?')){state.custom={};save();render();}">↩️ איפוס לברירות מחדל</button>`:''}
   </div>`;
 }
 function T_set(k,v){ state.thresholds[k]=+v; save(); toast('נשמר'); }
