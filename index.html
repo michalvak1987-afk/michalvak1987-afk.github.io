@@ -3,30 +3,85 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>סימולטור אולפנת הראל</title>
+<title>סימולטור בגרות</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
-  --bg:#f4f6fb; --card:#fff; --ink:#1e2a3a; --muted:#6b7a90;
-  --brand:#4338ca; --brand2:#7c3aed; --ok:#059669; --warn:#d97706; --bad:#dc2626;
-  --gold:#b45309; --line:#e4e9f2; --soft:#eef1f8;
+  --bg:#eef1f9; --card:#fff; --ink:#16233a; --muted:#64748b;
+  --brand:#4f46e5; --brand2:#9333ea; --ok:#059669; --warn:#e0820c; --bad:#e11d48;
+  --gold:#b45309; --line:#e6eaf4; --soft:#f1f4fb;
+  --sh:0 4px 16px rgba(30,41,80,.07); --sh2:0 12px 32px rgba(30,41,80,.13);
 }
+@keyframes fadeUp{from{opacity:0; transform:translateY(10px);}to{opacity:1; transform:none;}}
+@keyframes pop{from{transform:scale(.94); opacity:0;}to{transform:scale(1); opacity:1;}}
+@keyframes shimmer{0%{background-position:-500px 0;}100%{background-position:500px 0;}}
+@keyframes sheetUp{from{transform:translateY(40px) scale(.97); opacity:0;}to{transform:none; opacity:1;}}
+@keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
+@keyframes ringIn{from{stroke-dashoffset:var(--circ);}}
+/* ===== ערכות צבע ===== */
+html[data-accent="indigo"]{--brand:#4f46e5; --brand2:#9333ea; --h1:#312e81; --h2:#5b21b6; --h3:#9333ea;}
+html[data-accent="ocean"]{--brand:#0284c7; --brand2:#0891b2; --h1:#0c4a6e; --h2:#0369a1; --h3:#06b6d4;}
+html[data-accent="emerald"]{--brand:#059669; --brand2:#0d9488; --h1:#064e3b; --h2:#047857; --h3:#14b8a6;}
+html[data-accent="rose"]{--brand:#e11d48; --brand2:#db2777; --h1:#881337; --h2:#be123c; --h3:#f43f5e;}
+html[data-accent="sunset"]{--brand:#ea580c; --brand2:#db2777; --h1:#7c2d12; --h2:#c2410c; --h3:#f59e0b;}
+/* ===== מתג iOS ===== */
+input[type=checkbox]{appearance:none; -webkit-appearance:none; width:44px; height:26px; border-radius:99px;
+  background:#d5dbe8; position:relative; cursor:pointer; transition:background .25s cubic-bezier(.2,.9,.3,1.2); vertical-align:middle; flex-shrink:0; border:none;}
+input[type=checkbox]::after{content:''; position:absolute; top:3px; right:3px; width:20px; height:20px; border-radius:50%;
+  background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.28); transition:transform .25s cubic-bezier(.2,.9,.3,1.2);}
+input[type=checkbox]:checked{background:linear-gradient(135deg,var(--brand),var(--brand2));}
+input[type=checkbox]:checked::after{transform:translateX(-18px);}
+input[type=checkbox]:active::after{width:24px;}
+label:has(input[type=checkbox]){display:inline-flex; align-items:center; gap:9px; cursor:pointer;}
+/* ===== גלילה מעוצבת ===== */
+::-webkit-scrollbar{width:11px; height:11px;}
+::-webkit-scrollbar-thumb{background:#c3cddf; border-radius:99px; border:3px solid transparent; background-clip:content-box;}
+::-webkit-scrollbar-thumb:hover{background:#9fadc7; background-clip:content-box;}
+::-webkit-scrollbar-track{background:transparent;}
+/* ===== טבעת התקדמות ===== */
+.ring-wrap{display:flex; gap:22px; flex-wrap:wrap; justify-content:center; align-items:center;}
+.ring{position:relative; width:132px; height:132px; text-align:center;}
+.ring svg{transform:rotate(-90deg);}
+.ring .rv{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+.ring .rn{font-size:27px; font-weight:800; letter-spacing:-1px;}
+.ring .rl{font-size:11.5px; color:var(--muted); font-weight:700; margin-top:1px;}
+/* ===== חיפוש מהיר ===== */
+#cmdk{position:fixed; inset:0; background:rgba(15,23,42,.45); backdrop-filter:blur(6px); z-index:600; display:none; align-items:flex-start; justify-content:center; padding-top:12vh;}
+#cmdk.show{display:flex;}
+#cmdk .panel{background:rgba(255,255,255,.96); backdrop-filter:blur(24px) saturate(180%); width:min(620px,92vw); border-radius:20px;
+  box-shadow:0 30px 80px rgba(15,23,42,.42); overflow:hidden; animation:sheetUp .22s cubic-bezier(.2,.9,.3,1.1) both; border:1px solid rgba(255,255,255,.7);}
+#cmdk input{width:100%; border:none; border-bottom:1px solid var(--line); border-radius:0; padding:17px 20px; font-size:16.5px; outline:none; background:transparent;}
+#cmdk .res{max-height:48vh; overflow:auto; padding:6px;}
+#cmdk .it{padding:11px 14px; border-radius:12px; cursor:pointer; display:flex; align-items:center; gap:10px; font-size:14px;}
+#cmdk .it:hover,#cmdk .it.sel{background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff;}
+#cmdk .it:hover .pill,#cmdk .it.sel .pill{background:rgba(255,255,255,.22); color:#fff; border-color:transparent;}
+#cmdk .hint{padding:9px 16px; font-size:11.5px; color:var(--muted); border-top:1px solid var(--line); background:#fafbfe; display:flex; gap:14px;}
+kbd{background:#fff; border:1px solid #d6deec; border-bottom-width:2px; border-radius:6px; padding:1px 6px; font-size:11px; font-family:inherit; font-weight:700;}
 *{box-sizing:border-box; margin:0; padding:0;}
-body{font-family:'Segoe UI','Heebo',Arial,sans-serif; background:var(--bg); color:var(--ink); font-size:14px;}
-header.app{background:linear-gradient(135deg,#312e81,#6d28d9 60%,#9333ea); color:#fff; padding:18px 26px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
-header.app h1{font-size:21px; font-weight:800;}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI','Heebo','Assistant',Arial,sans-serif; color:var(--ink); font-size:14px;
+  background:var(--bg);
+  background-image:radial-gradient(1200px 500px at 100% -80px,rgba(147,51,234,.10),transparent 60%),radial-gradient(900px 400px at -10% 0,rgba(79,70,229,.10),transparent 55%);
+  background-attachment:fixed;}
+header.app{background:linear-gradient(120deg,#312e81 0%,#5b21b6 45%,#9333ea 100%); color:#fff; padding:16px 26px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; position:relative; overflow:hidden; box-shadow:0 6px 24px rgba(49,46,129,.28);}
+header.app::after{content:''; position:absolute; inset:0; background:radial-gradient(600px 200px at 85% -40px,rgba(255,255,255,.18),transparent 70%); pointer-events:none;}
+header.app>*{position:relative; z-index:1;}
+header.app h1{font-size:22px; font-weight:800; letter-spacing:-.4px; text-shadow:0 2px 10px rgba(0,0,0,.18);}
 header.app .sub{opacity:.85; font-size:12.5px;}
-nav.tabs{display:flex; gap:4px; background:#fff; padding:8px 18px; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:50; overflow-x:auto;}
+nav.tabs{display:flex; gap:5px; background:rgba(255,255,255,.72); backdrop-filter:blur(22px) saturate(180%); -webkit-backdrop-filter:blur(22px) saturate(180%); padding:9px 18px; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:50; overflow-x:auto; box-shadow:0 2px 12px rgba(30,41,80,.05);}
 nav.tabs button{border:none; background:transparent; padding:9px 16px; border-radius:10px; font-size:14px; font-weight:600; color:var(--muted); cursor:pointer; white-space:nowrap; font-family:inherit;}
-nav.tabs button.active{background:var(--brand); color:#fff;}
+nav.tabs button{transition:all .18s ease;}
+nav.tabs button.active{background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; box-shadow:0 4px 14px rgba(79,70,229,.35); transform:translateY(-1px);}
 nav.tabs button:hover:not(.active){background:var(--soft); color:var(--ink);}
 main{padding:20px; max-width:1500px; margin:0 auto;}
 .row{display:flex; gap:14px; flex-wrap:wrap;}
-.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; box-shadow:0 1px 3px rgba(30,42,58,.06);}
+.card{background:rgba(255,255,255,.86); backdrop-filter:blur(14px) saturate(150%); -webkit-backdrop-filter:blur(14px) saturate(150%); border:1px solid rgba(255,255,255,.75); border-radius:20px; padding:17px; box-shadow:var(--sh); animation:fadeUp .3s ease both; transition:box-shadow .2s ease;}
+.card:hover{box-shadow:var(--sh2);}
 .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px;}
-.kpi{border-radius:14px; padding:14px 16px; color:#fff; position:relative; overflow:hidden;}
-.kpi .n{font-size:26px; font-weight:800;}
+.kpi{border-radius:20px; padding:15px 17px; color:#fff; position:relative; overflow:hidden; box-shadow:var(--sh); animation:pop .35s ease both; transition:transform .18s ease, box-shadow .18s ease;}
+.kpi:hover{transform:translateY(-3px) scale(1.015); box-shadow:var(--sh2);}
+.kpi::after{content:''; position:absolute; inset:0; background:radial-gradient(140px 70px at 90% -10px,rgba(255,255,255,.3),transparent 70%); pointer-events:none;}
+.kpi .n{font-size:28px; font-weight:800; letter-spacing:-.5px; text-shadow:0 2px 8px rgba(0,0,0,.15);}
 .kpi .t{font-size:12.5px; opacity:.92;}
 .kpi.k1{background:linear-gradient(135deg,#4338ca,#6366f1);}
 .kpi.k2{background:linear-gradient(135deg,#047857,#10b981);}
@@ -37,13 +92,14 @@ main{padding:20px; max-width:1500px; margin:0 auto;}
 h2.sec{font-size:16px; font-weight:800; margin:6px 0 12px;}
 h3.sec{font-size:14px; font-weight:700; margin:4px 0 10px; color:var(--brand);}
 table.tbl{width:100%; border-collapse:collapse; font-size:13px;}
-table.tbl th{background:var(--soft); padding:8px 9px; text-align:right; font-weight:700; border-bottom:2px solid var(--line); position:sticky; top:0; white-space:nowrap;}
+table.tbl th{background:linear-gradient(180deg,#f4f7fd,#eaf0fa); padding:9px; text-align:right; font-weight:800; border-bottom:2px solid #dbe3f2; position:sticky; top:0; white-space:nowrap; color:#33415c;}
 table.tbl td{padding:7px 9px; border-bottom:1px solid var(--line); text-align:right;}
-table.tbl tr:hover td{background:#f8faff;}
+table.tbl tbody tr{transition:background .12s ease;}
+table.tbl tr:hover td{background:#f2f6ff;}
 .scroll{overflow:auto; max-height:70vh; border:1px solid var(--line); border-radius:10px;}
-.badge{display:inline-block; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:700; white-space:nowrap;}
-.b-exc{background:#fef3c7; color:#92400e; border:1px solid #f59e0b;}
-.b-pot{background:#ede9fe; color:#5b21b6; border:1px solid #a78bfa;}
+.badge{display:inline-block; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:700; white-space:nowrap; box-shadow:0 1px 3px rgba(0,0,0,.07);}
+.b-exc{background:linear-gradient(135deg,#fde68a,#fbbf24); color:#7c2d12; border:1px solid #f59e0b; box-shadow:0 2px 8px rgba(245,158,11,.35);}
+.b-pot{background:linear-gradient(135deg,#ede9fe,#ddd6fe); color:#5b21b6; border:1px solid #a78bfa;}
 .b-ok{background:#d1fae5; color:#065f46;}
 .b-warn{background:#ffedd5; color:#9a3412;}
 .b-bad{background:#fee2e2; color:#991b1b;}
@@ -53,9 +109,10 @@ table.tbl tr:hover td{background:#f8faff;}
 .grade-warn{color:var(--warn); font-weight:700;}
 .grade-bad{color:var(--bad); font-weight:800;}
 .grade-miss{color:#94a3b8;}
-input[type=number], select, input[type=text]{border:1px solid #cbd5e1; border-radius:8px; padding:6px 8px; font-size:13px; font-family:inherit; background:#fff; color:var(--ink);}
+input[type=number], select, input[type=text], textarea{border:1.5px solid #d6deec; border-radius:9px; padding:6px 9px; font-size:13px; font-family:inherit; background:#fff; color:var(--ink); transition:border-color .15s ease, box-shadow .15s ease;}
+input[type=number]:hover, select:hover, input[type=text]:hover{border-color:#a9b8d4;}
 input[type=number]{width:62px; text-align:center;}
-input[type=number]:focus, select:focus{outline:2px solid #a5b4fc; border-color:var(--brand);}
+input[type=number]:focus, select:focus, input[type=text]:focus, textarea:focus{outline:none; border-color:var(--brand); box-shadow:0 0 0 3px rgba(79,70,229,.16);}
 input.cell-miss{background:#f1f5f9; border-style:dashed;}
 input.g-red, .g-red{color:#dc2626 !important; font-weight:800;}
 input.g-blue, .g-blue{color:#1d4ed8 !important; font-weight:800; font-style:italic;}
@@ -65,30 +122,35 @@ body.sim-on #simBanner{display:flex;}
 body.sim-on nav.tabs{border-bottom-color:#f59e0b;}
 #simTabBtn{border:2px solid transparent;}
 body.sim-on #simTabBtn{background:#f59e0b !important; color:#fff !important; border-color:#b45309;}
-button.btn{border:none; border-radius:10px; padding:9px 16px; font-size:13.5px; font-weight:700; cursor:pointer; font-family:inherit; background:var(--brand); color:#fff;}
-button.btn:hover{filter:brightness(1.1);}
-button.btn.sec{background:var(--soft); color:var(--ink); border:1px solid var(--line);}
-button.btn.ok{background:var(--ok);}
-button.btn.warn{background:var(--warn);}
-button.btn.bad{background:var(--bad);}
+button.btn{border:none; border-radius:13px; padding:9px 16px; font-size:13.5px; font-weight:700; cursor:pointer; font-family:inherit;
+  background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; box-shadow:0 3px 10px rgba(79,70,229,.28); transition:all .16s ease;}
+button.btn:hover{transform:translateY(-1px); box-shadow:0 6px 18px rgba(79,70,229,.4); filter:brightness(1.06);}
+button.btn:active{transform:translateY(0) scale(.98);}
+button.btn.sec{background:var(--soft); color:var(--ink); border:1px solid var(--line); box-shadow:none;}
+button.btn.sec:hover{background:#e8edf9; box-shadow:0 3px 10px rgba(30,41,80,.1);}
+button.btn.ok{background:linear-gradient(135deg,#059669,#10b981); box-shadow:0 3px 10px rgba(5,150,105,.3);}
+button.btn.warn{background:linear-gradient(135deg,#d97706,#f59e0b); box-shadow:0 3px 10px rgba(217,119,6,.3);}
+button.btn.bad{background:linear-gradient(135deg,#e11d48,#f43f5e); box-shadow:0 3px 10px rgba(225,29,72,.3);}
 button.btn.sm{padding:5px 10px; font-size:12px; border-radius:8px;}
 .toolbar{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:14px;}
 .toolbar label{font-weight:600; color:var(--muted); font-size:13px;}
 .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
 .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
 @media(max-width:1000px){.grid2,.grid3{grid-template-columns:1fr;}}
-.alert-item{display:flex; gap:10px; align-items:center; padding:8px 12px; border-radius:10px; margin-bottom:6px; font-size:13px;}
+.alert-item{display:flex; gap:10px; align-items:center; padding:9px 13px; border-radius:11px; margin-bottom:7px; font-size:13px; transition:transform .12s ease;}
+.alert-item:hover{transform:translateX(-3px);}
 .al-bad{background:#fef2f2; border-right:4px solid var(--bad);}
 .al-warn{background:#fffbeb; border-right:4px solid var(--warn);}
 .al-info{background:#eff6ff; border-right:4px solid #3b82f6;}
 .al-pot{background:#f5f3ff; border-right:4px solid var(--brand2);}
 .al-miss{background:#f8fafc; border-right:4px solid #94a3b8;}
 .chartbox{position:relative; height:280px;}
-.subj-card{border:1px solid var(--line); border-radius:12px; margin-bottom:10px; overflow:hidden;}
-.subj-head{background:var(--soft); padding:10px 14px; font-weight:700; cursor:pointer; display:flex; justify-content:space-between; align-items:center;}
+.subj-card{border:1px solid var(--line); border-radius:13px; margin-bottom:11px; overflow:hidden; box-shadow:0 2px 10px rgba(30,41,80,.05);}
+.subj-head{background:linear-gradient(135deg,#f1f4fb,#e9eefb); padding:11px 14px; font-weight:800; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;}
+.subj-head:hover{background:linear-gradient(135deg,#e9eefb,#e0e8fa);}
 .subj-body{padding:12px 14px; display:none;}
 .subj-card.open .subj-body{display:block;}
-.pill{background:#fff; border:1px solid var(--line); border-radius:999px; padding:2px 10px; font-size:11.5px; color:var(--muted);}
+.pill{background:#fff; border:1px solid var(--line); border-radius:999px; padding:2.5px 10px; font-size:11.5px; color:var(--muted); box-shadow:0 1px 2px rgba(30,41,80,.04);}
 .note{font-size:12px; color:var(--muted); margin-top:6px;}
 .delta-up{color:var(--ok); font-weight:800;}
 .delta-dn{color:var(--bad); font-weight:800;}
@@ -96,12 +158,13 @@ button.btn.sm{padding:5px 10px; font-size:12px; border-radius:8px;}
 .name-link:hover{text-decoration:underline;}
 #giModal{position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:210; display:none; align-items:flex-start; justify-content:center; padding:30px 15px; overflow:auto;}
 #giModal.show{display:flex;}
-#giModal .box{background:#fff; border-radius:16px; max-width:900px; width:100%; padding:20px; max-height:88vh; overflow:auto;}
+#giModal .box{background:rgba(255,255,255,.97); backdrop-filter:blur(24px) saturate(180%); border-radius:24px; max-width:900px; width:100%; padding:20px; max-height:88vh; overflow:auto;}
 #studentModal{position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:200; display:none; align-items:flex-start; justify-content:center; padding:30px 15px; overflow:auto;}
 #studentModal.show{display:flex;}
-#studentModal .box{background:#fff; border-radius:16px; max-width:1000px; width:100%; padding:20px; max-height:88vh; overflow:auto;}
+#studentModal .box{background:rgba(255,255,255,.97); backdrop-filter:blur(24px) saturate(180%); border-radius:24px; max-width:1000px; width:100%; padding:22px; max-height:88vh; overflow:auto; box-shadow:0 24px 60px rgba(15,23,42,.4); animation:sheetUp .26s cubic-bezier(.2,.9,.3,1.1) both;}
 .comp-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px;}
-.comp-box{border:1px solid var(--line); border-radius:10px; padding:9px; background:#fbfcff;}
+.comp-box{border:1px solid var(--line); border-radius:12px; padding:10px; background:linear-gradient(180deg,#fff,#f8faff); box-shadow:0 2px 8px rgba(30,41,80,.05); transition:transform .15s ease, box-shadow .15s ease;}
+.comp-box:hover{transform:translateY(-2px); box-shadow:0 6px 18px rgba(30,41,80,.1);}
 .comp-box .cn{font-size:11.5px; color:var(--muted); font-weight:600; margin-bottom:5px; min-height:28px;}
 .comp-inputs{display:flex; gap:6px; align-items:center; font-size:11.5px; flex-wrap:wrap;}
 .comp-row{display:flex; gap:6px; align-items:center; font-size:11.5px; padding:3px 0; border-top:1px dashed #e2e8f0;}
@@ -109,7 +172,7 @@ button.btn.sm{padding:5px 10px; font-size:12px; border-radius:8px;}
 .comp-row .lbl{min-width:54px; color:var(--muted); font-weight:700;}
 .comp-row input[type=number]{width:58px;}
 .comp-box .cn{min-height:auto;}
-footer{padding:14px; text-align:center; color:var(--muted); font-size:12px;}
+footer{padding:18px; text-align:center; color:var(--muted); font-size:12px; border-top:1px solid var(--line); margin-top:20px; background:rgba(255,255,255,.5);}
 @media print{
   body>*{display:none !important;}
   #printArea{display:block !important; padding:0;}
@@ -120,18 +183,21 @@ footer{padding:14px; text-align:center; color:var(--muted); font-size:12px;}
 #printArea{display:none;}
 body.print-mode #printArea{display:block; padding:20px; background:#fff;}
 .status-cell{min-width:110px;}
-.toast{position:fixed; bottom:20px; left:20px; background:#1e293b; color:#fff; padding:12px 20px; border-radius:12px; z-index:500; font-size:13.5px; box-shadow:0 8px 24px rgba(0,0,0,.25); opacity:0; transition:opacity .3s;}
-.toast.show{opacity:1;}
+.toast{position:fixed; bottom:22px; left:22px; background:rgba(30,41,59,.92); backdrop-filter:blur(18px) saturate(180%); color:#fff; padding:13px 22px; border-radius:14px; z-index:500; font-size:13.5px; box-shadow:0 12px 32px rgba(0,0,0,.32); opacity:0; transform:translateY(12px); transition:all .28s cubic-bezier(.2,.8,.3,1); border:1px solid rgba(255,255,255,.12);}
+.toast.show{opacity:1; transform:none;}
 </style>
 </head>
 <body>
 <header class="app">
   <div id="logoSlot" style="flex-shrink:0;"></div>
   <div>
-    <h1>סימולטור אולפנת הראל</h1>
+    <h1 id="appH1">סימולטור בגרות</h1>
     <div class="sub">מגזר ממלכתי דתי · חישוב זכאות, איתור מצטיינות, סימולציות ודוחות</div>
   </div>
-  <div id="profileSlot" style="display:flex; gap:6px; align-items:center; margin-inline-start:14px;"></div>
+  <div id="profileSlot" style="display:flex; gap:6px; align-items:center; margin-inline-start:14px; flex-wrap:wrap;"></div>
+  <button onclick="openCmd()" title="חיפוש מהיר (Ctrl+K)" style="background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.32); color:#fff; border-radius:12px; padding:7px 14px; cursor:pointer; font-family:inherit; font-size:13px; display:flex; align-items:center; gap:8px; margin-inline-start:10px;">
+    🔍 <span style="opacity:.9;">חיפוש</span> <kbd style="background:rgba(255,255,255,.2); border-color:rgba(255,255,255,.3); color:#fff;">Ctrl K</kbd></button>
+  <div id="fileBar" style="display:flex; gap:6px; align-items:center; margin-inline-start:10px;"></div>
   <div id="saveInd" onclick="setTab('settings')" title="לחצי לפרטי השמירה והגיבוי" style="cursor:pointer; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35); border-radius:10px; padding:5px 10px; font-size:12px; line-height:1.35; white-space:nowrap;"></div>
   <div style="margin-inline-start:auto; display:flex; gap:8px; flex-wrap:wrap;">
     <button class="btn sec sm" onclick="exportExcel()">📥 ייצוא לאקסל</button>
@@ -142,6 +208,7 @@ body.print-mode #printArea{display:block; padding:20px; background:#fff;}
     <input type="file" id="jsonFile" accept=".json" style="display:none" onchange="importJSON(this)">
   </div>
 </header>
+<div id="nagBar" style="display:none; background:linear-gradient(90deg,#fef2f2,#fee2e2); border-bottom:2px solid #dc2626; padding:9px 18px; font-size:13.5px; align-items:center; gap:12px; flex-wrap:wrap;"></div>
 <nav class="tabs" id="tabs">
   <button data-tab="dash" class="active" onclick="setTab('dash')">📊 דשבורד</button>
   <button data-tab="students" onclick="setTab('students')">👩‍🎓 תלמידות</button>
@@ -156,8 +223,25 @@ body.print-mode #printArea{display:block; padding:20px; background:#fff;}
 <div id="studentModal" onclick="if(event.target===this)closeStudent()"><div class="box" id="studentBox"></div></div>
 <div id="giModal" onclick="if(event.target===this)closeGradeImport()"><div class="box" id="giBox"></div></div>
 <div id="printArea"></div>
+<div id="lockScreen" style="display:none; position:fixed; inset:0; z-index:900; background:linear-gradient(135deg,#1e1b4b,#4c1d95 55%,#7e22ce); align-items:center; justify-content:center; padding:20px;">
+  <div style="background:rgba(255,255,255,.97); backdrop-filter:blur(24px); border-radius:26px; padding:32px 30px; width:min(400px,92vw); text-align:center; box-shadow:0 30px 80px rgba(0,0,0,.45); animation:sheetUp .3s cubic-bezier(.2,.9,.3,1.1) both;">
+    <div style="font-size:52px; line-height:1; margin-bottom:10px;">🔒</div>
+    <h2 style="font-size:19px; font-weight:800; margin-bottom:4px;" id="lockTitle">הקובץ נעול</h2>
+    <div class="note" style="margin-bottom:18px;">הזיני את הסיסמה כדי להיכנס</div>
+    <input type="password" id="lockPass" placeholder="סיסמה" style="width:100%; text-align:center; font-size:17px; padding:12px; border-radius:14px;" onkeydown="if(event.key==='Enter')tryUnlock()">
+    <div id="lockErr" style="color:var(--bad); font-size:12.5px; font-weight:700; height:18px; margin-top:8px;"></div>
+    <button class="btn" style="width:100%; margin-top:6px; padding:12px;" onclick="tryUnlock()">כניסה</button>
+    <button class="btn sec" style="width:100%; margin-top:10px;" onclick="forgotPass()">🔑 שכחתי סיסמה — כניסה עם קוד שחזור</button>
+    <div class="note" style="margin-top:12px; font-size:11.5px;">קוד השחזור נמצא בקובץ שירד בעת הפעלת הנעילה, וגם בתוך כל קובץ גיבוי. <b>הנתונים לעולם לא נמחקים בגלל סיסמה שנשכחה.</b></div>
+  </div>
+</div>
+<div id="cmdk" onclick="if(event.target===this)closeCmd()"><div class="panel">
+  <input id="cmdInput" placeholder="חיפוש תלמידה, מקצוע או לשונית…" oninput="cmdFilter()" onkeydown="cmdKey(event)">
+  <div class="res" id="cmdRes"></div>
+  <div class="hint"><span><kbd>↑</kbd><kbd>↓</kbd> ניווט</span><span><kbd>Enter</kbd> פתיחה</span><span><kbd>Esc</kbd> סגירה</span><span style="margin-inline-start:auto;">Ctrl+K</span></div>
+</div></div>
 <div class="toast" id="toast"></div>
-<footer>סימולטור אולפנת הראל · <b>גרסה 1.0</b> (31.08.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
+<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 1.4</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
 <script>
 "use strict";
 /* ============ מודל המקצועות ============ */
@@ -376,7 +460,7 @@ function applyLegacyStructure(st){
 }
 
 /* ============ מצב ושמירה ============ */
-const DEFAULT_STATE={classes:[], students:[], custom:{}, includeInternal:false, reqUnits:true, flipFav:true, logo:null, thresholds:{pass:54.5, excel:90, potential:85, gap:20}};
+const DEFAULT_STATE={classes:[], students:[], custom:{}, coord:'', includeInternal:false, reqUnits:true, flipFav:true, logo:null, thresholds:{pass:54.5, excel:90, potential:85, gap:20}};
 /* ============ שכבת הניסוי של הסימולציה (חיה רק בלשונית הסימולציה, לא נוגעת במקור) ============ */
 function gradesOf(st,sim){
   if(sim&&st.simg&&Object.keys(st.simg).length) return Object.assign({},st.grades||{},st.simg);
@@ -414,7 +498,18 @@ function commitSim(){
   });
   save(); render(); toast(n+' ציונים הועברו לטבלה האמיתית');
 }
-const DEFAULT_LOGO='<svg viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;"><rect x="0" y="0" width="240" height="120" rx="16" fill="#ffffff"/><ellipse cx="120" cy="58" rx="112" ry="52" fill="none" stroke="#3db3e3" stroke-width="9"/><text x="196" y="38" text-anchor="middle" font-size="20" font-weight="900" font-style="italic" fill="#1b3a6b" font-family="Arial Black, Arial">ORT</text><text x="112" y="60" text-anchor="middle" font-size="44" font-weight="900" font-style="italic" fill="#1b3a6b" font-family="Arial Black, Arial" transform="skewX(-8)">אורט</text><text x="120" y="86" text-anchor="middle" font-size="21" font-weight="800" fill="#1b3a6b" font-family="Arial">אולפנת הראל</text><text x="120" y="105" text-anchor="middle" font-size="14" font-weight="700" fill="#3db3e3" font-family="Arial">נהריה</text></svg>';
+let schoolName='';
+try{ schoolName=localStorage.getItem('bagrutSchool')||''; }catch(e){}
+function appTitle(){ return schoolName?('סימולטור '+schoolName):'סימולטור בגרות'; }
+function reportTitle(){ return schoolName?(schoolName+' · דוח מצב בגרות'):'דוח מצב בגרות'; }
+function setSchoolName(v){
+  schoolName=(v||'').trim();
+  try{ localStorage.setItem('bagrutSchool',schoolName); }catch(e){}
+  const t=document.getElementById('appH1'); if(t) t.textContent=appTitle();
+  document.title=appTitle();
+  render(); toast(schoolName?('שם בית הספר: '+schoolName):'שם בית הספר נוקה');
+}
+const DEFAULT_LOGO='<svg viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs><rect x="4" y="4" width="232" height="112" rx="18" fill="url(#lg1)"/><path d="M120 30 L172 52 L120 74 L68 52 Z" fill="#fff" opacity="0.95"/><path d="M92 62 v18 c0 8 13 14 28 14 s28-6 28-14 V62" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/><circle cx="172" cy="52" r="4" fill="#fff"/><path d="M172 52 v20" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/><text x="120" y="108" text-anchor="middle" font-size="15" font-weight="800" fill="#ffffff" font-family="Arial" opacity=".95">סימולטור בגרות</text></svg>';
 function logoHtml(size){
   if(state.logo) return `<img src="${state.logo}" style="height:${size}px; max-width:${size*2.4}px; object-fit:contain; border-radius:10px; background:#fff; padding:2px;" alt="לוגו">`;
   return `<span style="display:inline-block; width:${size*2}px; height:${size}px;">${DEFAULT_LOGO}</span>`;
@@ -430,6 +525,142 @@ function uploadLogo(input){
   reader.readAsDataURL(file);
   input.value='';
 }
+/* ============ שמירה אוטומטית לקובץ במחשב (כמו אקסל) ============ */
+let fileHandle=null, fileName='', fileSaveTimer=null, fileState='off'; // off|on|need-permission|unsupported
+const FS_OK=(typeof window!=='undefined'&&'showSaveFilePicker'in window);
+// שמירת ה"ידית" לקובץ ב-IndexedDB כדי שתשרוד סגירת דפדפן
+function idb(){ return new Promise((res,rej)=>{ const r=indexedDB.open('bagrutFS',1);
+  r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+async function idbSet(k,v){ try{ const db=await idb(); return new Promise(res=>{ const t=db.transaction('kv','readwrite'); t.objectStore('kv').put(v,k); t.oncomplete=()=>res(); }); }catch(e){} }
+async function idbGet(k){ try{ const db=await idb(); return new Promise(res=>{ const t=db.transaction('kv','readonly'); const q=t.objectStore('kv').get(k); q.onsuccess=()=>res(q.result); q.onerror=()=>res(null); }); }catch(e){ return null; } }
+async function idbDel(k){ try{ const db=await idb(); return new Promise(res=>{ const t=db.transaction('kv','readwrite'); t.objectStore('kv').delete(k); t.oncomplete=()=>res(); }); }catch(e){} }
+
+function fullBackupObject(){
+  const all={_type:'bagrut-backup',_ver:2,_at:new Date().toISOString(),school:schoolName,lock:lockHash,rec:recCode,rec:recCode,lock:lockHash,profiles:profiles,current:currentProfileId,data:{}};
+  profiles.forEach(pr=>{
+    const key=pr.id==='main'?'bagrutSimPro':'bagrutSimPro:'+pr.id;
+    try{ const raw=localStorage.getItem(key); if(raw) all.data[pr.id]=JSON.parse(raw); }catch(e){}
+  });
+  all.data[currentProfileId]=state;
+  return all;
+}
+function applyBackupObject(d){
+  if(!d||!d.data) return false;
+  if(typeof d.rec==='string'){ recCode=d.rec; try{ if(recCode) localStorage.setItem('bagrutRec',recCode); }catch(e){} }
+  if(typeof d.lock==='string'){ lockHash=d.lock; try{ if(lockHash) localStorage.setItem('bagrutLock',lockHash); else localStorage.removeItem('bagrutLock'); }catch(e){} }
+  if(typeof d.school==='string'){ schoolName=d.school; try{ localStorage.setItem('bagrutSchool',schoolName); }catch(e){}
+    const t=document.getElementById('appH1'); if(t) t.textContent=appTitle();
+    const f=document.getElementById('appFoot'); if(f) f.textContent=appTitle(); document.title=appTitle(); }
+  (d.profiles||[]).forEach(pr=>{
+    const key=pr.id==='main'?'bagrutSimPro':'bagrutSimPro:'+pr.id;
+    if(d.data[pr.id]) localStorage.setItem(key,JSON.stringify(d.data[pr.id]));
+  });
+  profiles=(d.profiles&&d.profiles.length)?d.profiles:[{id:'main',name:'',unnamed:1}];
+  currentProfileId=(d.current&&profiles.some(p=>p.id===d.current))?d.current:profiles[0].id;
+  saveProfiles();
+  state=loadState();
+  return true;
+}
+// יצירת קובץ נתונים חדש (Save As)
+async function fileConnectNew(){
+  if(!FS_OK){ alert('הדפדפן הזה לא תומך בשמירה אוטומטית לקובץ.\nמומלץ Chrome או Edge במחשב.\nבינתיים אפשר להשתמש ב-💾 גיבוי ידני.'); return; }
+  try{
+    const hn=await window.showSaveFilePicker({
+      suggestedName:'נתוני-סימולטור-בגרות.json',
+      types:[{description:'קובץ נתונים של הסימולטור',accept:{'application/json':['.json']}}]
+    });
+    fileHandle=hn; fileName=hn.name; fileState='on';
+    await idbSet('handle',hn);
+    await fileWrite(true);
+    renderFileBar(); render();
+    alert('✅ מחובר לקובץ: '+fileName+'\n\nמעכשיו כל שינוי נשמר אוטומטית לקובץ הזה — בדיוק כמו באקסל.\n\nטיפ: אם שמרת אותו בתיקיית Google Drive במחשב, הוא גם מגובה בענן אוטומטית.');
+  }catch(e){ if(e.name!=='AbortError') toast('שגיאה: '+e.message); }
+}
+// פתיחת קובץ נתונים קיים
+async function fileConnectOpen(){
+  if(!FS_OK){ alert('הדפדפן הזה לא תומך בפתיחת קובץ נתונים.\nמומלץ Chrome או Edge במחשב.'); return; }
+  try{
+    const [hn]=await window.showOpenFilePicker({types:[{description:'קובץ נתונים של הסימולטור',accept:{'application/json':['.json']}}]});
+    const f=await hn.getFile();
+    const txt=await f.text();
+    const d=JSON.parse(txt);
+    if(!d||!d._type){ alert('הקובץ אינו קובץ נתונים של הסימולטור.'); return; }
+    let tot=0; Object.values(d.data||{}).forEach(s=>tot+=((s&&s.students)||[]).length);
+    if(!confirm(`פתיחת קובץ הנתונים "${hn.name}"\n\nסימולטורים: ${(d.profiles||[]).map(p=>p.name||'(ללא שם)').join(', ')}\nתלמידות: ${tot}\n\n⚠️ הנתונים הפתוחים כרגע יוחלפו בתוכן הקובץ. להמשיך?`)) return;
+    applyBackupObject(d);
+    fileHandle=hn; fileName=hn.name; fileState='on';
+    await idbSet('handle',hn);
+    renderProfileBar(); renderLogo(); renderFileBar(); setTab('dash');
+    toast('הקובץ נפתח — '+tot+' תלמידות · שמירה אוטומטית פעילה');
+  }catch(e){ if(e.name!=='AbortError') toast('שגיאה: '+e.message); }
+}
+async function fileDisconnect(){
+  if(!confirm('לנתק את השמירה האוטומטית לקובץ?\nהנתונים יישארו בדפדפן ובקובץ, אבל שינויים חדשים לא ייכתבו לקובץ.')) return;
+  fileHandle=null; fileName=''; fileState='off'; await idbDel('handle');
+  renderFileBar(); render();
+}
+async function fileWrite(force){
+  if(!fileHandle||fileState!=='on') return;
+  try{
+    const w=await fileHandle.createWritable();
+    await w.write(JSON.stringify(fullBackupObject()));
+    await w.close();
+    lastFileSave=new Date();
+    try{ localStorage.setItem('bagrutLastBackup',JSON.stringify({at:lastFileSave.toISOString(),n:countAllStudents(),file:fileName})); }catch(e){}
+    renderFileBar();
+  }catch(e){
+    fileState='need-permission'; renderFileBar();
+  }
+}
+let lastFileSave=null;
+function scheduleFileSave(){
+  if(!fileHandle) return;
+  clearTimeout(fileSaveTimer);
+  fileSaveTimer=setTimeout(()=>fileWrite(),700);
+}
+async function fileReconnect(){
+  if(!fileHandle) return;
+  try{
+    const perm=await fileHandle.requestPermission({mode:'readwrite'});
+    if(perm==='granted'){ fileState='on'; await fileWrite(true); renderFileBar(); render(); toast('החיבור לקובץ חודש — שמירה אוטומטית פעילה'); }
+    else toast('ההרשאה נדחתה');
+  }catch(e){ toast('שגיאה: '+e.message); }
+}
+function renderFileBar(){
+  const el=document.getElementById('fileBar'); if(!el) return;
+  if(!FS_OK){
+    el.innerHTML=`<span class="pill" style="background:rgba(255,255,255,.15); color:#fff; border-color:rgba(255,255,255,.3);">💾 גיבוי ידני</span>`;
+    return;
+  }
+  if(fileState==='on'){
+    const t=lastFileSave?lastFileSave.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'}):'';
+    el.innerHTML=`<span class="pill" title="כל שינוי נשמר אוטומטית לקובץ הזה" style="background:rgba(16,185,129,.25); color:#fff; border-color:rgba(255,255,255,.45); font-weight:700;">💾 ${esc(fileName)} ✓${t?' '+t:''}</span>
+      <button class="btn sm" style="background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35);" onclick="fileDisconnect()" title="ניתוק">✕</button>`;
+  }else if(fileState==='need-permission'){
+    el.innerHTML=`<button class="btn sm" style="background:#f59e0b; border:none; font-weight:700;" onclick="fileReconnect()">🔓 חידוש חיבור לקובץ ${esc(fileName)}</button>`;
+  }else{
+    el.innerHTML=`<button class="btn sm" style="background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4); font-weight:700;" onclick="fileConnectNew()" title="שמירה אוטומטית לקובץ במחשב — כמו אקסל">💾 חיבור קובץ נתונים</button>
+      <button class="btn sm" style="background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.3);" onclick="fileConnectOpen()" title="פתיחת קובץ נתונים קיים">📂</button>`;
+  }
+}
+async function fileInit(){
+  if(!FS_OK){ fileState='unsupported'; renderFileBar(); return; }
+  const hn=await idbGet('handle');
+  if(!hn){ renderFileBar(); return; }
+  fileHandle=hn; fileName=hn.name||'קובץ נתונים';
+  try{
+    const perm=await hn.queryPermission({mode:'readwrite'});
+    if(perm==='granted'){
+      fileState='on';
+      try{
+        const f=await hn.getFile(); const txt=await f.text();
+        if(txt&&txt.trim()){ const d=JSON.parse(txt); if(d&&d._type&&applyBackupObject(d)){ renderProfileBar(); renderLogo(); } }
+      }catch(e){}
+      renderFileBar(); render();
+    }else{ fileState='need-permission'; renderFileBar(); }
+  }catch(e){ fileState='need-permission'; renderFileBar(); }
+}
+
 /* ============ סימולטורים מרובים (שנתונים/כיתות) ============ */
 let profiles=[], currentProfileId='main';
 try{ profiles=JSON.parse(localStorage.getItem('bagrutProfiles'))||[]; }catch(e){ profiles=[]; }
@@ -445,7 +676,8 @@ function renderProfileBar(){
     ${profiles.map(p=>`<option value="${p.id}" ${p.id===currentProfileId?'selected':''}>${esc(p.name||'(ללא שם)')}</option>`).join('')}
   </select>
   <button class="btn sm" style="background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4);" onclick="renameProfile()" title="שינוי שם הסימולטור">✏️</button>
-  <button class="btn sm" style="background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4);" onclick="newProfile()" title="יצירת סימולטור נפרד לשנתון או כיתה נוספת">➕ חדש</button>`;
+  <button class="btn sm" style="background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4);" onclick="newProfile()" title="יצירת סימולטור נפרד לשנתון או כיתה נוספת">➕ חדש</button>
+  ${state.coord?`<span class="pill" title="רכזת פדגוגית" style="background:rgba(255,255,255,.18); color:#fff; border-color:rgba(255,255,255,.35);">👩‍🏫 ${esc(state.coord)}</span>`:''}`;
 }
 function switchProfile(id){
   if(!profiles.some(p=>p.id===id)) return;
@@ -459,7 +691,7 @@ function setProfileName(v){
   p.name=v.trim(); delete p.unnamed; saveProfiles(); renderProfileBar(); render(); toast('שם הסימולטור: '+p.name);
 }
 function newProfile(){
-  const name=prompt('שם הסימולטור החדש (למשל: יב תשפ"ז, שכבת יא):');
+  const name=prompt('שם הסימולטור החדש:','');
   if(!name||!name.trim()) return;
   const nm=name.trim();
   const id='p'+Date.now().toString(36);
@@ -467,7 +699,7 @@ function newProfile(){
   // סימולטור חדש מתחיל נקי לגמרי — בלי הכיתות של הסימולטור הקודם
   state=JSON.parse(JSON.stringify(DEFAULT_STATE));
   state.classes=[];
-  const first=prompt('שם הכיתה הראשונה בסימולטור "'+nm+'":', nm);
+  const first=prompt('שם הכיתה הראשונה:','');
   if(first&&first.trim()) state.classes.push(first.trim());
   save();
   renderProfileBar(); renderLogo(); setTab('students');
@@ -475,7 +707,7 @@ function newProfile(){
 }
 function renameProfile(){
   const p=profiles.find(x=>x.id===currentProfileId);
-  const name=prompt('שם הסימולטור (למשל: יב תשפ"ו):',p.name||'');
+  const name=prompt('שם הסימולטור:',p.name||'');
   if(name===null) return;
   if(name.trim()){ p.name=name.trim(); delete p.unnamed; saveProfiles(); renderProfileBar(); render(); toast('השם עודכן'); }
 }
@@ -503,6 +735,7 @@ function save(){
     saveOk=(back===json);
     lastSaveAt=new Date();
     localStorage.setItem('bagrutLastSave:'+currentProfileId,lastSaveAt.toISOString());
+    scheduleFileSave();   // כתיבה אוטומטית לקובץ הנתונים
   }catch(e){
     saveOk=false;
     alert('⚠️ השמירה נכשלה! ייתכן שהדפדפן במצב גלישה בסתר או שהאחסון מלא.\nשגיאה: '+e.message+'\n\nמומלץ ללחוץ "💾 גיבוי" ולשמור את הקובץ מיד.');
@@ -513,6 +746,26 @@ function storageBytes(){
   let n=0;
   try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf('bagrut')===0) n+=(k.length+(localStorage.getItem(k)||'').length)*2; } }catch(e){}
   return n;
+}
+function renderNag(){
+  const el=document.getElementById('nagBar'); if(!el) return;
+  const n=countAllStudents();
+  if(!n){ el.style.display='none'; return; }
+  if(fileState==='on'){ el.style.display='none'; return; }   // מחובר לקובץ — נשמר אוטומטית
+  const b=lastBackupInfo();
+  const today=new Date().toDateString();
+  const backedUpToday=b&&new Date(b.at).toDateString()===today;
+  const diff=b?n-(b.n||0):n;
+  if(backedUpToday&&diff===0){ el.style.display='none'; return; }
+  const txt=!b?'<b>⚠️ עדיין לא נעשה גיבוי!</b> הנתונים קיימים רק בדפדפן הזה.'
+    :(!backedUpToday?`<b>🔔 תזכורת יומית:</b> הגיבוי האחרון היה ב-${new Date(b.at).toLocaleDateString('he-IL')} (${b.n} תלמידות).`
+                    :`<b>🔔 נוספו/שונו נתונים מאז הגיבוי</b> (${Math.abs(diff)} תלמידות).`);
+  el.innerHTML=`${txt} <span>מומלץ לגבות בסוף היום.</span>
+    <span style="margin-inline-start:auto; display:flex; gap:6px;">
+      <button class="btn ok sm" onclick="exportJSON()">💾 גיבוי עכשיו</button>
+      <button class="btn sec sm" onclick="document.getElementById('nagBar').style.display='none'">אחר כך</button>
+    </span>`;
+  el.style.display='flex';
 }
 function renderSaveInd(){
   const el=document.getElementById('saveInd'); if(!el) return;
@@ -670,6 +923,198 @@ function gradeClass(v){
 }
 function fmt(v){ return (v===null||v===undefined)?'—':(Math.round(v*10)/10); }
 
+/* ============ נעילה בסיסמה (אופציונלי) ============ */
+let lockHash='', recCode='';
+try{ lockHash=localStorage.getItem('bagrutLock')||''; recCode=localStorage.getItem('bagrutRec')||''; }catch(e){}
+function makeRecCode(){
+  const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // בלי תווים מבלבלים
+  let s=''; for(let g=0;g<4;g++){ for(let i=0;i<4;i++) s+=A[Math.floor(Math.random()*A.length)]; if(g<3) s+='-'; }
+  return s;
+}
+function downloadRecovery(code){
+  const txt=`קוד שחזור — ${appTitle()}\n`+
+    `=====================================\n\n`+
+    `הקוד:  ${code}\n\n`+
+    `נוצר בתאריך: ${new Date().toLocaleString('he-IL')}\n\n`+
+    `שמרו את הקובץ הזה במקום בטוח.\n`+
+    `אם תשכחו את סיסמת הכניסה — לחצו "שכחתי סיסמה" במסך הנעילה\n`+
+    `והזינו את הקוד הזה. הנעילה תוסר והנתונים יישארו במלואם.\n\n`+
+    `הקוד שמור גם בתוך כל קובץ גיבוי שתפיקו.\n`;
+  const b=new Blob([txt],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b);
+  a.download=`קוד-שחזור-${(schoolName||'סימולטור').replace(/[\\/:*?"<>|]/g,'')}.txt`; a.click();
+}
+async function sha256(s){
+  const b=new TextEncoder().encode('bagrut::'+s);
+  const d=await crypto.subtle.digest('SHA-256',b);
+  return Array.from(new Uint8Array(d)).map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function isLocked(){ return !!lockHash; }
+function showLock(){
+  const el=document.getElementById('lockScreen'); if(!el) return;
+  el.style.display='flex';
+  const t=document.getElementById('lockTitle'); if(t) t.textContent=(schoolName?schoolName+' — ':'')+'הקובץ נעול';
+  setTimeout(()=>{ const i=document.getElementById('lockPass'); if(i) i.focus(); },120);
+}
+async function tryUnlock(){
+  const v=(document.getElementById('lockPass')||{}).value||'';
+  const err=document.getElementById('lockErr');
+  if(!v){ err.textContent='נא להזין סיסמה'; return; }
+  if(await sha256(v)===lockHash){
+    document.getElementById('lockScreen').style.display='none';
+    sessionStorage.setItem('bagrutUnlocked','1');
+    render();
+  }else{
+    err.textContent='סיסמה שגויה';
+    const i=document.getElementById('lockPass'); i.value=''; i.focus();
+  }
+}
+async function setLock(){
+  const p1=prompt('בחרי סיסמה לנעילת הקובץ:\n(רק אם תרצי — זו אינה חובה)');
+  if(p1===null) return;
+  if(!p1.trim()||p1.length<4){ alert('הסיסמה חייבת להכיל לפחות 4 תווים.'); return; }
+  const p2=prompt('הקלידי שוב את הסיסמה לאישור:');
+  if(p2===null) return;
+  if(p1!==p2){ alert('הסיסמאות אינן תואמות.'); return; }
+  if(!confirm('⚠️ חשוב לדעת:\n\n• אין דרך לשחזר סיסמה שנשכחה.\n• הנעילה מונעת כניסה מזדמנת למחשב — היא אינה הצפנה צבאית של הקובץ.\n• מומלץ לשמור גיבוי במקום בטוח.\n\nלהפעיל את הנעילה?')) return;
+  lockHash=await sha256(p1);
+  recCode=makeRecCode();
+  try{ localStorage.setItem('bagrutLock',lockHash); localStorage.setItem('bagrutRec',recCode); }catch(e){}
+  sessionStorage.setItem('bagrutUnlocked','1');
+  scheduleFileSave(); render();
+  downloadRecovery(recCode);
+  alert('🔒 הנעילה הופעלה!\n\n🔑 קוד השחזור שלך:\n\n        '+recCode+'\n\nקובץ עם הקוד ירד למחשב — שמרי אותו במקום בטוח (למשל בדרייב).\n\nאם תשכחי את הסיסמה — לחצי "שכחתי סיסמה" במסך הנעילה והזיני את הקוד הזה. הנתונים לעולם לא יאבדו.\n\nהקוד שמור גם בתוך כל קובץ גיבוי.');
+}
+async function forgotPass(){
+  const c=prompt('הזיני את קוד השחזור (מהקובץ שירד בעת הפעלת הנעילה, או מתוך קובץ גיבוי):');
+  if(c===null) return;
+  const norm=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(!recCode){ alert('לא נמצא קוד שחזור במכשיר זה.\n\nאם יש לך קובץ גיבוי — שחזרי ממנו (♻️ שחזור); הקוד שמור בתוכו.'); return; }
+  if(norm(c)!==norm(recCode)){ alert('קוד שחזור שגוי.'); return; }
+  lockHash='';
+  try{ localStorage.removeItem('bagrutLock'); }catch(e){}
+  sessionStorage.setItem('bagrutUnlocked','1');
+  document.getElementById('lockScreen').style.display='none';
+  scheduleFileSave(); render();
+  alert('✅ הנעילה הוסרה בהצלחה וכל הנתונים נשמרו.\n\nאפשר להגדיר סיסמה חדשה בהגדרות.');
+}
+function showRecCode(){
+  if(!recCode){ toast('אין קוד שחזור'); return; }
+  if(!confirm('להציג את קוד השחזור?')) return;
+  alert('🔑 קוד השחזור שלך:\n\n        '+recCode+'\n\nשמרי אותו במקום בטוח.');
+  downloadRecovery(recCode);
+}
+async function changeLock(){
+  const cur=prompt('הסיסמה הנוכחית:');
+  if(cur===null) return;
+  if(await sha256(cur)!==lockHash){ alert('סיסמה שגויה.'); return; }
+  await setLock();
+}
+async function removeLock(){
+  const cur=prompt('הסיסמה הנוכחית (להסרת הנעילה):');
+  if(cur===null) return;
+  if(await sha256(cur)!==lockHash){ alert('סיסמה שגויה.'); return; }
+  lockHash=''; recCode='';
+  try{ localStorage.removeItem('bagrutLock'); localStorage.removeItem('bagrutRec'); }catch(e){}
+  scheduleFileSave(); render(); toast('🔓 הנעילה הוסרה');
+}
+
+/* ============ ערכת צבע ============ */
+const ACCENTS=[['indigo','סגול','#4f46e5'],['ocean','ים','#0284c7'],['emerald','ירוק','#059669'],['rose','ורוד','#e11d48'],['sunset','שקיעה','#ea580c']];
+function setAccent(a){
+  document.documentElement.setAttribute('data-accent',a);
+  try{ localStorage.setItem('bagrutAccent',a); }catch(e){}
+  const hd=document.querySelector('header.app');
+  if(hd){ const c=getComputedStyle(document.documentElement);
+    hd.style.background=`linear-gradient(120deg,${c.getPropertyValue('--h1')} 0%,${c.getPropertyValue('--h2')} 45%,${c.getPropertyValue('--h3')} 100%)`; }
+  if(currentTab==='settings') render();
+}
+function initAccent(){ let a='indigo'; try{ a=localStorage.getItem('bagrutAccent')||'indigo'; }catch(e){} setAccent(a); }
+
+/* ============ מונים מונפשים ============ */
+function animateCounters(){
+  document.querySelectorAll('.kpi .n[data-to]').forEach(el=>{
+    const to=parseFloat(el.getAttribute('data-to')); if(isNaN(to)) return;
+    const dec=(el.getAttribute('data-dec')==='1'), suf=el.getAttribute('data-suf')||'';
+    const dur=650, t0=performance.now();
+    const step=now=>{
+      const k=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-k,3);
+      const v=to*e;
+      el.textContent=(dec?(Math.round(v*10)/10).toFixed(1):Math.round(v))+suf;
+      if(k<1) requestAnimationFrame(step);
+    };
+    el.textContent=dec?'0.0':'0'; requestAnimationFrame(step);
+  });
+}
+function kpiNum(v,suf,dec){
+  if(v===null||v===undefined) return '<div class="n">—</div>';
+  return `<div class="n" data-to="${v}" ${dec?'data-dec="1"':''} ${suf?`data-suf="${esc(suf)}"`:''}>0</div>`;
+}
+/* ============ טבעת התקדמות ============ */
+function ring(pct,label,color,sub){
+  const r=54, circ=2*Math.PI*r, off=circ*(1-Math.max(0,Math.min(100,pct))/100);
+  return `<div class="ring">
+    <svg width="132" height="132" viewBox="0 0 132 132">
+      <circle cx="66" cy="66" r="${r}" fill="none" stroke="#e8edf7" stroke-width="13"/>
+      <circle cx="66" cy="66" r="${r}" fill="none" stroke="${color}" stroke-width="13" stroke-linecap="round"
+        stroke-dasharray="${circ}" stroke-dashoffset="${off}" style="--circ:${circ}; animation:ringIn 1s cubic-bezier(.2,.9,.3,1) both;"/>
+    </svg>
+    <div class="rv"><div class="rn" style="color:${color};">${Math.round(pct)}%</div><div class="rl">${esc(label)}</div>${sub?`<div class="rl" style="opacity:.75;">${esc(sub)}</div>`:''}</div>
+  </div>`;
+}
+/* ============ חיפוש מהיר Ctrl+K ============ */
+let cmdSel=0, cmdItems=[];
+function openCmd(){
+  document.getElementById('cmdk').classList.add('show');
+  const i=document.getElementById('cmdInput'); i.value=''; i.focus(); cmdFilter();
+}
+function closeCmd(){ document.getElementById('cmdk').classList.remove('show'); }
+function cmdFilter(){
+  const q=(document.getElementById('cmdInput').value||'').trim();
+  const nq=normName(q);
+  cmdItems=[]; cmdSel=0;
+  const tabs=[['dash','📊 דשבורד'],['students','👩‍🎓 תלמידות'],['entry','✏️ הזנת ציונים'],['sim','🧪 סימולציה'],['reports','📄 דוחות'],['alerts','🚨 התראות'],['settings','⚙️ הגדרות'],['help','❓ מדריך']];
+  tabs.forEach(([id,nm])=>{ if(!q||nm.indexOf(q)>-1) cmdItems.push({t:'tab',id,label:nm,sub:'לשונית'}); });
+  if(q){
+    state.students.forEach(st=>{
+      if(normName(st.name).indexOf(nq)>-1){
+        const r=calcStudent(st);
+        cmdItems.push({t:'stu',id:st.id,label:st.name,sub:`${st.cls} · ממוצע ${fmt(r.avg)}`,badge:r.status,cls:r.cls});
+      }
+    });
+    SUBJECTS.forEach(s=>{ if(s.name.indexOf(q)>-1) cmdItems.push({t:'subj',id:s.id,label:'✏️ הזנת ציונים · '+s.name,sub:'מקצוע'}); });
+  }
+  cmdItems=cmdItems.slice(0,40);
+  document.getElementById('cmdRes').innerHTML=cmdItems.length?cmdItems.map((x,i)=>
+    `<div class="it ${i===0?'sel':''}" onclick="cmdGo(${i})">
+      <span style="font-weight:700;">${esc(x.label)}</span>
+      <span class="pill">${esc(x.sub)}</span>
+      ${x.badge?`<span class="badge ${x.cls}" style="margin-inline-start:auto;">${esc(x.badge)}</span>`:''}
+    </div>`).join(''):'<div class="it" style="color:var(--muted);">לא נמצאו תוצאות</div>';
+}
+function cmdKey(e){
+  if(e.key==='Escape'){ closeCmd(); return; }
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    e.preventDefault();
+    cmdSel=Math.max(0,Math.min(cmdItems.length-1,cmdSel+(e.key==='ArrowDown'?1:-1)));
+    const els=document.querySelectorAll('#cmdRes .it');
+    els.forEach((el,i)=>el.classList.toggle('sel',i===cmdSel));
+    if(els[cmdSel]) els[cmdSel].scrollIntoView({block:'nearest'});
+    return;
+  }
+  if(e.key==='Enter'){ e.preventDefault(); cmdGo(cmdSel); }
+}
+function cmdGo(i){
+  const x=cmdItems[i]; if(!x) return;
+  closeCmd();
+  if(x.t==='tab') setTab(x.id);
+  else if(x.t==='stu') openStudent(x.id);
+  else if(x.t==='subj'){ entrySubj=x.id; setTab('entry'); }
+}
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&(e.key==='k'||e.key==='K')){ e.preventDefault(); openCmd(); }
+});
+
 /* ============ ניווט ============ */
 let currentTab='dash', charts={};
 function setTab(t){
@@ -689,7 +1134,7 @@ function render(){
   else if(currentTab==='alerts') renderAlerts(m);
   else if(currentTab==='settings') renderSettings(m);
   else if(currentTab==='help') renderHelp(m);
-  renderSaveInd();
+  renderSaveInd(); renderNag(); animateCounters();
 }
 function classFilterHtml(id,val){
   return `<select id="${id}" onchange="render()"><option value="">כל השכבה</option>${state.classes.map(c=>`<option ${val===c?'selected':''}>${c}</option>`).join('')}</select>`;
@@ -725,7 +1170,7 @@ function renderDash(m){
     </div>
     <div class="toolbar" style="margin-top:10px; margin-bottom:0; background:#fff; padding:8px 10px; border-radius:10px; border:1px solid var(--line);">
       <label>שם הסימולטור:</label>
-      <input type="text" id="pfName" placeholder="למשל: יב תשפ&quot;ו" value="${esc((profiles.find(p=>p.id===currentProfileId)||{}).name||'')}" style="width:170px;">
+      <input type="text" id="pfName" placeholder="שם הסימולטור" value="${esc((profiles.find(p=>p.id===currentProfileId)||{}).name||'')}" style="width:170px;">
       <button class="btn ok sm" onclick="setProfileName(document.getElementById('pfName').value)">שמירת השם</button>
     </div>
     <div class="toolbar" style="margin-top:10px; margin-bottom:0;">
@@ -735,13 +1180,20 @@ function renderDash(m){
     </div>
   </div>`:''}
   <div class="kpis">
-    <div class="kpi k1"><div class="n">${n}</div><div class="t">תלמידות</div></div>
-    <div class="kpi k2"><div class="n">${elig}${n?` (${Math.round(elig/n*100)}%)`:''}</div><div class="t">זכאיות לבגרות</div></div>
-    <div class="kpi k3"><div class="n">${exc}</div><div class="t">מצטיינות (מעל ${state.thresholds.excel}) ⭐</div></div>
-    <div class="kpi k4"><div class="n">${pot}</div><div class="t">פוטנציאל (${state.thresholds.potential} עד ${state.thresholds.excel})</div></div>
-    <div class="kpi k5"><div class="n">${blocked}</div><div class="t">עם מקצועות מעכבים</div></div>
-    <div class="kpi k6"><div class="n">${avgAll===null?'—':avgAll}</div><div class="t">ממוצע שכבתי משוקלל</div></div>
+    <div class="kpi k1">${kpiNum(n)}<div class="t">תלמידות</div></div>
+    <div class="kpi k2">${kpiNum(elig)}<div class="t">זכאיות לבגרות${n?` · ${Math.round(elig/n*100)}%`:''}</div></div>
+    <div class="kpi k3">${kpiNum(exc)}<div class="t">מצטיינות (מעל ${state.thresholds.excel}) ⭐</div></div>
+    <div class="kpi k4">${kpiNum(pot)}<div class="t">פוטנציאל (${state.thresholds.potential} עד ${state.thresholds.excel})</div></div>
+    <div class="kpi k5">${kpiNum(blocked)}<div class="t">עם מקצועות מעכבים</div></div>
+    <div class="kpi k6">${kpiNum(avgAll,'',true)}<div class="t">ממוצע שכבתי משוקלל</div></div>
   </div>
+  ${n?`<div class="card" style="margin-bottom:16px;"><div class="ring-wrap">
+    ${ring(elig/n*100,'זכאות','#10b981',elig+' מתוך '+n)}
+    ${ring(exc/n*100,'מצטיינות','#f59e0b',exc+' תלמידות')}
+    ${ring(pot/n*100,'פוטנציאל','#a855f7',pot+' תלמידות')}
+    ${ring(blocked/n*100,'עם מעכבים','#f43f5e',blocked+' תלמידות')}
+    ${ring(Math.max(0,Math.min(100,avgAll||0)),'ממוצע שכבתי','#4f46e5',avgAll===null?'—':String(avgAll))}
+  </div></div>`:''}
   ${(()=>{ let r=0,b=0; studs.forEach(s=>Object.values(s.gstat||{}).forEach(v=>{v==='r'?r++:v==='b'?b++:0;}));
     return (r||b)?`<div class="card" style="padding:10px 14px; margin-bottom:14px;">${statusLegend()}
       <div style="margin-top:6px; font-size:13px;">${r?`<span class="badge b-warn">🔴 ${r} ציונים אמיתיים שטרם דווחו למשרד</span> `:''}${b?`<span class="badge" style="background:#dbeafe; color:#1e40af;">🔵 ${b} ציונים פיקטיביים בשימוש</span>`:''}</div></div>`:''; })()}
@@ -816,7 +1268,8 @@ function renderStudents(m){
         <a style="color:var(--bad); cursor:pointer; font-weight:800;" onclick="delClass('${esc(c)}')">✕</a></span>`).join('')||'<span class="note">אין כיתות — צרי כיתה למעלה, או ייבאי קובץ אקסל והכיתה תיווצר אוטומטית</span>'}</div>
       <div style="margin-top:10px;"><button class="btn sec sm" onclick="loadDemo()" title="יוצר 24 תלמידות בדיוניות בכיתות יב-1/יב-2 — להתנסות בלבד">🎲 נתוני הדגמה (שמות בדיוניים)</button>
       <button class="btn bad sm" onclick="if(confirm('למחוק את כל התלמידות (הכיתות יישארו)?')){state.students=[];save();render();}">🗑️ מחיקת כל התלמידות</button>
-      <button class="btn bad sm" onclick="if(confirm('למחוק את כל הכיתות ואת כל התלמידות בסימולטור הזה?')){state.students=[];state.classes=[];save();render();}">🧹 מחיקת כיתות + תלמידות</button></div>
+      <button class="btn bad sm" onclick="if(confirm('למחוק את כל הכיתות ואת כל התלמידות בסימולטור הזה?')){state.students=[];state.classes=[];save();render();}">🧹 מחיקת כיתות + תלמידות</button>
+      <button class="btn bad sm" onclick="factoryReset()" title="מוחק את כל הסימולטורים והנתונים במכשיר הזה ומחזיר תוכנה נקייה">🗑️ איפוס מלא (הכול)</button></div>
     </div>
   </div>
   <div class="card" style="margin-top:14px;">
@@ -861,7 +1314,11 @@ function bulkAdd(){
 function addClass(){
   const c=document.getElementById('newClsName').value.trim();
   if(!c||state.classes.includes(c)){toast('שם כיתה חסר או קיים');return;}
-  state.classes.push(c); save(); render();
+  state.classes.push(c);
+  // אם לסימולטור עדיין אין שם — הכיתה הראשונה נותנת לו את שמה
+  const pf=profiles.find(x=>x.id===currentProfileId);
+  if(pf&&(pf.unnamed||!pf.name)){ pf.name=c; delete pf.unnamed; saveProfiles(); renderProfileBar(); }
+  save(); render(); toast('נוצרה כיתה: '+c);
 }
 function delClass(c){
   const cnt=state.students.filter(s=>s.cls===c).length;
@@ -1628,8 +2085,9 @@ function buildReportHtml(cls){
   <div style="display:flex; align-items:center; justify-content:center; gap:14px; margin-bottom:14px;">
     ${logoHtml(48)}
     <div style="text-align:center;">
-      <h2 style="font-size:20px;">אולפנת הראל · דוח מצב בגרות — ${cls?esc(cls):'כל השכבה'}</h2>
-      <div class="note">הופק בתאריך ${today} · סימולטור אולפנת הראל</div>
+      <h2 style="font-size:20px;">${esc(reportTitle())} — ${cls?esc(cls):'כל השכבה'}</h2>
+      ${state.coord?`<div style="font-size:13.5px; font-weight:700; color:var(--brand); margin-top:2px;">רכזת פדגוגית: ${esc(state.coord)}</div>`:''}
+      <div class="note">הופק בתאריך ${today} · ${esc(appTitle())}</div>
     </div>
   </div>
   <div class="kpis">
@@ -1678,7 +2136,8 @@ function reportText(cls){
   const pot=results.filter(x=>x.r.potential);
   const blocked=results.filter(x=>x.r.blockers.length>0);
   const avgAll=avgOf(results.map(x=>x.r.avg).filter(v=>v!==null));
-  let t=`אולפנת הראל · דוח מצב בגרות — ${cls||'כל השכבה'} (${new Date().toLocaleDateString('he-IL')})\n`;
+  let t=`${reportTitle()} — ${cls||'כל השכבה'} (${new Date().toLocaleDateString('he-IL')})\n`;
+  if(state.coord) t+=`רכזת פדגוגית: ${state.coord}\n`;
   t+=`תלמידות: ${n} | זכאיות: ${elig} (${Math.round(elig/n*100)}%) | מצטיינות: ${exc.length} | פוטנציאל: ${pot.length} | עם מעכבים: ${blocked.length} | ממוצע: ${avgAll??'—'}\n\n`;
   if(exc.length) t+='⭐ מצטיינות:\n'+exc.sort((a,b)=>b.r.avg-a.r.avg).map(x=>`  ${x.st.name} (${x.st.cls}) — ${x.r.avg}`).join('\n')+'\n\n';
   if(pot.length) t+='💜 פוטנציאל הצטיינות:\n'+pot.sort((a,b)=>b.r.avg-a.r.avg).map(x=>`  ${x.st.name} (${x.st.cls}) — ${x.r.avg}`).join('\n')+'\n\n';
@@ -1687,7 +2146,7 @@ function reportText(cls){
 }
 function emailReport(){
   const t=reportText(reportClass);
-  const subj=encodeURIComponent(`אולפנת הראל · דוח מצב בגרות — ${reportClass||'כל השכבה'} — ${new Date().toLocaleDateString('he-IL')}`);
+  const subj=encodeURIComponent(`${reportTitle()} — ${reportClass||'כל השכבה'} — ${new Date().toLocaleDateString('he-IL')}`);
   window.location.href=`mailto:?subject=${subj}&body=${encodeURIComponent(t)}`;
 }
 function copyReport(){
@@ -1699,7 +2158,7 @@ function renderSettings(m){
   m.innerHTML=`
   <div class="card" style="margin-bottom:14px; border:2px solid var(--ok);">
     <h2 class="sec">💾 מצב השמירה — האם הנתונים שלי בטוחים?</h2>
-    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>1.0</b> · 31.08.2026</span>
+    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>1.4</b> · 01.09.2026</span>
     <span class="note">אחרי העלאת גרסה חדשה — רעננו את הדף (Ctrl+F5) וּודאו שהמספר כאן התעדכן.</span></div>
     <div id="storageBox">${storageStatusHtml()}</div>
     ${(()=>{const b=lastBackupInfo(); const cur=countAllStudents();
@@ -1731,11 +2190,43 @@ function renderSettings(m){
     <div class="note">כל סימולטור הוא סביבה נפרדת לחלוטין — תלמידות, כיתות, ציונים והגדרות משלו. מעבר בין סימולטורים דרך התפריט בכותרת העליונה. כך אפשר לנהל במקביל את יב, יא, ושנתונים קודמים.</div>
   </div>
   <div class="card" style="margin-bottom:14px;">
-    <h2 class="sec">🏫 לוגו בית הספר</h2>
+    <h2 class="sec">🔒 נעילת הקובץ (אופציונלי)</h2>
+    <div class="toolbar" style="margin-bottom:6px;">
+      ${lockHash?`<span class="badge b-ok">🔒 נעילה פעילה</span>
+        <button class="btn sec sm" onclick="changeLock()">שינוי סיסמה</button>
+        <button class="btn sec sm" onclick="showRecCode()">🔑 הצגת קוד השחזור</button>
+        <button class="btn bad sm" onclick="removeLock()">הסרת הנעילה</button>`
+        :`<span class="badge b-miss">🔓 ללא נעילה</span>
+        <button class="btn ok sm" onclick="setLock()">🔒 הפעלת נעילה בסיסמה</button>`}
+    </div>
+    <div class="note" style="margin-bottom:14px;">מסך כניסה שמונע פתיחה מזדמנת של הקובץ במחשב משותף. <b>אינה הצפנה</b> — משתמש מקצועי יוכל לעקוף אותה.<br>
+    <b>סיסמה שנשכחה לעולם לא תגרום לאובדן נתונים:</b> בעת ההפעלה נוצר <b>קוד שחזור</b> שיורד כקובץ ונשמר גם בכל גיבוי. במסך הנעילה יש "שכחתי סיסמה" שמסיר את הנעילה בעזרתו.</div>
+    <h2 class="sec">🎨 ערכת צבע</h2>
+    <div class="toolbar" style="margin-bottom:14px;">
+      ${ACCENTS.map(([id,nm,col])=>`<button onclick="setAccent('${id}')" title="${esc(nm)}"
+        style="width:42px; height:42px; border-radius:14px; border:${(document.documentElement.getAttribute('data-accent')||'indigo')===id?'3px solid var(--ink)':'2px solid rgba(0,0,0,.08)'};
+        background:${col}; cursor:pointer; box-shadow:0 4px 12px ${col}55; transition:transform .15s ease;"
+        onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform=''"></button>`).join('')}
+      <span class="note">הצבע משפיע על הכותרת, הכפתורים והלשוניות.</span>
+    </div>
+    <h2 class="sec">🏫 זהות בית הספר</h2>
+    <div class="toolbar">
+      <label><b>שם בית הספר:</b></label>
+      <input type="text" id="schName" value="${esc(schoolName)}" placeholder="למשל: אולפנת הראל / תיכון רמון" style="width:210px;">
+      <button class="btn ok sm" onclick="setSchoolName(document.getElementById('schName').value)">שמירה</button>
+      ${schoolName?`<button class="btn sec sm" onclick="setSchoolName('')">ניקוי</button>`:''}
+      <span class="note">מופיע בכותרת, בדוחות, במייל ובשם קובץ הגיבוי. ריק = "סימולטור בגרות".</span>
+    </div>
+    <div class="toolbar">
+      <label><b>רכזת פדגוגית (לסימולטור הנוכחי):</b></label>
+      <input type="text" id="coordName" value="${esc(state.coord||'')}" placeholder="שם הרכזת" style="width:190px;">
+      <button class="btn ok sm" onclick="state.coord=document.getElementById('coordName').value.trim();save();render();toast(state.coord?('רכזת: '+state.coord):'נוקה');">שמירה</button>
+      <span class="note">מופיע בראש כל דוח ובייצוא לאקסל.</span>
+    </div>
     <div class="toolbar">
       ${logoHtml(48)}
       <button class="btn sec sm" onclick="document.getElementById('logoFile').click()">📷 העלאת לוגו</button>
-      ${state.logo?'<button class="btn bad sm" onclick="state.logo=null;save();renderLogo();render();">חזרה ללוגו המובנה</button>':'<span class="note">מוצג לוגו אורט אולפנת הראל המובנה — להחלפה בקובץ התמונה המקורי לחצי על "העלאת לוגו"</span>'}
+      ${state.logo?'<button class="btn bad sm" onclick="state.logo=null;save();renderLogo();render();">חזרה ללוגו המובנה</button>':'<span class="note">מוצג לוגו ברירת מחדל — להעלאת הלוגו של בית הספר לחצי על "העלאת לוגו"</span>'}
       <input type="file" id="logoFile" accept="image/*" style="display:none" onchange="uploadLogo(this)">
     </div>
   </div>
@@ -1919,6 +2410,7 @@ function exportExcel(cls){
     row['סטטוס']=r.status;
     return row;
   });
+  if(state.coord) sumRows.forEach(r=>{ r['רכזת פדגוגית']=state.coord; });
   const ws1=XLSX.utils.json_to_sheet(sumRows);
   ws1['!cols']=Object.keys(sumRows[0]).map(()=>({wch:13}));
   XLSX.utils.book_append_sheet(wb,ws1,'סיכום');
@@ -2101,7 +2593,7 @@ function importExcel(input){
 }
 function exportJSON(){
   // גיבוי מלא: כל הסימולטורים יחד — כדי שאפשר יהיה לשחזר הכול במכשיר אחר
-  const all={_type:'bagrut-backup',_ver:2,_at:new Date().toISOString(),profiles:profiles,current:currentProfileId,data:{}};
+  const all={_type:'bagrut-backup',_ver:2,_at:new Date().toISOString(),school:schoolName,profiles:profiles,current:currentProfileId,data:{}};
   profiles.forEach(pr=>{
     const key=pr.id==='main'?'bagrutSimPro':'bagrutSimPro:'+pr.id;
     try{ const raw=localStorage.getItem(key); if(raw) all.data[pr.id]=JSON.parse(raw); }catch(e){}
@@ -2112,7 +2604,7 @@ function exportJSON(){
   a.href=URL.createObjectURL(blob);
   const d=new Date();
   const pad=n=>String(n).padStart(2,'0');
-  a.download=`גיבוי-סימולטור-הראל-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.json`;
+  a.download=`גיבוי-${(schoolName||'סימולטור-בגרות').replace(/[\\/:*?"<>|]/g,'')}-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.json`;
   a.click();
   try{ localStorage.setItem('bagrutLastBackup',JSON.stringify({at:d.toISOString(),n:countAllStudents()})); }catch(e){}
   const n=Object.keys(all.data).length;
@@ -2253,6 +2745,7 @@ function factoryReset(){
   }catch(e){}
   profiles=[{id:'main',name:'',unnamed:1}];
   currentProfileId='main';
+  lockHash=''; recCode=''; try{ sessionStorage.removeItem('bagrutUnlocked'); }catch(e){}
   saveProfiles();
   state=JSON.parse(JSON.stringify(DEFAULT_STATE));
   lastSaveAt=null; saveOk=null;
@@ -2280,11 +2773,22 @@ function renderHelp(m){
   const step=(n,t,body)=>`<div class="card" style="margin-bottom:12px;"><h3 class="sec" style="font-size:15px;">${n} ${t}</h3><div style="font-size:13.5px; line-height:1.9;">${body}</div></div>`;
   m.innerHTML=`
   <div class="card" style="margin-bottom:14px; background:linear-gradient(135deg,#eef2ff,#fff); border:2px solid var(--brand);">
-    <h2 class="sec" style="font-size:18px;">❓ מדריך למשתמש — סימולטור אולפנת הראל</h2>
+    <h2 class="sec" style="font-size:18px;">❓ מדריך למשתמש — ${esc(appTitle())}</h2>
     <div style="font-size:14px; line-height:1.8;">הכלי מחשב זכאות לבגרות וממוצע משוקלל לפי מבנה הבגרות הגמישה, מאתר מצטיינות ותלמידות בסיכון, ומאפשר סימולציות בלי לגעת בציונים האמיתיים. <b>הכול נשמר אוטומטית בדפדפן של המחשב הזה.</b></div>
   </div>
+  ${step('🏫','התאמה לבית הספר שלכם',`
+    <b>הגדרות ← 🏫 זהות בית הספר:</b> מזינים את שם בית הספר ולוחצים שמירה — והוא מופיע מיד בכותרת, בכל הדוחות המודפסים, בנושא המייל ובשם קובץ הגיבוי.<br>
+    באותו מקום מעלים גם את <b>הלוגו</b> של בית הספר (כל קובץ תמונה). כברירת מחדל מוצג לוגו כללי.<br>
+    זהו — התוכנה שלכם, עם השם והמיתוג שלכם.`)}
+  ${step('🔒','נעילה בסיסמה (רשות)',`
+    <b>הגדרות ← 🔒 נעילת הקובץ:</b> אפשר להגדיר סיסמה, ואז בכל פתיחה יופיע מסך כניסה. שימושי במחשב משותף בחדר מורים.<br>
+    <b>הסיסמה עצמה לא נשמרת</b> — נשמרת רק חתימה מוצפנת חד-כיוונית שלה (SHA-256).<br>
+    <b>🔑 שכחת סיסמה? הנתונים בטוחים.</b> בעת הפעלת הנעילה נוצר <b>קוד שחזור</b> (למשל ML6B-AE85-PLDW-5A68): הוא מוצג על המסך, יורד כקובץ טקסט למחשב, ונשמר בתוך כל קובץ גיבוי. במסך הנעילה יש כפתור <b>"שכחתי סיסמה"</b> — מזינים את הקוד, הנעילה מוסרת, וכל הנתונים נשארים במקומם. אפשר גם להציג את הקוד שוב בכל רגע מההגדרות.<br>
+    <b>וכנות לגבי רמת האבטחה:</b> זו הגנה מפני כניסה מזדמנת במחשב משותף, <b>לא הצפנה</b> — מי שמבין במחשבים יוכל לעקוף אותה.`)}
   ${step('1️⃣','מתחילים — פעם אחת',`
-    בפינה העליונה בוחרים סימולטור (או יוצרים חדש ב-<b>➕ חדש</b> — למשל "יב תשפ"ז"). כל סימולטור הוא סביבה נפרדת לגמרי לשנתון: <b>נוצר ריק</b>, בלי הכיתות והתלמידות של הסימולטור הקודם, והוא מבקש מיד שם לכיתה הראשונה.<br>
+    בלשונית <b>👩‍🎓 תלמידות</b> יוצרים כיתה — והסימולטור מקבל אוטומטית את שמה. אין שמות ברירת מחדל ואין דוגמאות.<br>
+    צריך שנתון נוסף? <b>➕ חדש</b> בכותרת יוצר סביבה נפרדת לגמרי — כיתות, תלמידות והגדרות משלה.<br>
+    בהגדרות אפשר להזין את שם <b>הרכזת הפדגוגית</b> — הוא יופיע בכותרת, בראש כל דוח ובייצוא לאקסל.<br>
     בלשונית <b>👩‍🎓 תלמידות</b> יוצרים כיתות ומוסיפים תלמידות — אחת-אחת, בהדבקת רשימת שמות, או הכי מהר: <b>📤 ייבוא מאקסל</b> בכותרת עם קובץ הסימולטור הישן — הכול נקלט אוטומטית: ציונים, יח"ל, מגמות וסמלי שאלונים.`)}
   ${step('2️⃣','מזינים ציונים',`
     בלשונית <b>✏️ הזנת ציונים</b> בוחרים מקצוע וכיתה ומזינים בטבלה — מגן ובחינה לכל שאלון.<br>
@@ -2328,10 +2832,17 @@ function renderHelp(m){
     <b>תנאי הצטיינות:</b> ממוצע <b>מעל 90</b> (לא כולל 90) + אנגלית 5 יח"ל + מתמטיקה 4/5 יח"ל + בלי מעכבים.<br>
     <b>🚨 התראות</b> — אוטומטיות: מעכבים, גבוליים, פערי מגן-בחינה חריגים, חסרים, וקרובות להצטיינות.<br>
     <b>📄 דוחות</b> — דוח כיתתי מעוצב: הדפסה/PDF, שליחה במייל, העתקה, וייצוא לאקסל.`)}
-  ${step('💾','גיבוי — ההרגל החשוב ביותר',`
+  ${step('💾','שמירה אוטומטית לקובץ — כמו באקסל (מומלץ!)',`
+    בכותרת יש כפתור <b>💾 חיבור קובץ נתונים</b>. לוחצים עליו פעם אחת, בוחרים איפה לשמור את הקובץ — ומאותו רגע <b>כל שינוי נשמר אוטומטית לקובץ הזה</b>, בדיוק כמו שאקסל שומר את עצמו.<br>
+    <b>למה זה חשוב:</b> הקובץ נמצא במחשב שלכם, בשליטתכם. גם אם תנקו את הדפדפן, תחליפו מחשב או תתקינו מחדש — פותחים את הקובץ (📂) והכול חוזר.<br>
+    <b>הטיפ הכי חשוב:</b> שמרו את הקובץ בתיקיית <b>Google Drive</b> במחשב — כך הוא מסונכרן לענן אוטומטית, ואפשר לפתוח אותו גם ממחשב אחר.<br>
+    בכותרת תראו תמיד את שם הקובץ ושעת השמירה האחרונה (💾 שם-הקובץ ✓ 14:32). אחרי הפעלה מחדש של הדפדפן ייתכן שתתבקשו ללחוץ פעם אחת על "🔓 חידוש חיבור" — זו דרישת אבטחה של הדפדפן.<br>
+    <b>הערה:</b> התכונה עובדת ב-Chrome וב-Edge במחשב. בטלפון או בדפדפן אחר — משתמשים ב-💾 גיבוי הידני.`)}
+  ${step('💾','גיבוי ידני — לגיבוי נוסף והעברה בין מכשירים',`
     <b>לעבוד מכמה מכשירים (מחשב + בית + טלפון):</b> הכלי שומר את הנתונים בדפדפן של כל מכשיר בנפרד, ולכן העברה נעשית דרך קובץ גיבוי:<br>
     1. במכשיר שעבדת בו: <b>💾 גיבוי</b> ← הקובץ יורד ← שומרים אותו בגוגל דרייב (או שולחים לעצמכם במייל).<br>
     2. במכשיר האחר: פותחים את אותו קישור ← <b>♻️ שחזור</b> ← בוחרים את הקובץ מהדרייב. הגיבוי כולל <b>את כל הסימולטורים יחד</b>, כך שהכול עובר בפעולה אחת.<br>
+    <b>🔥 טריק שהופך את הגיבוי לאוטומטי:</b> התקינו את אפליקציית <b>Google Drive למחשב</b>, ואז בכרום: הגדרות ← הורדות ← שינוי תיקיית ההורדות ← בחירת תיקייה בתוך הדרייב (למשל "גיבויי סימולטור"). מעכשיו כל לחיצה על 💾 גיבוי שומרת את הקובץ <b>ישירות לדרייב</b> — מסונכרן, נגיש מכל מכשיר, בלי צעדים נוספים. התוכנה גם תזכיר לכם לגבות בכל יום שבו היו שינויים.<br><br>
     <b>כלל זהב:</b> עובדים במכשיר אחד בכל פעם ומגבים בסוף — אחרת השחזור האחרון "ידרוס" את מה שנעשה במקום אחר.<br><br>
     השמירה <b>אוטומטית בכל שינוי</b> — אין כפתור "שמור". בכותרת יש חיווי <b>✓ נשמר [שעה]</b> עם מספר התלמידות, וכך רואים בוודאות שהכול נקלט. בהגדרות ← "💾 מצב השמירה" יש טבלה של כל הסימולטורים עם שעת השמירה האחרונה, וכפתור <b>🧪 בדיקת שמירה</b> שמאמת בזמן אמת.<br>
     אבל: הנתונים יושבים <b>בדפדפן של המכשיר הזה בלבד</b>. ניקוי היסטוריית גלישה מוחק אותם!<br>
@@ -2343,16 +2854,38 @@ function renderHelp(m){
     <b>"הנתונים נעלמו!"</b> — כנראה נפתח בדפדפן אחר או במכשיר אחר (הנתונים לא עוברים לבד), או שנוקתה היסטוריית הדפדפן. פתרון: ♻️ שחזור מקובץ הגיבוי האחרון.<br>
     <b>"הציון לא מתעדכן"</b> — כנראה חסר רכיב: משבצת מקווקוות = ציון חסר, והציון הסופי יחושב רק כשהכול מלא (או בסימולציה עם 🔮).<br>
     <b>"תלמידה עם 92 לא מסומנת מצטיינת"</b> — בדקי את תנאי היח"ל: נדרש מתמטיקה 4-5 ואנגלית 5. אפשר לשנות בהגדרות.<br>
-    <b>"אני רוצה להתחיל מאפס"</b> — הגדרות ← "💾 מצב השמירה" ← <b>🗑️ איפוס מלא</b>. מוחק הכול מהדפדפן במכשיר הזה ומחזיר תוכנה נקייה (כדאי לגבות קודם).<br>
+    <b>"אני רוצה להתחיל מאפס"</b> — שלוש דרכים: (1) לשונית <b>תלמידות</b> ← 🗑️ איפוס מלא · (2) <b>הגדרות</b> ← מצב השמירה ← 🗑️ איפוס מלא · (3) להוסיף <code>?reset=1</code> לסוף הכתובת בדפדפן. כדאי לגבות קודם.<br>
+    <b>"אני רואה כיתות ישנות אחרי שהחלפתי גרסה"</b> — הקובץ תמיד נקי; מה שנשמר זה זיכרון הדפדפן. כדי לראות בדיוק מה משתמש חדש רואה, פתחו <b>חלון גלישה בסתר</b> (Ctrl+Shift+N).<br>
     <b>אנדרואיד</b> — פותחים את הקישור בכרום ← ⋮ ← "הוספה למסך הבית" ומקבלים אייקון כמו אפליקציה.</div>
   </div>`;
 }
 
 /* ============ אתחול ============ */
+// פתיחה עם ‎?reset=1‎ בכתובת — מנקה הכול ומתחילה מאפס (שימושי להדגמה/מסירה ללקוח)
+try{
+  if(location.search.indexOf('reset=1')>-1){
+    if(confirm('🗑️ פתיחה במצב איפוס\n\nלמחוק את כל הנתונים במכשיר הזה ולהתחיל תוכנה נקייה לגמרי?')){
+      const kk=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf('bagrut')===0) kk.push(k); }
+      schoolName=''; lockHash=''; recCode=''; sessionStorage.removeItem('bagrutUnlocked');
+      kk.forEach(k=>localStorage.removeItem(k));
+      try{ indexedDB.deleteDatabase('bagrutFS'); }catch(e){}
+      profiles=[{id:'main',name:'',unnamed:1}]; currentProfileId='main'; saveProfiles();
+      state=JSON.parse(JSON.stringify(DEFAULT_STATE));
+      location.replace(location.pathname);
+    }
+  }
+}catch(e){}
+(function(){ const t=document.getElementById('appH1'); if(t) t.textContent=appTitle();
+  const f=document.getElementById('appFoot'); if(f) f.textContent=appTitle();
+  document.title=appTitle(); })();
+initAccent();
+if(isLocked()&&sessionStorage.getItem('bagrutUnlocked')!=='1') showLock();
 renderProfileBar();
 renderLogo();
 renderSaveInd();
 render();
+renderNag();
+fileInit();
 // אזהרה אם הדפדפן לא מאפשר שמירה בכלל (גלישה בסתר / חסימה)
 try{ localStorage.setItem('bagrutTest','1'); localStorage.removeItem('bagrutTest'); }
 catch(e){ setTimeout(()=>alert('⚠️ הדפדפן חוסם שמירת נתונים (ייתכן מצב גלישה בסתר).\nהנתונים לא יישמרו בין פתיחות! פתחי בחלון דפדפן רגיל.'),400); }
