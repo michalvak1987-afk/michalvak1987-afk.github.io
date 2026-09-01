@@ -225,6 +225,9 @@ button.btn.sm{padding:5px 10px; font-size:12px; border-radius:8px;}
 .delta-dn{color:var(--bad); font-weight:800;}
 .name-link{color:var(--brand); font-weight:700; cursor:pointer; text-decoration:none;}
 .name-link:hover{text-decoration:underline;}
+#tdModal{position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:215; display:none; align-items:flex-start; justify-content:center; padding:30px 15px; overflow:auto;}
+#tdModal.show{display:flex;}
+#tdModal .box{background:#fff; border-radius:22px; max-width:640px; width:100%; padding:20px; max-height:88vh; overflow:auto; box-shadow:0 24px 60px rgba(15,23,42,.4); animation:sheetUp .24s cubic-bezier(.2,.9,.3,1.1) both;}
 #giModal{position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:210; display:none; align-items:flex-start; justify-content:center; padding:30px 15px; overflow:auto;}
 #giModal.show{display:flex;}
 #giModal .box{background:rgba(255,255,255,.97); backdrop-filter:blur(24px) saturate(180%); border-radius:24px; max-width:900px; width:100%; padding:20px; max-height:88vh; overflow:auto;}
@@ -322,6 +325,7 @@ body.print-mode #printArea{display:block; padding:20px; background:#fff;}
 <main id="main"></main>
 <div id="studentModal" onclick="if(event.target===this)closeStudent()"><div class="box" id="studentBox"></div></div>
 <div id="giModal" onclick="if(event.target===this)closeGradeImport()"><div class="box" id="giBox"></div></div>
+<div id="tdModal" onclick="if(event.target===this)closeTestsDlg()"><div class="box" id="tdBox"></div></div>
 <div id="printArea"></div>
 <div id="lockScreen" style="display:none; position:fixed; inset:0; z-index:900; background:linear-gradient(135deg,#1e1b4b,#4c1d95 55%,#7e22ce); align-items:center; justify-content:center; padding:20px;">
   <div style="background:rgba(255,255,255,.97); backdrop-filter:blur(24px); border-radius:26px; padding:32px 30px; width:min(400px,92vw); text-align:center; box-shadow:0 30px 80px rgba(0,0,0,.45); animation:sheetUp .3s cubic-bezier(.2,.9,.3,1.1) both;">
@@ -341,7 +345,7 @@ body.print-mode #printArea{display:block; padding:20px; background:#fff;}
   <div class="hint"><span><kbd>↑</kbd><kbd>↓</kbd> ניווט</span><span><kbd>Enter</kbd> פתיחה</span><span><kbd>Esc</kbd> סגירה</span><span style="margin-inline-start:auto;">Ctrl+K</span></div>
 </div></div>
 <div class="toast" id="toast"></div>
-<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 2.6</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
+<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 2.7</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
 <script>
 "use strict";
 /* ============ מודל המקצועות ============ */
@@ -904,8 +908,76 @@ document.addEventListener('keydown',e=>{
 });
 
 /* ============ מבחני כיתה (לחיזוי בלבד — לא חלק מהציון הרשמי) ============ */
-function testsOf(st,sid){ const t=(st.tests||{})[sid]; if(t===undefined||t===null) return []; return Array.isArray(t)?t.filter(x=>typeof x==='number'):[t]; }
-function testAvg(st,sid){ const a=testsOf(st,sid); if(!a.length) return null; return Math.round(a.reduce((x,y)=>x+y,0)/a.length*10)/10; }
+// כל בדיקה: {n:שם, g:ציון, w:משקל יחסי}. תומך גם בפורמט הישן (מספר / מערך מספרים)
+function normTests(t){
+  if(t===undefined||t===null) return [];
+  if(typeof t==='number') return [{n:'מבחן',g:t,w:1}];
+  if(!Array.isArray(t)) return [];
+  return t.map(x=>typeof x==='number'?{n:'מבחן',g:x,w:1}:{n:(x.n||'מבחן'),g:+x.g,w:(+x.w||1)}).filter(x=>!isNaN(x.g));
+}
+function testsOf(st,sid){ return normTests((st.tests||{})[sid]); }
+function testAvg(st,sid){
+  const a=testsOf(st,sid); if(!a.length) return null;
+  const W=a.reduce((s,x)=>s+x.w,0)||1;
+  return Math.round(a.reduce((s,x)=>s+x.g*x.w,0)/W*10)/10;
+}
+function saveTests(st,sid,arr){
+  st.tests=st.tests||{};
+  if(!arr||!arr.length) delete st.tests[sid]; else st.tests[sid]=arr;
+}
+/* ===== חלון ניהול בדיקות לתלמידה ===== */
+let td={id:'',sid:''};
+function openTestsDlg(id,sid){
+  td={id,sid};
+  document.getElementById('tdModal').classList.add('show');
+  renderTestsDlg();
+}
+function closeTestsDlg(){ document.getElementById('tdModal').classList.remove('show'); render(); }
+function renderTestsDlg(){
+  const st=state.students.find(s=>s.id===td.id); if(!st) return;
+  const subj=SUBJ_MAP[td.sid]||SUBJECTS[0];
+  const arr=testsOf(st,td.sid);
+  const avg=testAvg(st,td.sid);
+  document.getElementById('tdBox').innerHTML=`
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:8px; flex-wrap:wrap;">
+    <h2 class="sec" style="margin:0;">📝 מבחנים, בחנים ועבודות — ${esc(st.name)} · ${esc(subj.name)}</h2>
+    <button class="btn sec sm" onclick="closeTestsDlg()">סגירה ✕</button>
+  </div>
+  <div class="note" style="margin-bottom:10px;">בדיקות אלה <b>אינן חלק מהציון הרשמי</b> — הן משמשות את החיזוי בלבד. המשקל קובע כמה כל בדיקה שוקלת בממוצע (מבחן 2, בוחן 1, למשל).</div>
+  <table class="tbl"><thead><tr><th>סוג / שם</th><th>ציון</th><th>משקל</th><th></th></tr></thead><tbody>
+  ${arr.map((t,i)=>`<tr>
+    <td><input type="text" value="${esc(t.n)}" style="width:150px;" onchange="tdSet(${i},'n',this.value)"></td>
+    <td><input type="number" min="0" max="100" value="${t.g}" onchange="tdSet(${i},'g',this.value)"></td>
+    <td><input type="number" min="0.5" max="10" step="0.5" value="${t.w}" style="width:60px;" onchange="tdSet(${i},'w',this.value)"></td>
+    <td><button class="btn bad sm" onclick="tdDel(${i})">✕</button></td></tr>`).join('')}
+  ${arr.length?'':'<tr><td colspan="4" class="note" style="text-align:center; padding:14px;">עדיין לא הוזנו בדיקות</td></tr>'}
+  </tbody>
+  ${arr.length?`<tfoot><tr><th>ממוצע משוקלל</th><th class="${gradeClass(avg)}" style="font-size:16px;">${avg}</th><th colspan="2"></th></tr></tfoot>`:''}
+  </table>
+  <div class="toolbar" style="margin-top:10px;">
+    ${['מבחן','בוחן','עבודה','מטלת ביצוע'].map(n=>`<button class="btn sec sm" onclick="tdAdd('${n}')">➕ ${n}</button>`).join('')}
+  </div>`;
+}
+function tdArr(){ const st=state.students.find(s=>s.id===td.id); return st?testsOf(st,td.sid):[]; }
+function tdSet(i,f,v){
+  const st=state.students.find(s=>s.id===td.id); if(!st) return;
+  const arr=testsOf(st,td.sid); if(!arr[i]) return;
+  if(f==='g'){ const g=+v; if(isNaN(g)) return; arr[i].g=Math.max(0,Math.min(100,g)); }
+  else if(f==='w'){ arr[i].w=Math.max(0.5,Math.min(10,+v||1)); }
+  else arr[i].n=String(v).trim()||'מבחן';
+  saveTests(st,td.sid,arr); save(); renderTestsDlg();
+}
+function tdDel(i){
+  const st=state.students.find(s=>s.id===td.id); if(!st) return;
+  const arr=testsOf(st,td.sid); arr.splice(i,1);
+  saveTests(st,td.sid,arr); save(); renderTestsDlg();
+}
+function tdAdd(name){
+  const st=state.students.find(s=>s.id===td.id); if(!st) return;
+  const arr=testsOf(st,td.sid);
+  arr.push({n:name,g:0,w:name==='בוחן'?1:2});
+  saveTests(st,td.sid,arr); save(); renderTestsDlg();
+}
 function setTest(id,sid,val){
   const st=state.students.find(s=>s.id===id); if(!st) return;
   st.tests=st.tests||{};
@@ -913,17 +985,7 @@ function setTest(id,sid,val){
   else st.tests[sid]=Math.max(0,Math.min(100,+val));
   save(); render();
 }
-function setTestMulti(id,sid){
-  const st=state.students.find(s=>s.id===id); if(!st) return;
-  const cur=testsOf(st,sid).join(', ');
-  const v=prompt('ציוני מבחנים בכיתה במקצוע זה (מופרדים בפסיק) — משמשים לחיזוי בלבד:',cur);
-  if(v===null) return;
-  const arr=v.split(/[,;\s]+/).map(x=>+x).filter(x=>!isNaN(x)&&x>=0&&x<=100);
-  st.tests=st.tests||{};
-  if(!arr.length) delete st.tests[sid]; else st.tests[sid]=arr;
-  save(); render();
-  toast(arr.length?`נשמרו ${arr.length} ציוני מבחנים · ממוצע ${testAvg(st,sid)}`:'ציוני המבחנים נוקו');
-}
+
 // כיול אוטומטי: הפער הממוצע בין בחינה למגן במקצוע, מתוך הנתונים שכבר קיימים
 function autoGap(sid){
   let sum=0,n=0;
@@ -1707,7 +1769,7 @@ function studentSubjEditor(st,subj){
   const finalHtml=u===0?'':`${subj.internalOnly&&!state.includeInternal?'<span class="pill">לא נכלל בממוצע</span> ':''}${custom?'<span class="badge b-pot">מותאם אישית</span> ':''}<span class="${gradeClass(r.final)}" style="font-size:15px; font-weight:800;" title="${r.raw!==null?'לפני עיגול: '+r.raw:''}">${fmt(r.final)}</span>${r.blocker&&!subj.internalOnly?' <span class="badge b-bad">מעכב</span>':''}${r.missing?' <span class="badge b-miss">חסר</span>':''}`;
   const resetBtn=custom?`<button class="btn sec sm" onclick="event.stopPropagation();resetOv('${st.id}','${subj.id}')" title="ביטול ההתאמות האישיות במקצוע זה">↩️ איפוס התאמות</button>`:'';
   const tA=testAvg(st,subj.id), tNn=testsOf(st,subj.id).length;
-  const testChip=(u!==0&&!subj.internalOnly)?`<button class="btn sec sm" onclick="event.stopPropagation();setTestMulti('${st.id}','${subj.id}')" title="ציוני מבחנים בכיתה — לחיזוי בלבד, לא נכנסים לציון" style="${tNn?'border-color:#c4b5fd; background:#faf5ff; color:#6d28d9;':''}">📝 מבחני כיתה${tNn?`: ${tA}${tNn>1?` (${tNn})`:''}`:''}</button>`:'';
+  const testChip=(u!==0&&!subj.internalOnly)?`<button class="btn sec sm" onclick="event.stopPropagation();openTestsDlg('${st.id}','${subj.id}')" title="ציוני מבחנים בכיתה — לחיזוי בלבד, לא נכנסים לציון" style="${tNn?'border-color:#c4b5fd; background:#faf5ff; color:#6d28d9;':''}">📝 מבחנים${tNn?`: ${tA} (${tNn})`:''}</button>`:'';
   const presetSel=subj.named?`<select onclick="event.stopPropagation()" onchange="applyMugbarPreset('${st.id}','${subj.id}',this.value)" style="font-size:11.5px;" title="החלת מבנה משקלים וסמלי שאלונים מקטלוג בית הספר">
     <option value="">📋 מבנה מהקטלוג...</option>
     ${Object.keys(MUGBAR_PRESETS).map(p=>`<option>${esc(p)}</option>`).join('')}</select>`:'';
@@ -1886,7 +1948,7 @@ function matchStudent(name,pool){
   return part.length===1?part[0]:null;
 }
 function openGradeImport(){
-  gi.subj=entrySubj; gi.comp=0; gi.target='e'; gi.rows=[]; gi.map={}; gi.color=''; gi.order='auto'; gi.detected='';
+  gi.subj=entrySubj; gi.comp=0; gi.target='e'; gi.rows=[]; gi.map={}; gi.color=''; gi.order='auto'; gi.detected=''; gi.testName='מבחן'; gi.testW=2;
   renderGradeImport();
   document.getElementById('giModal').classList.add('show');
 }
@@ -1900,11 +1962,12 @@ function renderGradeImport(){
   const box=document.getElementById('giBox');
   const subj=SUBJ_MAP[gi.subj]||SUBJECTS[0];
   const comps=giCompOptions();
-  const cur=comps.find(c=>c.i===gi.comp)||comps[0]||{t:'i',s:0};
+  const isTest=gi.comp==='T';
+  const cur=isTest?{t:'T',n:(gi.testName||'מבחן'),i:'T'}:(comps.find(c=>c.i===gi.comp)||comps[0]||{t:'i',s:0});
   const isExt=cur.t==='e';
   const pool=state.students.filter(s=>!entryClass||s.cls===entryClass);
-  const curName=(comps.find(c=>c.i===gi.comp)||{}).n||'';
-  const tgtTxt=isExt?(gi.target==='m'?'ציון מגן':'ציון בחינה'):'הערכה פנימית (ציון אחד)';
+  const curName=isTest?(gi.testName||'מבחן'):((comps.find(c=>c.i===gi.comp)||{}).n||'');
+  const tgtTxt=isTest?`📝 ${gi.testName||'מבחן'} — לחיזוי בלבד (לא נכנס לציון)`:(isExt?(gi.target==='m'?'ציון מגן':'ציון בחינה'):'הערכה פנימית (ציון אחד)');
   const colTxt=gi.color==='r'?'🔴 אדום — טרם דווח':gi.color==='b'?'🔵 כחול — פיקטיבי':'⚫ שחור — דווח למשרד';
   const warn=`<div style="background:linear-gradient(135deg,#fef3c7,#fffbeb); border:2.5px solid #f59e0b; border-radius:16px; padding:13px 16px; margin:12px 0;">
     <div style="font-size:14.5px; font-weight:900; color:#92400e; margin-bottom:7px;">⚠️ שימי לב — אילו ציונים עומדים להתעדכן?</div>
@@ -1957,13 +2020,18 @@ function renderGradeImport(){
   <div class="note" style="margin-bottom:10px;">מעתיקים מוורד/אקסל את רשימת השמות והציונים (שתי עמודות) ומדביקים כאן — או בוחרים קובץ אקסל. המערכת מזהה כל תלמידה לפי השם ומראה תצוגה מקדימה לפני ההחלה.</div>
   <div class="toolbar">
     <label>מקצוע:</label><select onchange="gi.subj=this.value;gi.comp=0;renderGradeImport()">${SUBJECTS.filter(s=>!s.internalOnly).map(s=>`<option value="${s.id}" ${s.id===gi.subj?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
-    <label>רכיב:</label><select onchange="gi.comp=+this.value;renderGradeImport()">${comps.map(c=>`<option value="${c.i}" ${c.i===gi.comp?'selected':''}>${esc(c.n)}</option>`).join('')}</select>
-    ${isExt?`<label>סוג הציון:</label><select onchange="gi.target=this.value">
+    <label>יעד:</label><select onchange="gi.comp=(this.value==='T'?'T':+this.value);renderGradeImport()">
+      <option value="T" ${gi.comp==='T'?'selected':''}>📝 מבחן / בוחן / עבודה — לחיזוי בלבד</option>
+      ${comps.map(c=>`<option value="${c.i}" ${c.i===gi.comp?'selected':''}>${esc(c.n)}</option>`).join('')}</select>
+    ${gi.comp==='T'?`<label>סוג:</label>
+      <select onchange="gi.testName=this.value;renderGradeImport()">${['מבחן','בוחן','עבודה','מטלת ביצוע','מבחן מחצית','מתכונת'].map(n=>`<option ${gi.testName===n?'selected':''}>${n}</option>`).join('')}</select>
+      <label>משקל:</label><input type="number" min="0.5" max="10" step="0.5" value="${gi.testW||2}" style="width:60px;" onchange="gi.testW=+this.value||2">`:''}
+    ${isExt&&!isTest?`<label>סוג הציון:</label><select onchange="gi.target=this.value">
       <option value="e" ${gi.target==='e'?'selected':''}>ציון בחינה</option>
-      <option value="m" ${gi.target==='m'?'selected':''}>ציון מגן</option></select>`:'<span class="pill">הערכה פנימית — ציון אחד</span>'}
+      <option value="m" ${gi.target==='m'?'selected':''}>ציון מגן</option></select>`:''}
     <label>כיתה:</label><span class="pill">${esc(entryClass||'כל השכבה')}</span>
   </div>
-  <div class="toolbar" style="background:#f8faff; padding:8px 10px; border-radius:10px; border:1px solid var(--line);">
+  <div class="toolbar" style="background:#f8faff; padding:8px 10px; border-radius:10px; border:1px solid var(--line); ${isTest?'display:none;':''}">
     <label><b>צבע הציונים שייכנסו (לכל הקבוצה):</b></label>
     <select onchange="gi.color=this.value;renderGradeImport()">
       <option value="" ${gi.color===''?'selected':''}>⚫ שחור — דווח למשרד</option>
@@ -2063,9 +2131,10 @@ function giParseFile(input){
 }
 function giApply(){
   const subjP=SUBJ_MAP[gi.subj]||SUBJECTS[0];
+  const isTestP=gi.comp==='T';
   const compsP=giCompOptions();
-  const curP=compsP.find(c=>c.i===gi.comp)||compsP[0];
-  const tgtP=curP.t==='e'?(gi.target==='m'?'ציון מגן':'ציון בחינה'):'הערכה פנימית';
+  const curP=isTestP?{t:'T',n:(gi.testName||'מבחן'),i:'T'}:(compsP.find(c=>c.i===gi.comp)||compsP[0]);
+  const tgtP=isTestP?`📝 ${gi.testName||'מבחן'} (לחיזוי)`:(curP.t==='e'?(gi.target==='m'?'ציון מגן':'ציון בחינה'):'הערכה פנימית');
   const poolP=state.students.filter(s=>!entryClass||s.cls===entryClass);
   let willN=0;
   gi.rows.forEach((r,idx)=>{ const mn=gi.map[idx];
@@ -2074,8 +2143,9 @@ function giApply(){
   if(!confirm(`אישור אחרון — עדכון ציונים\n\n📘 מקצוע: ${subjP.name}\n📝 רכיב: ${curP.n}\n🎯 סוג הציון: ${tgtP}\n🏫 כיתה: ${entryClass||'כל השכבה'}\n👩‍🎓 תלמידות שיתעדכנו: ${willN}\n\nציונים קיימים ברכיב זה יידרסו. להמשיך?`)) return;
   pushUndo(`ייבוא ${subjP.name} · ${tgtP}`);
   const subj=SUBJ_MAP[gi.subj]||SUBJECTS[0];
+  const isTest=gi.comp==='T';
   const comps=giCompOptions();
-  const cur=comps.find(c=>c.i===gi.comp)||comps[0];
+  const cur=isTest?{t:'T',i:'T'}:(comps.find(c=>c.i===gi.comp)||comps[0]);
   const pool=state.students.filter(s=>!entryClass||s.cls===entryClass);
   let n=0, skipped=[];
   gi.rows.forEach((r,idx)=>{
@@ -2085,6 +2155,16 @@ function giApply(){
     else if(manual) st=pool.find(s=>s.id===manual);
     else st=matchStudent(r.name,pool);
     if(!st){ skipped.push(r.name); return; }
+    if(isTest){
+      // מבחן/בוחן/עבודה — נכנס לשכבת החיזוי, לא לציון הרשמי
+      const arr=testsOf(st,subj.id);
+      const nm=gi.testName||'מבחן', w=+gi.testW||2;
+      const ex=arr.findIndex(x=>x.n===nm);
+      if(ex>=0) arr[ex]={n:nm,g:Math.max(0,Math.min(100,r.grade)),w};
+      else arr.push({n:nm,g:Math.max(0,Math.min(100,r.grade)),w});
+      saveTests(st,subj.id,arr);
+      n++; return;
+    }
     const base=subj.id+'.'+cur.i;
     const key=cur.t==='e'?base+'.'+gi.target:base;
     st.grades=st.grades||{};
@@ -2094,8 +2174,8 @@ function giApply(){
     n++;
   });
   save();
-  const cTxt=gi.color==='r'?' (אדום — טרם דווח)':gi.color==='b'?' (כחול — פיקטיבי)':' (שחור — דווח)';
-  toast(`הוזנו ${n} ציונים ב${subj.name} · ${cur.n}${cTxt}`+(skipped.length?` · ${skipped.length} לא זוהו ודולגו`:''));
+  const cTxt=isTest?` · ${gi.testName} (לחיזוי בלבד)`:(gi.color==='r'?' (אדום — טרם דווח)':gi.color==='b'?' (כחול — פיקטיבי)':' (שחור — דווח)');
+  toast(`הוזנו ${n} ציונים ב${subj.name}${isTest?'':' · '+cur.n}${cTxt}`+(skipped.length?` · ${skipped.length} לא זוהו ודולגו`:''));
   gi.rows=[]; closeGradeImport();
 }
 
@@ -2245,7 +2325,7 @@ function simGrid(subj,studs){
   const headComps=subj.comps(maxU);
   let head=`<tr><th>שם</th>${subj.opts.length>1?'<th>יח"ל</th>':''}`;
   headComps.forEach(c=>{ head+=c.t==='i'?`<th>${esc(c.n)}</th>`:`<th>${esc(c.n)}<br><small>${c.s===0?'100% בחינה':'מגן '+c.s+'%'}</small></th>`; });
-  head+='<th style="background:#f5f3ff;">מבחני כיתה<br><small>לחיזוי בלבד</small></th><th>ציון אמיתי</th><th>ציון בניסוי</th></tr>';
+  head+='<th style="background:#f5f3ff;">מבחנים · בחנים · עבודות<br><small>ממוצע משוקלל · לחיזוי בלבד</small></th><th>ציון אמיתי</th><th>ציון בניסוי</th></tr>';
   const rows=studs.map(st=>{
     const u=getUnits(st,subj);
     const comps=u===0?[]:getCompsFor(st,subj,u);
@@ -2278,11 +2358,12 @@ function simGrid(subj,studs){
     });
     // מבחני כיתה — לא נכנסים לציון הרשמי, רק משפרים את החיזוי
     const tAvg=testAvg(st,subj.id), tN=testsOf(st,subj.id).length;
+    const tList=testsOf(st,subj.id);
     tds+=`<td style="background:#faf8ff;"><div class="gcell">
-      <input type="number" min="0" max="100" value="${tN===1?testsOf(st,subj.id)[0]:(tAvg??'')}" placeholder="—"
-        style="border-color:#c4b5fd; background:#fdfcff;" title="ציון מבחן כיתתי — משמש לחיזוי בלבד"
-        onchange="setTest('${st.id}','${subj.id}',this.value)">
-      <button class="btn sec sm" style="padding:1px 7px; font-size:10.5px;" onclick="setTestMulti('${st.id}','${subj.id}')" title="הזנת כמה ציוני מבחנים">${tN>1?`${tN} מבחנים · ממוצע ${tAvg}`:'+ עוד'}</button>
+      ${tAvg!==null?`<span class="${gradeClass(tAvg)}" style="font-size:15px; font-weight:800;">${tAvg}</span>
+        <span class="pill" style="font-size:9.5px; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${esc(tList.map(t=>t.n+' '+t.g+' (×'+t.w+')').join(' · '))}">${tList.map(t=>t.n).join(' · ')}</span>`
+        :'<span style="color:#cbd5e1;">—</span>'}
+      <button class="btn sec sm" style="padding:1px 8px; font-size:10.5px; border-color:#c4b5fd; color:#6d28d9;" onclick="event.stopPropagation();openTestsDlg('${st.id}','${subj.id}')" title="ניהול מבחנים, בחנים ועבודות">${tN?'✏️ ניהול':'➕ הוספה'}</button>
     </div></td>`;
     const diff=u!==0&&rReal.final!==rSim.final;
     tds+=`<td class="${gradeClass(u===0?null:rReal.final)}">${u===0?'—':fmt(rReal.final)}</td>
@@ -2593,7 +2674,7 @@ function renderSettings(m){
   m.innerHTML=`
   <div class="card" style="margin-bottom:14px; border:2px solid var(--ok);">
     <h2 class="sec">${ic('save',19)}מצב השמירה — האם הנתונים שלי בטוחים?</h2>
-    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>2.6</b> · 01.09.2026</span>
+    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>2.7</b> · 01.09.2026</span>
     <span class="note">אחרי העלאת גרסה חדשה — רעננו את הדף (Ctrl+F5) וּודאו שהמספר כאן התעדכן.</span></div>
     <div id="storageBox">${storageStatusHtml()}</div>
     ${(()=>{const b=lastBackupInfo(); const cur=countAllStudents();
@@ -3249,7 +3330,9 @@ function renderHelp(m){
     <b>סדר העדיפויות של החיזוי:</b> 1) <b>ציון מבחן כיתתי</b> אם הוזן · 2) ציון המגן בתוספת רמת החיזוי.<br>
     <b>ארבע רמות חיזוי:</b> <b>אופטימי</b> (בחינה = מגן) · <b>מציאותי</b> (מגן פחות 5) · <b>זהיר</b> (מגן פחות 10) · <b>🎯 כיול אוטומטי</b> — הכלי לומד מהנתונים שכבר יש בקובץ מה הפער הממוצע בין בחינה למגן בכל מקצוע, ומחיל אותו.<br>
     <b>למה זה חשוב:</b> בפועל הבחינה נוטה להיות נמוכה מהמגן — ובמתמטיקה ואנגלית הפער גדול במיוחד. חיזוי "אופטימי" יראה תמונה ורודה מדי. מומלץ להתחיל ב"כיול אוטומטי" ברגע שיש כמה ציוני בחינות בקובץ.<br>
-    <b>📝 מבחני כיתה:</b> בעמודה הסגולה בטבלת הניסוי (וגם בכרטיס התלמידה) אפשר להזין ציוני מבחנים שנעשו בכיתה — אפילו כמה, והכלי לוקח את הממוצע. הם <b>לא נכנסים לציון הרשמי</b> ולא משפיעים על הזכאות, אלא רק מחדדים את החיזוי — כי מבחן אמיתי הוא מנבא טוב יותר ממגן.`)}
+    <b>📝 מבחנים, בחנים ועבודות:</b> בעמודה הסגולה בטבלת הניסוי (וגם בכרטיס התלמידה) לוחצים "ניהול" ונפתח חלון שבו מוסיפים כמה בדיקות שרוצים — <b>מבחן, בוחן, עבודה, מטלת ביצוע, מתכונת</b> — לכל אחת שם, ציון ו<b>משקל</b> (מבחן ×2, בוחן ×1). החיזוי משתמש בממוצע המשוקלל שלהן.<br>
+    <b>לכל הכיתה בבת אחת:</b> בלשונית הזנת ציונים ← <b>📋 ייבוא ציונים</b> ← בשדה "יעד" בוחרים <b>"📝 מבחן / בוחן / עבודה"</b>, בוחרים סוג ומשקל, ומדביקים את רשימת השמות והציונים. הזנה חוזרת של אותו סוג <b>מעדכנת</b> ולא מכפילה.<br>
+    הבדיקות האלה <b>לא נכנסות לציון הרשמי</b> ולא משפיעות על הזכאות — הן רק מחדדות את החיזוי.`)}
   ${step('🎯','כמה צריך בהערכה הפנימית? (מחשבון בסימולציה)',`
     בלשונית <b>🧪 סימולציה</b> יש כרטיס <b>🎯 מחשבון: כמה צריך בהערכה הפנימית</b> — הוא עושה את החשבון במקומך:<br>
     <b>🔴 כדי לעבור:</b> לכל תלמידה עם ציון מעכב מוצג בדיוק איזה ציון בהערכה הפנימית יביא את המקצוע ל-55. דוגמה: מגן 85 ובחינה 24 → ציון המקצוע 39; המחשבון יראה ש<b>נדרש 54</b> בהערכה הפנימית כדי להגיע ל-55 (ועם 53 היא עוד נכשלת).<br>
