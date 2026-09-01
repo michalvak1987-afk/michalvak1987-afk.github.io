@@ -225,6 +225,15 @@ button.btn.sm{padding:5px 10px; font-size:12px; border-radius:8px;}
 .delta-dn{color:var(--bad); font-weight:800;}
 .name-link{color:var(--brand); font-weight:700; cursor:pointer; text-decoration:none;}
 .name-link:hover{text-decoration:underline;}
+#ndModal{position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:230; display:none; align-items:flex-start; justify-content:center; padding:40px 15px; overflow:auto;}
+#ndModal.show{display:flex;}
+#ndModal .box{background:#fff; border-radius:22px; max-width:520px; width:100%; padding:20px; box-shadow:0 24px 60px rgba(15,23,42,.4); animation:sheetUp .22s cubic-bezier(.2,.9,.3,1.1) both;}
+.noteBtn{background:transparent; border:1px solid var(--line); border-radius:8px; padding:2px 6px; cursor:pointer; color:#94a3b8; position:relative; line-height:1;}
+.noteBtn:hover{background:var(--soft); color:var(--brand); border-color:var(--brand);}
+.noteBtn.has{background:#fffbeb; border-color:#f59e0b; color:#b45309;}
+.noteBtn .dot{position:absolute; top:-3px; inset-inline-end:-3px; width:7px; height:7px; border-radius:50%; background:#f59e0b; border:1.5px solid #fff;}
+td.hasNote{position:relative;}
+td.hasNote::before{content:''; position:absolute; top:0; inset-inline-end:0; border-width:0 9px 9px 0; border-style:solid; border-color:transparent #f59e0b transparent transparent;}
 #tdModal{position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:215; display:none; align-items:flex-start; justify-content:center; padding:30px 15px; overflow:auto;}
 #tdModal.show{display:flex;}
 #tdModal .box{background:#fff; border-radius:22px; max-width:640px; width:100%; padding:20px; max-height:88vh; overflow:auto; box-shadow:0 24px 60px rgba(15,23,42,.4); animation:sheetUp .24s cubic-bezier(.2,.9,.3,1.1) both;}
@@ -326,6 +335,7 @@ body.print-mode #printArea{display:block; padding:20px; background:#fff;}
 <div id="studentModal" onclick="if(event.target===this)closeStudent()"><div class="box" id="studentBox"></div></div>
 <div id="giModal" onclick="if(event.target===this)closeGradeImport()"><div class="box" id="giBox"></div></div>
 <div id="tdModal" onclick="if(event.target===this)closeTestsDlg()"><div class="box" id="tdBox"></div></div>
+<div id="ndModal" onclick="if(event.target===this)closeNote()"><div class="box" id="ndBox"></div></div>
 <div id="printArea"></div>
 <div id="lockScreen" style="display:none; position:fixed; inset:0; z-index:900; background:linear-gradient(135deg,#1e1b4b,#4c1d95 55%,#7e22ce); align-items:center; justify-content:center; padding:20px;">
   <div style="background:rgba(255,255,255,.97); backdrop-filter:blur(24px); border-radius:26px; padding:32px 30px; width:min(400px,92vw); text-align:center; box-shadow:0 30px 80px rgba(0,0,0,.45); animation:sheetUp .3s cubic-bezier(.2,.9,.3,1.1) both;">
@@ -345,7 +355,7 @@ body.print-mode #printArea{display:block; padding:20px; background:#fff;}
   <div class="hint"><span><kbd>↑</kbd><kbd>↓</kbd> ניווט</span><span><kbd>Enter</kbd> פתיחה</span><span><kbd>Esc</kbd> סגירה</span><span style="margin-inline-start:auto;">Ctrl+K</span></div>
 </div></div>
 <div class="toast" id="toast"></div>
-<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 2.8</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
+<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 3.0</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
 <script>
 "use strict";
 /* ============ מודל המקצועות ============ */
@@ -387,7 +397,10 @@ function cycleGstat(id,key){
   const cur=st.gstat[key]||'';
   const nxt=cur===''?'r':(cur==='r'?'b':'');
   if(nxt) st.gstat[key]=nxt; else delete st.gstat[key];
-  save(); refreshOpenViews(id);
+  save();
+  const modal=document.getElementById('studentModal');
+  if(modal&&modal.classList.contains('show')) refreshOpenViews(id);
+  else renderKeepScroll();
 }
 function statusLegend(){
   return `<div class="note" style="display:flex; gap:14px; flex-wrap:wrap; align-items:center;">
@@ -581,7 +594,7 @@ function setGradeSim(id,key,val){
     if((st.grades||{})[key]===v) delete st.simg[key]; // חזרה לערך האמיתי = ביטול השינוי
     else st.simg[key]=v;
   }
-  save(); render();
+  save(); renderKeepScroll();
 }
 function clearSim(){
   const n=simCount();
@@ -881,6 +894,64 @@ function renderSaveInd(){
 function uid(){ return 's'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
 
+/* ============ הערות (לכל קובייה ולכל מקצוע) ============ */
+function noteOf(st,key){ return ((st.notes||{})[key]||'').trim(); }
+function noteBtn(st,key,label){
+  const t=noteOf(st,key);
+  return `<button class="noteBtn ${t?'has':''}" onclick="event.stopPropagation();openNote('${st.id}','${key}','${esc(label).replace(/'/g,'')}')"
+    title="${t?esc(t):'הוספת הערה'}">${ic('edit',13)}${t?'<span class="dot"></span>':''}</button>`;
+}
+let nd={id:'',key:'',label:''};
+function openNote(id,key,label){
+  nd={id,key,label};
+  const st=state.students.find(s=>s.id===id); if(!st) return;
+  document.getElementById('ndModal').classList.add('show');
+  document.getElementById('ndBox').innerHTML=`
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px; flex-wrap:wrap;">
+      <h2 class="sec" style="margin:0; font-size:16px;">📝 הערה — ${esc(st.name)}</h2>
+      <button class="btn sec sm" onclick="closeNote()">✕</button>
+    </div>
+    <div class="note" style="margin-bottom:8px;">${esc(label)}</div>
+    <textarea id="ndText" rows="5" style="width:100%; border-radius:12px; padding:10px; font-family:inherit; font-size:13.5px;"
+      placeholder="למשל: נעדרה מהמבחן — מועד ב' · אישור ועדת חריגים · הציון טרם סופי">${esc(noteOf(st,key))}</textarea>
+    <div class="toolbar" style="margin-top:10px; margin-bottom:0;">
+      <button class="btn ok" onclick="saveNote()">שמירה</button>
+      ${noteOf(st,key)?`<button class="btn bad sm" onclick="delNote()">מחיקת ההערה</button>`:''}
+      <span class="note" style="margin-inline-start:auto;">ההערות נכללות בייצוא לאקסל ובדוחות</span>
+    </div>`;
+  setTimeout(()=>{ const t=document.getElementById('ndText'); if(t) t.focus(); },100);
+}
+function closeNote(){ document.getElementById('ndModal').classList.remove('show'); refreshOpenViews(nd.id); }
+function saveNote(){
+  const st=state.students.find(s=>s.id===nd.id); if(!st) return;
+  const v=(document.getElementById('ndText')||{}).value||'';
+  st.notes=st.notes||{};
+  if(v.trim()) st.notes[nd.key]=v.trim(); else delete st.notes[nd.key];
+  save(); closeNote(); toast(v.trim()?'ההערה נשמרה':'ההערה נמחקה');
+}
+function delNote(){
+  const st=state.students.find(s=>s.id===nd.id); if(!st) return;
+  if(st.notes) delete st.notes[nd.key];
+  save(); closeNote(); toast('ההערה נמחקה');
+}
+function allNotes(studs){
+  const out=[];
+  studs.forEach(st=>{
+    Object.keys(st.notes||{}).forEach(k=>{
+      const txt=noteOf(st,k); if(!txt) return;
+      const sid=k.split('.')[0], subj=SUBJ_MAP[sid];
+      let lbl=subj?subj.name:sid;
+      const idx=k.split('.')[1];
+      if(idx!==undefined&&subj){
+        const cs=subj.comps(getUnits(st,subj)||subj.opts[subj.opts.length-1]);
+        if(cs[+idx]) lbl+=' · '+cs[+idx].n;
+      }
+      out.push({st,label:lbl,txt});
+    });
+  });
+  return out;
+}
+
 /* ============ זיהוי כפל שמות ============ */
 function dupGroups(){
   const byKey={}, byName={};
@@ -1020,7 +1091,7 @@ function setTest(id,sid,val){
   st.tests=st.tests||{};
   if(val===''||val===null) delete st.tests[sid];
   else st.tests[sid]=Math.max(0,Math.min(100,+val));
-  save(); render();
+  save(); renderKeepScroll();
 }
 
 // כיול אוטומטי: הפער הממוצע בין בחינה למגן במקצוע, מתוך הנתונים שכבר קיימים
@@ -1498,6 +1569,25 @@ function setTab(t){
   renderTabs();
   render();
 }
+// רינדור שמשמר את מיקום הגלילה, השדה הפעיל ומיקום הסמן — כדי שלא נקפוץ לראש הרשימה
+function renderKeepScroll(){
+  const main=document.getElementById('main');
+  const sc=main?main.querySelector('.scroll'):null;
+  const top=sc?sc.scrollTop:0, left=sc?sc.scrollLeft:0;
+  const wy=window.scrollY;
+  const ae=document.activeElement;
+  const ak=(ae&&ae.getAttribute)?ae.getAttribute('data-k'):null;
+  const selS=(ae&&ae.selectionStart!==undefined)?ae.selectionStart:null;
+  render();
+  const m2=document.getElementById('main');
+  const ns=m2?m2.querySelector('.scroll'):null;
+  if(ns){ ns.scrollTop=top; ns.scrollLeft=left; }
+  window.scrollTo(0,wy);
+  if(ak){
+    const el=document.querySelector('#main [data-k="'+ak+'"]');
+    if(el){ el.focus(); try{ if(selS!==null&&el.setSelectionRange) el.setSelectionRange(selS,selS); }catch(e){} }
+  }
+}
 function destroyCharts(){ Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}}); charts={}; }
 function render(){
   destroyCharts();
@@ -1716,7 +1806,7 @@ function setStudentClass(id,val){
   const st=state.students.find(s=>s.id===id); if(!st) return;
   st.cls=val; save();
   const modal=document.getElementById('studentModal');
-  if(modal.classList.contains('show')) openStudent(id); else render();
+  if(modal.classList.contains('show')) openStudent(id); else renderKeepScroll();
 }
 function delStudent(id){
   const st=state.students.find(s=>s.id===id);
@@ -1763,6 +1853,8 @@ function studentSubjEditor(st,subj){
     body=`<div class="comp-grid">${comps.map((c,i)=>{
       // במקצועות מוגברים וברכיב "עבודה נוספת" מציגים גם רכיבים במשקל 0 כדי לאפשר הפעלה; בשאר מסתירים
       if(isHidden(st,subj.id+'.'+i)) return '';
+      // "עבודה נוספת" מוצגת רק אם הופעלה, או שכבר יש בה משקל/ציון
+      if(c.b&&!c.w&&!((st.grades||{})[subj.id+'.'+i]!==undefined)&&!((st.shw||{})[subj.id+'.'+i])) return '';
       // מציגים רכיב גם כשמשקלו 0 אם: מקצוע מוגבר · עבודה נוספת · או שהמשקל אופס ידנית (כדי שאפשר יהיה להחזירו)
       if(!c.w&&!subj.named&&!c.b&&!(baseComps[i]&&baseComps[i].w>0)) return '';
       const key=subj.id+'.'+i, g=st.grades||{};
@@ -1780,7 +1872,7 @@ function studentSubjEditor(st,subj){
         ${(()=>{const dv=(r.details||[])[i]; const v=dv&&dv.val!==null&&dv.val!==undefined?dv.val:null;
           return (v!==null&&c.w)?`<span class="pill" title="תרומה לציון הסופי">= ${Math.round(v*c.w/100*10)/10} נק׳ מתוך ${c.w}</span>`:'';})()}</div>
         <div class="comp-row"><span class="lbl">משקל</span>${wIn}</div>
-        <div class="comp-row"><span class="lbl">סמל</span>${codeSelect(st,key)}</div></div>`;
+        <div class="comp-row"><span class="lbl">סמל</span>${codeSelect(st,key)} ${noteBtn(st,key,subj.name+' · '+c.n)}</div></div>`;
       }
       const fl=(r.flips||[]).find(f=>f.comp===c.n);
       const flBadge=fl?` <span class="badge b-warn" title="ציון הבחינה (${fl.e}) גבוה מהמגן (${fl.m}) — המשקל הגדול עבר לבחינה: מגן ${fl.s}% / בחינה ${100-fl.s}%">🔀 היפוך לטובת הבחינה</span>`:'';
@@ -1803,7 +1895,7 @@ function studentSubjEditor(st,subj){
       ${rowM}${rowE}${rowFinal}
       <div class="comp-row"><span class="lbl">חלוקה</span>${sSel}</div>
       <div class="comp-row"><span class="lbl">משקל</span>${wIn}</div>
-      <div class="comp-row"><span class="lbl">סמל</span>${codeSelect(st,key)}</div></div>`;
+      <div class="comp-row"><span class="lbl">סמל</span>${codeSelect(st,key)} ${noteBtn(st,key,subj.name+' · '+c.n)}</div></div>`;
     }).join('')}</div>`;
     const hid=comps.map((c,i)=>({c,i})).filter(x=>isHidden(st,subj.id+'.'+x.i));
     if(hid.length) body+=`<div class="hiddenChips"><span class="note" style="align-self:center;">רכיבים שהוסרו:</span>
@@ -1814,11 +1906,28 @@ function studentSubjEditor(st,subj){
   const resetBtn=custom?`<button class="btn sec sm" onclick="event.stopPropagation();resetOv('${st.id}','${subj.id}')" title="ביטול ההתאמות האישיות במקצוע זה">↩️ איפוס התאמות</button>`:'';
   const tA=testAvg(st,subj.id), tNn=testsOf(st,subj.id).length;
   const testChip=(u!==0&&!subj.internalOnly)?`<button class="btn sec sm" onclick="event.stopPropagation();openTestsDlg('${st.id}','${subj.id}')" title="ציוני מבחנים בכיתה — לחיזוי בלבד, לא נכנסים לציון" style="${tNn?'border-color:#c4b5fd; background:#faf5ff; color:#6d28d9;':''}">📝 מבחנים${tNn?`: ${tA} (${tNn})`:''}</button>`:'';
+  // כפתור הוספת "עבודה נוספת" — רק אם היא לא מוצגת כרגע
+  let bonusBtn='';
+  if(u!==0&&!subj.internalOnly){
+    const cAll=getCompsFor(st,subj,u);
+    const bi=cAll.findIndex(c=>c.b);
+    if(bi>=0){
+      const bk=subj.id+'.'+bi;
+      const shown=(cAll[bi].w>0)||((st.grades||{})[bk]!==undefined)||((st.shw||{})[bk]);
+      if(!shown&&!isHidden(st,bk)) bonusBtn=`<button class="btn sec sm" style="border-color:#86efac; color:#166534; background:#f0fdf4;" onclick="event.stopPropagation();addBonus('${st.id}','${subj.id}',${bi})" title="הוספת עבודה נוספת / הערכה חלופית לשיפור הציון">➕ עבודה נוספת</button>`;
+    }
+  }
   const presetSel=subj.named?`<select onclick="event.stopPropagation()" onchange="applyMugbarPreset('${st.id}','${subj.id}',this.value)" style="font-size:11.5px;" title="החלת מבנה משקלים וסמלי שאלונים מקטלוג בית הספר">
     <option value="">📋 מבנה מהקטלוג...</option>
     ${Object.keys(MUGBAR_PRESETS).map(p=>`<option>${esc(p)}</option>`).join('')}</select>`:'';
-  return `<div class="subj-card open"><div class="subj-head"><span>${esc(subj.name)} ${nameInput} ${unitsSel} ${presetSel} ${testChip} ${resetBtn}</span><span>${finalHtml}</span></div>
+  return `<div class="subj-card open"><div class="subj-head"><span>${esc(subj.name)} ${nameInput} ${unitsSel} ${noteBtn(st,subj.id,'הערה כללית — '+subj.name)} ${bonusBtn} ${presetSel} ${testChip} ${resetBtn}</span><span>${finalHtml}</span></div>
   <div class="subj-body">${body}</div></div>`;
+}
+function addBonus(id,sid,i){
+  const st=state.students.find(s=>s.id===id); if(!st) return;
+  st.shw=st.shw||{}; st.shw[sid+'.'+i]=1;
+  if(st.hid) delete st.hid[sid+'.'+i];
+  save(); refreshOpenViews(id); toast('נוספה עבודה נוספת — הזיני משקל וציון');
 }
 function hideComp(id,key,w,name){
   const st=state.students.find(s=>s.id===id); if(!st) return;
@@ -1828,6 +1937,7 @@ function hideComp(id,key,w,name){
     st.ov=st.ov||{}; st.ov[key]=Object.assign({},st.ov[key],{w:0});
   }
   st.hid=st.hid||{}; st.hid[key]=1;
+  if(st.shw) delete st.shw[key];
   save(); refreshOpenViews(id); toast('הרכיב הוסר — אפשר להחזירו מהשורה התחתונה במקצוע');
 }
 function showComp(id,key){
@@ -1865,12 +1975,18 @@ function setGrade(id,key,val){
   st.grades=st.grades||{};
   if(val===''||val===null) delete st.grades[key];
   else st.grades[key]=Math.max(0,Math.min(100,+val));
-  save(); refreshOpenViews(id);
+  save();
+  const modal=document.getElementById('studentModal');
+  if(modal&&modal.classList.contains('show')) refreshOpenViews(id);
+  else renderKeepScroll();
 }
 function setUnits(id,sid,val){
   const st=state.students.find(s=>s.id===id); if(!st) return;
   st.units=st.units||{}; st.units[sid]=+val;
-  save(); refreshOpenViews(id,true);
+  save();
+  const modal=document.getElementById('studentModal');
+  if(modal&&modal.classList.contains('show')) refreshOpenViews(id,true);
+  else renderKeepScroll();
 }
 function setMugbarName(id,sid,val){
   const st=state.students.find(s=>s.id===id); if(!st) return;
@@ -1961,21 +2077,22 @@ function entryGrid(subj,studs){
     const r=calcSubject(st,subj);
     const comps=u===0?[]:getCompsFor(st,subj,u);
     let tds=`<td><span class="name-link" onclick="openStudent('${st.id}')">${esc(st.name)}</span><br><small style="color:var(--muted)">${esc(st.cls)}</small></td>`;
-    if(subj.opts.length>1) tds+=`<td><select onchange="setUnits('${st.id}','${subj.id}',this.value)">${subj.opts.map(o=>`<option value="${o}" ${o===u?'selected':''}>${o===0?'—':o}</option>`).join('')}</select></td>`;
-    if(subj.named) tds+=`<td><input type="text" style="width:110px;" value="${esc((st.mugbarNames||{})[subj.id]||'')}" onchange="setMugbarName('${st.id}','${subj.id}',this.value)"></td>`;
+    if(subj.opts.length>1) tds+=`<td><select data-k="u|${st.id}|${subj.id}" onchange="setUnits('${st.id}','${subj.id}',this.value)">${subj.opts.map(o=>`<option value="${o}" ${o===u?'selected':''}>${o===0?'—':o}</option>`).join('')}</select></td>`;
+    if(subj.named) tds+=`<td><input type="text" data-k="n|${st.id}|${subj.id}" style="width:110px;" value="${esc((st.mugbarNames||{})[subj.id]||'')}" onchange="setMugbarName('${st.id}','${subj.id}',this.value)"></td>`;
     headComps.forEach((hc,i)=>{
       const c=comps[i];
       if(u===0||!c||!c.w){ tds+='<td style="color:#cbd5e1;">—</td>'; return; }
       const key=subj.id+'.'+i, g=st.grades||{};
+      const nt=noteOf(st,key);
       const kc=k=>((g[k]==null?'cell-miss':'')+gstatCls(st,k));
       const ct=k=>`oncontextmenu="event.preventDefault();cycleGstat('${st.id}','${k}')" title="לחיצה ימנית: שחור→אדום→כחול"`;
       if(c.t==='i'){
-        tds+=`<td><div class="gcell"><input type="number" min="0" max="100" class="${kc(key)}" ${ct(key)} value="${g[key]??''}" onchange="setGrade('${st.id}','${key}',this.value)"></div></td>`;
+        tds+=`<td class="${nt?'hasNote':''}" title="${nt?esc(nt):''}"><div class="gcell"><input type="number" min="0" max="100" data-k="g|${st.id}|${key}" class="${kc(key)}" ${ct(key)} value="${g[key]??''}" onchange="setGrade('${st.id}','${key}',this.value)"></div></td>`;
       }else{
         const eff=c.s;
-        const rM=eff>0?`<div class="gcell"><small>מגן</small><input type="number" min="0" max="100" class="${kc(key+'.m')}" ${ct(key+'.m')} value="${g[key+'.m']??''}" onchange="setGrade('${st.id}','${key}.m',this.value)"></div>`:'';
-        const rE=eff<100?`<div class="gcell"><small>בחינה</small><input type="number" min="0" max="100" class="${kc(key+'.e')}" ${ct(key+'.e')} value="${g[key+'.e']??''}" onchange="setGrade('${st.id}','${key}.e',this.value)"></div>`:'';
-        tds+=`<td>${rM}${rE}</td>`;
+        const rM=eff>0?`<div class="gcell"><small>מגן</small><input type="number" min="0" max="100" data-k="g|${st.id}|${key}.m" class="${kc(key+'.m')}" ${ct(key+'.m')} value="${g[key+'.m']??''}" onchange="setGrade('${st.id}','${key}.m',this.value)"></div>`:'';
+        const rE=eff<100?`<div class="gcell"><small>בחינה</small><input type="number" min="0" max="100" data-k="g|${st.id}|${key}.e" class="${kc(key+'.e')}" ${ct(key+'.e')} value="${g[key+'.e']??''}" onchange="setGrade('${st.id}','${key}.e',this.value)"></div>`:'';
+        tds+=`<td class="${nt?'hasNote':''}" title="${nt?esc(nt):''}">${rM}${rE}</td>`;
       }
     });
     const flIc=(r.flips&&r.flips.length)?' <span title="היפוך אחוזים לטובת הבחינה ב: '+esc(r.flips.map(f=>f.comp).join(', '))+'">🔀</span>':'';
@@ -2014,7 +2131,9 @@ function closeGradeImport(){ document.getElementById('giModal').classList.remove
 function giCompOptions(){
   const subj=SUBJ_MAP[gi.subj]||SUBJECTS[0];
   const u=subj.opts[subj.opts.length-1];
-  return getComps(subj,u).map((c,i)=>({i,n:c.n,t:c.t,s:c.s,w:c.w})).filter(c=>c.w||c.t==='e');
+  // מציגים את כל הרכיבים — גם כאלה שמשקלם 0 בברירת המחדל (למשל הערכה פנימית במתמטיקה 5 יח"ל,
+  // שכן קיימת אצל תלמידות ב-3 יח"ל, ושאלוני ההגבר בתנ"ך ותושב"ע)
+  return getComps(subj,u).map((c,i)=>({i,n:c.n,t:c.t,s:c.s,w:c.w}));
 }
 function renderGradeImport(){
   const box=document.getElementById('giBox');
@@ -2080,7 +2199,7 @@ function renderGradeImport(){
     <label>מקצוע:</label><select onchange="gi.subj=this.value;gi.comp=0;renderGradeImport()">${SUBJECTS.filter(s=>!s.internalOnly).map(s=>`<option value="${s.id}" ${s.id===gi.subj?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
     <label>יעד:</label><select onchange="gi.comp=(this.value==='T'?'T':+this.value);renderGradeImport()">
       <option value="T" ${gi.comp==='T'?'selected':''}>📝 מבחן / בוחן / עבודה — לחיזוי בלבד</option>
-      ${comps.map(c=>`<option value="${c.i}" ${c.i===gi.comp?'selected':''}>${esc(c.n)}</option>`).join('')}</select>
+      ${comps.map(c=>`<option value="${c.i}" ${c.i===gi.comp?'selected':''}>${esc(c.n)}${c.w?` (${c.w}%)`:' — לפי יח"ל'}</option>`).join('')}</select>
     ${gi.comp==='T'?`<label>סוג:</label>
       <select onchange="gi.testName=this.value;renderGradeImport()">${['מבחן','בוחן','עבודה','מטלת ביצוע','מבחן מחצית','מתכונת'].map(n=>`<option ${gi.testName===n?'selected':''}>${n}</option>`).join('')}</select>
       <label>משקל:</label><input type="number" min="0.5" max="10" step="0.5" value="${gi.testW||2}" style="width:60px;" onchange="gi.testW=+this.value||2">`:''}
@@ -2406,11 +2525,11 @@ function simGrid(subj,studs){
           need=nd.ok?`<span class="needbadge" title="הזיני ציון זה כדי שהמקצוע יעבור">צריך ${nd.x}</span>`
                     :`<span class="badge b-bad" style="font-size:11px;">לא ניתן</span>`;
         }
-        tds+=`<td><div class="gcell"><input type="number" min="0" max="100" class="${cls(key)}" value="${g[key]??''}" onchange="setGradeSim('${st.id}','${key}',this.value)">${need}</div></td>`;
+        tds+=`<td><div class="gcell"><input type="number" min="0" max="100" data-k="s|${st.id}|${key}" class="${cls(key)}" value="${g[key]??''}" onchange="setGradeSim('${st.id}','${key}',this.value)">${need}</div></td>`;
       }else{
         const eff=c.s;
-        const rM=eff>0?`<div class="gcell"><small>מגן</small><input type="number" min="0" max="100" class="${cls(key+'.m')}" value="${g[key+'.m']??''}" onchange="setGradeSim('${st.id}','${key}.m',this.value)"></div>`:'';
-        const rE=eff<100?`<div class="gcell"><small>בחינה</small><input type="number" min="0" max="100" class="${cls(key+'.e')}" value="${g[key+'.e']??''}" onchange="setGradeSim('${st.id}','${key}.e',this.value)"></div>`:'';
+        const rM=eff>0?`<div class="gcell"><small>מגן</small><input type="number" min="0" max="100" data-k="s|${st.id}|${key}.m" class="${cls(key+'.m')}" value="${g[key+'.m']??''}" onchange="setGradeSim('${st.id}','${key}.m',this.value)"></div>`:'';
+        const rE=eff<100?`<div class="gcell"><small>בחינה</small><input type="number" min="0" max="100" data-k="s|${st.id}|${key}.e" class="${cls(key+'.e')}" value="${g[key+'.e']??''}" onchange="setGradeSim('${st.id}','${key}.e',this.value)"></div>`:'';
         tds+=`<td>${rM}${rE}</td>`;
       }
     });
@@ -2691,6 +2810,10 @@ function buildReportHtml(cls){
       <h3 class="sec">🚨 דורשות התייחסות (${alerts.length})</h3>
       ${alerts.slice(0,30).map(a=>`<div class="alert-item al-${a.sev}">${esc(a.text)}</div>`).join('')||'<div class="note">אין התראות</div>'}
       ${alerts.length>30?`<div class="note">ועוד ${alerts.length-30} התראות — ראי לשונית התראות</div>`:''}
+      ${(()=>{const nts=allNotes(studs); return nts.length?`<h3 class="sec" style="margin-top:12px;">📝 הערות (${nts.length})</h3>
+        <div class="scroll" style="max-height:220px;"><table class="tbl"><tbody>
+        ${nts.map(x=>`<tr><td style="font-weight:700; white-space:nowrap;">${esc(x.st.name)}</td><td style="white-space:nowrap;"><span class="pill">${esc(x.label)}</span></td><td>${esc(x.txt)}</td></tr>`).join('')}
+        </tbody></table></div>`:'';})()}
       <h3 class="sec" style="margin-top:12px;">📚 ממוצע לפי מקצוע</h3>
       <table class="tbl">${subjAvgs.map(x=>`<tr><td>${esc(x.name)}</td><td class="${gradeClass(x.avg)}" style="font-weight:700;">${x.avg}</td></tr>`).join('')}</table>
     </div>
@@ -2732,7 +2855,7 @@ function renderSettings(m){
   m.innerHTML=`
   <div class="card" style="margin-bottom:14px; border:2px solid var(--ok);">
     <h2 class="sec">${ic('save',19)}מצב השמירה — האם הנתונים שלי בטוחים?</h2>
-    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>2.8</b> · 01.09.2026</span>
+    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>3.0</b> · 01.09.2026</span>
     <span class="note">אחרי העלאת גרסה חדשה — רעננו את הדף (Ctrl+F5) וּודאו שהמספר כאן התעדכן.</span></div>
     <div id="storageBox">${storageStatusHtml()}</div>
     ${(()=>{const b=lastBackupInfo(); const cur=countAllStudents();
@@ -3006,6 +3129,7 @@ function exportExcel(cls){
   const rawRows=studs.map(st=>{
     const row={'שם':st.name,'כיתה':st.cls};
     SUBJECTS.forEach(subj=>{
+      const sn=noteOf(st,subj.id); if(sn) row[subj.name+' - הערה כללית']=sn;
       if(subj.opts.length>1) row[subj.name+' - יח"ל']=getUnits(st,subj);
       if(subj.named) row[subj.name+' - שם מקצוע']=(st.mugbarNames||{})[subj.id]||'';
       const maxU=subj.opts[subj.opts.length-1];
@@ -3018,6 +3142,7 @@ function exportExcel(cls){
         const sTxt=c.t==='i'?stTxt(key):[stTxt(key+'.m'),stTxt(key+'.e')].filter(Boolean).join(' / ');
         if(sTxt) row[subj.name+' | '+c.n+' | סימון']=sTxt;
         if(codes[key]) row[subj.name+' | '+c.n+' | סמל שאלון']=codes[key];
+        const nt=noteOf(st,key); if(nt) row[subj.name+' | '+c.n+' | הערה']=nt;
         if(ov.w!==undefined||ov.s!==undefined) row[subj.name+' | '+c.n+' | התאמה אישית']=(ov.w!==undefined?'משקל '+ov.w+'%':'')+(ov.s!==undefined?' מגן '+ov.s+'%':'');
       });
     });
@@ -3421,9 +3546,15 @@ function renderHelp(m){
     <span style="color:#111; font-weight:800;">■ שחור</span> — ציון שכבר דווח למשרד החינוך · <span style="color:#dc2626; font-weight:800;">■ אדום</span> — ציון אמיתי ונכון שטרם דווח · <span style="color:#1d4ed8; font-weight:800;">■ כחול</span> — ציון פיקטיבי / הערכה.<br>
     הצבעים מוצגים בטבלת ההזנה ובכרטיס התלמידה. לשינוי: <b>לחיצה ימנית</b> על הציון בטבלה, או כפתור העיגול הצבעוני בכרטיס התלמידה (⚫→🔴→🔵).<br>
     בלשונית ההתראות תקבלי סיכום: כמה ציונים טרם דווחו וכמה פיקטיביים — וגם בייצוא לאקסל יש עמודת "סימון".`)}
+  ${step('📝','הערות לכל ציון',`
+    בכל קובייה, בשורת הסמל, יש כפתור <b>📝</b>. לחיצה פותחת חלון כתיבה חופשי — "נעדרה מהמבחן, מועד ב'", "אישור ועדת חריגים", "הציון טרם סופי".<br>
+    כשיש הערה הכפתור נצבע כתום עם נקודה, ובטבלת ההזנה מופיע <b>משולש כתום</b> בפינת התא — כך רואים מיד שיש הערה בלי להיכנס לכרטיס (מעבר עכבר מציג אותה).<br>
+    יש גם <b>הערה כללית למקצוע</b> — הכפתור 📝 שליד שם המקצוע בכותרת.<br>
+    כל ההערות נכללות ב<b>ייצוא לאקסל</b> וב<b>דוח המודפס</b>, בטבלה ייעודית בסופו.`)}
   ${step('➖','הסרה והחזרה של רכיבים',`
     לא צריך רכיב מסוים אצל תלמידה? מעבירים עכבר על הקובייה ולוחצים על <b>✕</b> בפינה.<br>
-    רכיב ללא משקל (כמו "עבודה נוספת" שלא בשימוש) פשוט נעלם מהתצוגה — הציון לא משתנה.<br>
+    רכיב ללא משקל פשוט נעלם מהתצוגה — הציון לא משתנה.<br>
+    <b>"עבודה נוספת" אינה מוצגת יותר כברירת מחדל</b> — היא מוסיפה עומס מיותר. כשצריך אותה, לוחצים <b>➕ עבודה נוספת</b> בכותרת המקצוע.<br>
     לרכיב עם משקל תופיע אזהרה: משקלו יתאפס והאחוזים יתחלקו מחדש בין השאר.<br>
     בתחתית המקצוע מופיעה שורת <b>"רכיבים שהוסרו"</b> — לחיצה על ➕ מחזירה את הרכיב יחד עם משקל ברירת המחדל שלו.`)}
   ${step('💜','התאמה אישית לתלמידה',`
