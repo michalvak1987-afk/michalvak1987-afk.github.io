@@ -6,7 +6,7 @@
 <title>סימולטור בגרות</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Assistant:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Assistant:wght@400;600;700;800&family=Heebo:wght@400;600;700;800;900&family=Varela+Round&family=Noto+Sans+Hebrew:wght@400;600;700;800&family=Secular+One&family=Frank+Ruhl+Libre:wght@400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -19,17 +19,29 @@
 @keyframes fadeUp{from{opacity:0; transform:translateY(10px);}to{opacity:1; transform:none;}}
 @keyframes pop{from{transform:scale(.94); opacity:0;}to{transform:scale(1); opacity:1;}}
 @keyframes shimmer{0%{background-position:-500px 0;}100%{background-position:500px 0;}}
-h1,h2,h3,.kpi .n,.ring .rn,table.tbl th,button.btn,.badge{font-family:'Rubik','Assistant',sans-serif;}
+.ic{vertical-align:-4px; flex-shrink:0;}
+nav.tabs button .ic{margin-inline-end:6px;}
+.kpi{display:flex; align-items:center; gap:13px;}
+.kpi .ico{width:46px; height:46px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,.22); border:1px solid rgba(255,255,255,.3); backdrop-filter:blur(6px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35), 0 3px 10px rgba(0,0,0,.12); flex-shrink:0;
+  transition:transform .34s cubic-bezier(.34,1.56,.64,1);}
+.kpi .ico svg{width:24px; height:24px; stroke-width:2.1;}
+.kpi:hover .ico{transform:scale(1.1) rotate(-5deg);}
+.kpi .txt{min-width:0;}
+h2.sec .ic,h3.sec .ic{margin-inline-end:7px; color:var(--brand);}
+button.btn .ic{margin-inline-end:5px;}
+h1,h2,h3,.kpi .n,.ring .rn,table.tbl th,button.btn,.badge{font-family:var(--font-head,'Rubik'),sans-serif;}
 /* ===== מספרים: שחור מודגש כברירת מחדל ===== */
-input[type=number]{font-family:'Rubik',sans-serif; font-weight:800; color:#0b1220; font-size:14px; letter-spacing:-.2px;}
-.grade-ok,.grade-exc,.grade-warn,.grade-bad{font-family:'Rubik',sans-serif; font-weight:800;}
+input[type=number]{font-family:var(--font-num,'Rubik'),sans-serif; font-weight:800; color:#0b1220; font-size:14px; letter-spacing:-.2px;}
+.grade-ok,.grade-exc,.grade-warn,.grade-bad{font-family:var(--font-num,'Rubik'),sans-serif; font-weight:800;}
 .grade-ok{color:#0b1220;}
 table.tbl td{font-weight:600;}
 table.tbl td .grade-ok,table.tbl td.grade-ok{font-weight:800; color:#0b1220;}
 /* גופן נעים גם לתפריטים ולשדות טקסט */
-select,input[type=text],textarea{font-family:'Assistant',sans-serif; font-weight:600;}
-nav.tabs button{font-family:'Rubik',sans-serif; font-weight:600;}
-.name-link{font-family:'Assistant',sans-serif; font-weight:800;}
+select,input[type=text],textarea{font-family:var(--font-body,'Assistant'),sans-serif; font-weight:600;}
+nav.tabs button{font-family:var(--font-head,'Rubik'),sans-serif; font-weight:600;}
+.name-link{font-family:var(--font-body,'Assistant'),sans-serif; font-weight:800;}
 td,th{font-variant-numeric:tabular-nums;}
 @keyframes sheetUp{from{transform:translateY(40px) scale(.97); opacity:0;}to{transform:none; opacity:1;}}
 @keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
@@ -74,16 +86,46 @@ label:has(input[type=checkbox]){display:inline-flex; align-items:center; gap:9px
 #cmdk .hint{padding:9px 16px; font-size:11.5px; color:var(--muted); border-top:1px solid var(--line); background:#fafbfe; display:flex; gap:14px;}
 kbd{background:#fff; border:1px solid #d6deec; border-bottom-width:2px; border-radius:6px; padding:1px 6px; font-size:11px; font-family:inherit; font-weight:700;}
 *{box-sizing:border-box; margin:0; padding:0;}
-body{font-family:'Assistant','Rubik',-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif; font-weight:600; letter-spacing:-.1px; color:var(--ink); font-size:14px;
+body{font-family:var(--font-body,'Assistant'),-apple-system,'Segoe UI',Arial,sans-serif; font-weight:600; letter-spacing:-.1px; color:var(--ink); font-size:14px;
   background:var(--bg);
   background-image:radial-gradient(1200px 500px at 100% -80px,rgba(147,51,234,.10),transparent 60%),radial-gradient(900px 400px at -10% 0,rgba(79,70,229,.10),transparent 55%);
   background-attachment:fixed;}
-header.app{background:linear-gradient(120deg,#312e81 0%,#5b21b6 45%,#9333ea 100%); color:#fff; padding:16px 26px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; position:relative; overflow:hidden; box-shadow:0 6px 24px rgba(49,46,129,.28);}
-header.app::after{content:''; position:absolute; inset:0; background:radial-gradient(600px 200px at 85% -40px,rgba(255,255,255,.18),transparent 70%); pointer-events:none;}
+header.app{background:linear-gradient(120deg,#312e81 0%,#5b21b6 45%,#9333ea 100%); color:#fff; padding:14px 26px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; position:relative; z-index:70; min-height:82px; box-shadow:0 6px 24px rgba(49,46,129,.28);}
+header.app::after{content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:radial-gradient(600px 200px at 85% -40px,rgba(255,255,255,.18),transparent 70%);}
 header.app>*{position:relative; z-index:1;}
 header.app h1{font-size:22px; font-weight:800; letter-spacing:-.4px; text-shadow:0 2px 10px rgba(0,0,0,.18);}
 header.app .sub{opacity:.85; font-size:12.5px;}
-nav.tabs{display:flex; gap:5px; background:rgba(255,255,255,.72); backdrop-filter:blur(22px) saturate(180%); -webkit-backdrop-filter:blur(22px) saturate(180%); padding:9px 18px; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:50; overflow-x:auto; box-shadow:0 2px 12px rgba(30,41,80,.05);}
+#hdrCenter{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); display:flex; align-items:center; gap:14px; text-align:center; pointer-events:none; z-index:2;}
+#hdrCenter .ttl{text-align:center;}
+#hdrActions{margin-inline-start:auto; display:flex; gap:8px; align-items:center; z-index:3;}
+.glassIcon{width:56px; height:56px; border-radius:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  background:linear-gradient(145deg,rgba(255,255,255,.34),rgba(255,255,255,.12));
+  border:1px solid rgba(255,255,255,.45); backdrop-filter:blur(12px) saturate(180%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6), inset 0 -8px 16px rgba(255,255,255,.09), 0 8px 22px rgba(0,0,0,.22);
+  position:relative; overflow:hidden; animation:floaty 4.5s ease-in-out infinite;}
+.glassIcon::before{content:''; position:absolute; top:-60%; left:-30%; width:80%; height:180%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent); transform:rotate(22deg); animation:sheen 5s ease-in-out infinite;}
+.glassIcon svg{width:28px; height:28px; stroke-width:2; filter:drop-shadow(0 2px 4px rgba(0,0,0,.25)); position:relative; z-index:1;}
+@keyframes sheen{0%,72%{left:-40%;}88%,100%{left:120%;}}
+.coordLine{display:inline-flex; align-items:center; gap:6px; margin-top:5px; font-size:12px; font-weight:700;
+  background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.3); border-radius:99px; padding:3px 12px; backdrop-filter:blur(8px);}
+@media(max-width:1150px){#hdrCenter{position:static; transform:none; margin-inline-start:14px; text-align:right;} #hdrCenter .ttl{text-align:right;}}
+.hbtn{background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.3); color:#fff; border-radius:12px;
+  padding:8px 12px; cursor:pointer; font-family:inherit; font-size:13px; font-weight:700; display:flex; align-items:center; gap:7px; transition:all .15s ease;}
+.hbtn:hover{background:rgba(255,255,255,.28); transform:translateY(-1px);}
+#subBar{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:8px 22px; position:relative; z-index:40;
+  background:rgba(255,255,255,.72); backdrop-filter:blur(16px); border-bottom:1px solid var(--line); font-size:12.5px;}
+#profileSlot{display:flex; gap:6px; align-items:center; flex-wrap:wrap;}
+#saveInd{cursor:pointer; background:#eef7f1; border:1px solid #cfe8db; color:#0f5132; border-radius:10px; padding:4px 10px; font-size:11.5px; line-height:1.3; white-space:nowrap;}
+#hdrMenu{display:none; position:absolute; inset-inline-end:0; top:calc(100% + 10px); background:#fff; border:1px solid var(--line);
+  border-radius:16px; box-shadow:0 24px 60px rgba(15,23,42,.32); min-width:255px; padding:7px; z-index:500; animation:sheetUp .16s ease both;}
+#hdrMenu.show{display:block;}
+#hdrMenu .mi{display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:11px; cursor:pointer; font-size:13.5px; font-weight:700; color:var(--ink); white-space:nowrap;}
+#hdrMenu .mi:hover{background:var(--soft);}
+#hdrMenu .sep{height:1px; background:var(--line); margin:5px 8px;}
+#hdrMenu .lbl{font-size:11px; color:var(--muted); padding:6px 12px 3px; font-weight:800;}
+nav.tabs{display:flex; gap:5px; background:rgba(255,255,255,.72); backdrop-filter:blur(22px) saturate(180%); -webkit-backdrop-filter:blur(22px) saturate(180%); padding:9px 18px; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:30; overflow-x:auto; box-shadow:0 2px 12px rgba(30,41,80,.05);}
 nav.tabs button{border:none; background:transparent; padding:9px 16px; border-radius:10px; font-size:14px; font-weight:600; color:var(--muted); cursor:pointer; white-space:nowrap; font-family:inherit;}
 nav.tabs button{transition:all .18s ease;}
 nav.tabs button.active{background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; box-shadow:0 4px 14px rgba(79,70,229,.35); transform:translateY(-1px);}
@@ -91,19 +133,29 @@ nav.tabs button:hover:not(.active){background:var(--soft); color:var(--ink);}
 main{padding:20px; max-width:1500px; margin:0 auto;}
 .row{display:flex; gap:14px; flex-wrap:wrap;}
 .card{background:rgba(255,255,255,.86); backdrop-filter:blur(14px) saturate(150%); -webkit-backdrop-filter:blur(14px) saturate(150%); border:1px solid rgba(255,255,255,.75); border-radius:20px; padding:17px; box-shadow:var(--sh); animation:fadeUp .3s ease both; transition:box-shadow .2s ease;}
+.card{transition:transform .34s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease;}
 .card:hover{box-shadow:var(--sh2);}
 .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px;}
-.kpi{border-radius:20px; padding:15px 17px; color:#fff; position:relative; overflow:hidden; box-shadow:var(--sh); animation:pop .35s ease both; transition:transform .18s ease, box-shadow .18s ease;}
-.kpi:hover{transform:translateY(-3px) scale(1.015); box-shadow:var(--sh2);}
+.kpi{border-radius:22px; padding:14px 16px; color:#fff; position:relative; overflow:hidden;
+  box-shadow:0 6px 20px rgba(30,41,80,.16), inset 0 1px 0 rgba(255,255,255,.22);
+  animation:kpiIn .5s cubic-bezier(.22,1.2,.36,1) both;
+  transition:transform .34s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease;
+  cursor:default; will-change:transform;}
+.kpi:hover{transform:translateY(-6px) scale(1.03); box-shadow:0 16px 34px rgba(30,41,80,.26), inset 0 1px 0 rgba(255,255,255,.3);}
+.kpi:active{transform:translateY(-2px) scale(.99); transition-duration:.12s;}
+.kpis .kpi:nth-child(1){animation-delay:.02s}.kpis .kpi:nth-child(2){animation-delay:.07s}
+.kpis .kpi:nth-child(3){animation-delay:.12s}.kpis .kpi:nth-child(4){animation-delay:.17s}
+.kpis .kpi:nth-child(5){animation-delay:.22s}.kpis .kpi:nth-child(6){animation-delay:.27s}
+@keyframes kpiIn{from{opacity:0; transform:translateY(18px) scale(.94);}to{opacity:1; transform:none;}}
 .kpi::after{content:''; position:absolute; inset:0; background:radial-gradient(140px 70px at 90% -10px,rgba(255,255,255,.3),transparent 70%); pointer-events:none;}
 .kpi .n{font-size:28px; font-weight:800; letter-spacing:-.5px; text-shadow:0 2px 8px rgba(0,0,0,.15);}
 .kpi .t{font-size:12.5px; opacity:.92;}
-.kpi.k1{background:linear-gradient(135deg,#4338ca,#6366f1);}
-.kpi.k2{background:linear-gradient(135deg,#047857,#10b981);}
-.kpi.k3{background:linear-gradient(135deg,#b45309,#f59e0b);}
-.kpi.k4{background:linear-gradient(135deg,#7c3aed,#a78bfa);}
-.kpi.k5{background:linear-gradient(135deg,#be123c,#f43f5e);}
-.kpi.k6{background:linear-gradient(135deg,#475569,#94a3b8);}
+.kpi.k1{background:linear-gradient(140deg,#4f46e5,#7c8cf8);}
+.kpi.k2{background:linear-gradient(140deg,#059669,#34d399);}
+.kpi.k3{background:linear-gradient(140deg,#d97706,#fbbf24);}
+.kpi.k4{background:linear-gradient(140deg,#7c3aed,#c084fc);}
+.kpi.k5{background:linear-gradient(140deg,#e11d48,#fb7185);}
+.kpi.k6{background:linear-gradient(140deg,#475569,#94a3b8);}
 h2.sec{font-size:16px; font-weight:800; margin:6px 0 12px;}
 h3.sec{font-size:14px; font-weight:700; margin:4px 0 10px; color:var(--brand);}
 table.tbl{width:100%; border-collapse:collapse; font-size:13px;}
@@ -113,13 +165,13 @@ table.tbl tbody tr{transition:background .12s ease;}
 table.tbl tr:hover td{background:#f2f6ff;}
 .scroll{overflow:auto; max-height:70vh; border:1px solid var(--line); border-radius:10px;}
 .badge{display:inline-block; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:700; white-space:nowrap; box-shadow:0 1px 3px rgba(0,0,0,.07);}
-.b-exc{background:linear-gradient(135deg,#fde68a,#fbbf24); color:#7c2d12; border:1px solid #f59e0b; box-shadow:0 2px 8px rgba(245,158,11,.35);}
-.b-pot{background:linear-gradient(135deg,#ede9fe,#ddd6fe); color:#5b21b6; border:1px solid #a78bfa;}
+.b-exc{background:linear-gradient(135deg,#e9d5ff,#c084fc); color:#4c1d95; border:1px solid #9333ea; box-shadow:0 2px 8px rgba(147,51,234,.32);}
+.b-pot{background:linear-gradient(135deg,#fef3c7,#fcd34d); color:#7c2d12; border:1px solid #f59e0b;}
 .b-ok{background:#d1fae5; color:#065f46;}
 .b-warn{background:#ffedd5; color:#9a3412;}
 .b-bad{background:#fee2e2; color:#991b1b;}
 .b-miss{background:#e2e8f0; color:#334155;}
-.grade-exc{color:var(--gold); font-weight:800;}
+.grade-exc{color:#7e22ce; font-weight:800;}
 .grade-ok{color:var(--ink);}
 .grade-warn{color:var(--warn); font-weight:700;}
 .grade-bad{color:var(--bad); font-weight:800;}
@@ -139,7 +191,8 @@ body.sim-on nav.tabs{border-bottom-color:#f59e0b;}
 body.sim-on #simTabBtn{background:#f59e0b !important; color:#fff !important; border-color:#b45309;}
 button.btn{border:none; border-radius:13px; padding:9px 16px; font-size:13.5px; font-weight:700; cursor:pointer; font-family:inherit;
   background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; box-shadow:0 3px 10px rgba(79,70,229,.28); transition:all .16s ease;}
-button.btn:hover{transform:translateY(-1px); box-shadow:0 6px 18px rgba(79,70,229,.4); filter:brightness(1.06);}
+button.btn{transition:transform .28s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease, filter .2s ease;}
+button.btn:hover{transform:translateY(-2px) scale(1.02); box-shadow:0 6px 18px rgba(79,70,229,.4); filter:brightness(1.06);}
 button.btn:active{transform:translateY(0) scale(.98);}
 button.btn.sec{background:var(--soft); color:var(--ink); border:1px solid var(--line); box-shadow:none;}
 button.btn.sec:hover{background:#e8edf9; box-shadow:0 3px 10px rgba(30,41,80,.1);}
@@ -152,6 +205,7 @@ button.btn.sm{padding:5px 10px; font-size:12px; border-radius:8px;}
 .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
 .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
 @media(max-width:1000px){.grid2,.grid3{grid-template-columns:1fr;}}
+@media(max-width:820px){.hide-sm{display:none;} header.app{padding:12px 16px;} #subBar{padding:7px 14px;} header.app h1{font-size:18px;} header.app .sub{display:none;}}
 .alert-item{display:flex; gap:10px; align-items:center; padding:9px 13px; border-radius:11px; margin-bottom:7px; font-size:13px; transition:transform .12s ease;}
 .alert-item:hover{transform:translateX(-3px);}
 .al-bad{background:#fef2f2; border-right:4px solid var(--bad);}
@@ -176,7 +230,17 @@ button.btn.sm{padding:5px 10px; font-size:12px; border-radius:8px;}
 #giModal .box{background:rgba(255,255,255,.97); backdrop-filter:blur(24px) saturate(180%); border-radius:24px; max-width:900px; width:100%; padding:20px; max-height:88vh; overflow:auto;}
 #studentModal{position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:200; display:none; align-items:flex-start; justify-content:center; padding:30px 15px; overflow:auto;}
 #studentModal.show{display:flex;}
-#studentModal .box{background:rgba(255,255,255,.97); backdrop-filter:blur(24px) saturate(180%); border-radius:24px; max-width:1000px; width:100%; padding:22px; max-height:88vh; overflow:auto; box-shadow:0 24px 60px rgba(15,23,42,.4); animation:sheetUp .26s cubic-bezier(.2,.9,.3,1.1) both;}
+#studentModal .box{background:rgba(255,255,255,.97); backdrop-filter:blur(24px) saturate(180%); border-radius:24px; max-width:1000px; width:100%; padding:0; max-height:90vh; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 24px 60px rgba(15,23,42,.4); animation:sheetUp .26s cubic-bezier(.2,.9,.3,1.1) both;}
+.stHead{padding:16px 20px 12px; border-bottom:1px solid var(--line); background:linear-gradient(180deg,#fff,#fbfcff); flex-shrink:0; border-radius:24px 24px 0 0;}
+.stBody{overflow:auto; padding:14px 20px 20px; flex:1; min-height:0;}
+.compHide{position:absolute; top:5px; inset-inline-start:5px; width:20px; height:20px; border-radius:50%; border:none;
+  background:rgba(148,163,184,.18); color:#64748b; cursor:pointer; font-size:12px; line-height:1; display:none; align-items:center; justify-content:center; padding:0;}
+.comp-box{position:relative;}
+.comp-box:hover .compHide{display:flex;}
+.compHide:hover{background:var(--bad); color:#fff;}
+.hiddenChips{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;}
+.hiddenChips button{background:#f1f5f9; border:1px dashed #cbd5e1; border-radius:99px; padding:3px 11px; font-size:11.5px; cursor:pointer; font-family:inherit; color:var(--muted); font-weight:700;}
+.hiddenChips button:hover{background:#e0f2fe; border-color:var(--brand); color:var(--brand);}
 .comp-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px;}
 .comp-box{border:1px solid var(--line); border-radius:12px; padding:10px; background:linear-gradient(180deg,#fff,#f8faff); box-shadow:0 2px 8px rgba(30,41,80,.05); transition:transform .15s ease, box-shadow .15s ease;}
 .comp-box:hover{transform:translateY(-2px); box-shadow:0 6px 18px rgba(30,41,80,.1);}
@@ -187,12 +251,34 @@ button.btn.sm{padding:5px 10px; font-size:12px; border-radius:8px;}
 .comp-row .lbl{min-width:54px; color:var(--muted); font-weight:700;}
 .comp-row input[type=number]{width:62px;}
 /* תא ציון ממורכז — בטבלאות ההזנה והסימולציה */
-.gcell{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-width:74px;}
+/* טבלאות ציונים — הכול ממורכז חוץ מעמודת השם */
+table.tbl.grades th,table.tbl.grades td{text-align:center; vertical-align:middle;}
+table.tbl.grades th:first-child,table.tbl.grades td:first-child{text-align:right;}
+table.tbl.grades td .name-link{display:inline-block;}
+table.tbl.grades th:nth-child(2):not(:last-child),table.tbl.grades td:nth-child(2):has(.name-link){text-align:right;}
+table.tbl.grades th{line-height:1.35;}
+table.tbl.grades th small{display:block; font-weight:600; opacity:.75; font-size:10.5px; margin-top:2px;}
+table.tbl.grades td{padding:7px 6px;}
+.gcell{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; width:100%;}
 .gcell small{color:var(--muted); font-weight:700; font-size:10.5px; letter-spacing:.2px;}
 .gcell input[type=number]{width:64px; height:34px; text-align:center; border-radius:10px; font-size:15px;}
 .gcell+.gcell{margin-top:5px; padding-top:5px; border-top:1px dashed #e6eaf4;}
+/* מסך מלא לטבלה */
+.card.tblfull{position:fixed; inset:0; z-index:420; margin:0; border-radius:0; max-width:none; overflow:auto;
+  background:rgba(255,255,255,.99); backdrop-filter:blur(20px); animation:none; box-shadow:none;}
+.card.tblfull .scroll{max-height:calc(100vh - 120px) !important;}
+/* תצוגה צפופה — יותר תלמידות במסך */
+.dense table.tbl td{padding:3px 5px;}
+.dense table.tbl th{padding:5px 6px; font-size:12px;}
+.dense .gcell input[type=number]{height:27px; width:56px; font-size:13px; border-radius:8px;}
+.dense .gcell{gap:1px;}
+.dense .gcell small{font-size:9.5px;}
+.dense .gcell+.gcell{margin-top:2px; padding-top:2px;}
+.dense .needbadge{font-size:10.5px; padding:1px 7px;}
+.dense .name-link{font-size:12.5px;}
+.dense table.tbl td small{font-size:10px;}
 .needbadge{background:linear-gradient(135deg,#059669,#10b981); color:#fff; font-weight:800; font-size:12px;
-  padding:2px 9px; border-radius:99px; box-shadow:0 2px 8px rgba(5,150,105,.35); font-family:'Rubik',sans-serif; white-space:nowrap;}
+  padding:2px 9px; border-radius:99px; box-shadow:0 2px 8px rgba(5,150,105,.35); font-family:var(--font-num,'Rubik'),sans-serif; white-space:nowrap;}
 .comp-box .cn{min-height:auto;}
 footer{padding:18px; text-align:center; color:var(--muted); font-size:12px; border-top:1px solid var(--line); margin-top:20px; background:rgba(255,255,255,.5);}
 @media print{
@@ -212,35 +298,27 @@ body.print-mode #printArea{display:block; padding:20px; background:#fff;}
 <body>
 <header class="app">
   <div id="logoSlot" style="flex-shrink:0;"></div>
-  <div>
-    <h1 id="appH1">סימולטור בגרות</h1>
-    <div class="sub">מגזר ממלכתי דתי · חישוב זכאות, איתור מצטיינות, סימולציות ודוחות</div>
+  <div id="hdrCenter"></div>
+  <div id="hdrActions">
+    <button id="btnSearch" class="hbtn" onclick="openCmd()" title="חיפוש מהיר (Ctrl+K)"></button>
+    <div style="position:relative;">
+      <button id="btnMenu" class="hbtn" onclick="toggleMenu(event)" title="קבצים ופעולות"></button>
+      <div id="hdrMenu"></div>
+    </div>
   </div>
-  <div id="profileSlot" style="display:flex; gap:6px; align-items:center; margin-inline-start:14px; flex-wrap:wrap;"></div>
-  <button onclick="openCmd()" title="חיפוש מהיר (Ctrl+K)" style="background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.32); color:#fff; border-radius:12px; padding:7px 14px; cursor:pointer; font-family:inherit; font-size:13px; display:flex; align-items:center; gap:8px; margin-inline-start:10px;">
-    🔍 <span style="opacity:.9;">חיפוש</span> <kbd style="background:rgba(255,255,255,.2); border-color:rgba(255,255,255,.3); color:#fff;">Ctrl K</kbd></button>
-  <div id="fileBar" style="display:flex; gap:6px; align-items:center; margin-inline-start:10px;"></div>
-  <div id="saveInd" onclick="setTab('settings')" title="לחצי לפרטי השמירה והגיבוי" style="cursor:pointer; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35); border-radius:10px; padding:5px 10px; font-size:12px; line-height:1.35; white-space:nowrap;"></div>
-  <div style="margin-inline-start:auto; display:flex; gap:8px; flex-wrap:wrap;">
-    <button class="btn sec sm" onclick="exportExcel()">📥 ייצוא לאקסל</button>
-    <button class="btn sec sm" onclick="document.getElementById('xlsxFile').click()">📤 ייבוא מאקסל</button>
-    <button class="btn sec sm" onclick="exportJSON()">💾 גיבוי</button>
-    <button class="btn sec sm" onclick="document.getElementById('jsonFile').click()">♻️ שחזור</button>
-    <input type="file" id="xlsxFile" accept=".xlsx" style="display:none" onchange="importExcel(this)">
-    <input type="file" id="jsonFile" accept=".json" style="display:none" onchange="importJSON(this)">
-  </div>
+  <input type="file" id="xlsxFile" accept=".xlsx" style="display:none" onchange="importExcel(this)">
+  <input type="file" id="jsonFile" accept=".json" style="display:none" onchange="importJSON(this)">
 </header>
+<div id="subBar">
+  <div id="profileSlot"></div>
+  <div style="margin-inline-start:auto; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+    <div id="undoBar"></div>
+    <div id="fileBar" style="display:flex; gap:6px; align-items:center;"></div>
+    <div id="saveInd" onclick="setTab('settings')" title="פרטי שמירה וגיבוי"></div>
+  </div>
+</div>
 <div id="nagBar" style="display:none; background:linear-gradient(90deg,#fef2f2,#fee2e2); border-bottom:2px solid #dc2626; padding:9px 18px; font-size:13.5px; align-items:center; gap:12px; flex-wrap:wrap;"></div>
-<nav class="tabs" id="tabs">
-  <button data-tab="dash" class="active" onclick="setTab('dash')">📊 דשבורד</button>
-  <button data-tab="students" onclick="setTab('students')">👩‍🎓 תלמידות</button>
-  <button data-tab="entry" onclick="setTab('entry')">✏️ הזנת ציונים</button>
-  <button data-tab="sim" onclick="setTab('sim')">🧪 סימולציה</button>
-  <button data-tab="reports" onclick="setTab('reports')">📄 דוחות</button>
-  <button data-tab="alerts" onclick="setTab('alerts')">🚨 התראות</button>
-  <button data-tab="settings" onclick="setTab('settings')">⚙️ הגדרות</button>
-  <button data-tab="help" onclick="setTab('help')">❓ מדריך</button>
-</nav>
+<nav class="tabs" id="tabs"></nav>
 <main id="main"></main>
 <div id="studentModal" onclick="if(event.target===this)closeStudent()"><div class="box" id="studentBox"></div></div>
 <div id="giModal" onclick="if(event.target===this)closeGradeImport()"><div class="box" id="giBox"></div></div>
@@ -263,7 +341,7 @@ body.print-mode #printArea{display:block; padding:20px; background:#fff;}
   <div class="hint"><span><kbd>↑</kbd><kbd>↓</kbd> ניווט</span><span><kbd>Enter</kbd> פתיחה</span><span><kbd>Esc</kbd> סגירה</span><span style="margin-inline-start:auto;">Ctrl+K</span></div>
 </div></div>
 <div class="toast" id="toast"></div>
-<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 1.5</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
+<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 2.6</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
 <script>
 "use strict";
 /* ============ מודל המקצועות ============ */
@@ -482,7 +560,7 @@ function applyLegacyStructure(st){
 }
 
 /* ============ מצב ושמירה ============ */
-const DEFAULT_STATE={classes:[], students:[], custom:{}, coord:'', includeInternal:false, reqUnits:true, flipFav:true, logo:null, thresholds:{pass:54.5, excel:90, potential:85, gap:20}};
+const DEFAULT_STATE={classes:[], students:[], custom:{}, coord:'', predLevel:0, includeInternal:false, reqUnits:true, flipFav:true, logo:null, thresholds:{pass:54.5, excel:90, potential:85, gap:20}};
 /* ============ שכבת הניסוי של הסימולציה (חיה רק בלשונית הסימולציה, לא נוגעת במקור) ============ */
 function gradesOf(st,sim){
   if(sim&&st.simg&&Object.keys(st.simg).length) return Object.assign({},st.grades||{},st.simg);
@@ -505,6 +583,7 @@ function clearSim(){
   const n=simCount();
   if(!n){ toast('אין שינויי ניסוי'); return; }
   if(!confirm('למחוק את '+n+' שינויי הניסוי ולחזור לציונים האמיתיים?')) return;
+  pushUndo('מחיקת שינויי ניסוי');
   state.students.forEach(s=>{ delete s.simg; });
   save(); render(); toast('שינויי הניסוי נמחקו — חזרנו לציונים האמיתיים');
 }
@@ -512,6 +591,7 @@ function commitSim(){
   const n=simCount();
   if(!n){ toast('אין שינויים בתרחיש'); return; }
   if(!confirm('להעביר '+n+' ציונים מהניסוי אל טבלת הציונים האמיתית?')) return;
+  pushUndo('העברת ניסוי לטבלה');
   state.students.forEach(s=>{
     if(!s.simg) return;
     s.grades=s.grades||{};
@@ -527,9 +607,9 @@ function reportTitle(){ return schoolName?(schoolName+' · דוח מצב בגר�
 function setSchoolName(v){
   schoolName=(v||'').trim();
   try{ localStorage.setItem('bagrutSchool',schoolName); }catch(e){}
-  const t=document.getElementById('appH1'); if(t) t.textContent=appTitle();
   document.title=appTitle();
-  render(); toast(schoolName?('שם בית הספר: '+schoolName):'שם בית הספר נוקה');
+  renderHeaderCenter(); render();
+  toast(schoolName?('שם בית הספר: '+schoolName):'שם בית הספר נוקה');
 }
 const DEFAULT_LOGO='<svg viewBox="0 0 240 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs><rect x="4" y="4" width="232" height="112" rx="18" fill="url(#lg1)"/><path d="M120 30 L172 52 L120 74 L68 52 Z" fill="#fff" opacity="0.95"/><path d="M92 62 v18 c0 8 13 14 28 14 s28-6 28-14 V62" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/><circle cx="172" cy="52" r="4" fill="#fff"/><path d="M172 52 v20" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/><text x="120" y="108" text-anchor="middle" font-size="15" font-weight="800" fill="#ffffff" font-family="Arial" opacity=".95">סימולטור בגרות</text></svg>';
 function logoHtml(size){
@@ -571,8 +651,8 @@ function applyBackupObject(d){
   if(typeof d.rec==='string'){ recCode=d.rec; try{ if(recCode) localStorage.setItem('bagrutRec',recCode); }catch(e){} }
   if(typeof d.lock==='string'){ lockHash=d.lock; try{ if(lockHash) localStorage.setItem('bagrutLock',lockHash); else localStorage.removeItem('bagrutLock'); }catch(e){} }
   if(typeof d.school==='string'){ schoolName=d.school; try{ localStorage.setItem('bagrutSchool',schoolName); }catch(e){}
-    const t=document.getElementById('appH1'); if(t) t.textContent=appTitle();
-    const f=document.getElementById('appFoot'); if(f) f.textContent=appTitle(); document.title=appTitle(); }
+    const f=document.getElementById('appFoot'); if(f) f.textContent=appTitle(); document.title=appTitle();
+    renderHeaderCenter(); }
   (d.profiles||[]).forEach(pr=>{
     const key=pr.id==='main'?'bagrutSimPro':'bagrutSimPro:'+pr.id;
     if(d.data[pr.id]) localStorage.setItem(key,JSON.stringify(d.data[pr.id]));
@@ -650,19 +730,14 @@ async function fileReconnect(){
 }
 function renderFileBar(){
   const el=document.getElementById('fileBar'); if(!el) return;
-  if(!FS_OK){
-    el.innerHTML=`<span class="pill" style="background:rgba(255,255,255,.15); color:#fff; border-color:rgba(255,255,255,.3);">💾 גיבוי ידני</span>`;
-    return;
-  }
+  if(!FS_OK){ el.innerHTML=''; return; }
   if(fileState==='on'){
     const t=lastFileSave?lastFileSave.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'}):'';
-    el.innerHTML=`<span class="pill" title="כל שינוי נשמר אוטומטית לקובץ הזה" style="background:rgba(16,185,129,.25); color:#fff; border-color:rgba(255,255,255,.45); font-weight:700;">💾 ${esc(fileName)} ✓${t?' '+t:''}</span>
-      <button class="btn sm" style="background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35);" onclick="fileDisconnect()" title="ניתוק">✕</button>`;
+    el.innerHTML=`<span class="pill" title="שמירה אוטומטית לקובץ: ${esc(fileName)}" style="background:#eef7f1; border-color:#cfe8db; color:#0f5132; font-weight:700; max-width:230px; overflow:hidden; text-overflow:ellipsis;">${ic('save',13)} ${esc(fileName)}${t?' · '+t:''}</span>`;
   }else if(fileState==='need-permission'){
-    el.innerHTML=`<button class="btn sm" style="background:#f59e0b; border:none; font-weight:700;" onclick="fileReconnect()">🔓 חידוש חיבור לקובץ ${esc(fileName)}</button>`;
+    el.innerHTML=`<button class="btn warn sm" style="padding:4px 11px; font-size:12px;" onclick="fileReconnect()">${ic('lock',13)}חידוש חיבור לקובץ</button>`;
   }else{
-    el.innerHTML=`<button class="btn sm" style="background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4); font-weight:700;" onclick="fileConnectNew()" title="שמירה אוטומטית לקובץ במחשב — כמו אקסל">💾 חיבור קובץ נתונים</button>
-      <button class="btn sm" style="background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.3);" onclick="fileConnectOpen()" title="פתיחת קובץ נתונים קיים">📂</button>`;
+    el.innerHTML=`<button class="btn ok sm" style="padding:4px 11px; font-size:12px;" onclick="fileConnectNew()" title="שמירה אוטומטית לקובץ במחשב — כמו אקסל">${ic('save',13)}חיבור קובץ נתונים</button>`;
   }
 }
 async function fileInit(){
@@ -693,8 +768,8 @@ function profileKey(){ return currentProfileId==='main'?'bagrutSimPro':'bagrutSi
 function saveProfiles(){ localStorage.setItem('bagrutProfiles',JSON.stringify(profiles)); localStorage.setItem('bagrutCurrentProfile',currentProfileId); }
 function renderProfileBar(){
   const s=document.getElementById('profileSlot'); if(!s) return;
-  s.innerHTML=`<label style="color:#fff; font-size:12px; opacity:.85;">סימולטור:</label>
-  <select onchange="switchProfile(this.value)" style="border-radius:8px; padding:5px 8px; font-weight:700; max-width:170px;">
+  s.innerHTML=`<label style="color:var(--muted); font-size:11.5px; font-weight:700;">סימולטור:</label>
+  <select onchange="switchProfile(this.value)" style="border-radius:9px; padding:4px 8px; font-weight:700; max-width:170px; font-size:12.5px;">
     ${profiles.map(p=>`<option value="${p.id}" ${p.id===currentProfileId?'selected':''}>${esc(p.name||'(ללא שם)')}</option>`).join('')}
   </select>
   <button class="btn sm" style="background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4);" onclick="renameProfile()" title="שינוי שם הסימולטור">✏️</button>
@@ -796,11 +871,79 @@ function renderSaveInd(){
   }
   const n=state.students.length;
   const t=lastSaveAt?lastSaveAt.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'}):'—';
-  if(saveOk===false){ el.innerHTML='<b style="color:#fecaca;">⚠️ השמירה נכשלה</b><br>לחצי כאן'; return; }
-  el.innerHTML=`<b>✓ נשמר ${t}</b><br>${n} תלמידות · ${Math.round(storageBytes()/1024)}KB`;
+  if(saveOk===false){ el.style.background='#fee2e2'; el.style.color='#991b1b'; el.innerHTML='⚠️ השמירה נכשלה — לחצי כאן'; return; }
+  el.innerHTML=`✓ נשמר ${t} · ${n} תלמידות`;
 }
 function uid(){ return 's'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
+
+/* ============ ביטול פעולה (Undo) ============ */
+let undoStack=[];
+function pushUndo(label){
+  try{ undoStack.push({label,at:Date.now(),snap:JSON.stringify(state)}); if(undoStack.length>12) undoStack.shift(); }catch(e){}
+  renderUndo();
+}
+function doUndo(){
+  const u=undoStack.pop();
+  if(!u){ toast('אין פעולה לביטול'); return; }
+  if(!confirm(`לבטל את הפעולה "${u.label}"?\nהמצב יחזור לרגע שלפניה.`)){ undoStack.push(u); return; }
+  try{ state=Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)),JSON.parse(u.snap)); }catch(e){ toast('שגיאה בביטול'); return; }
+  save(); render(); toast('✅ בוטל: '+u.label);
+}
+function renderUndo(){
+  const el=document.getElementById('undoBar'); if(!el) return;
+  if(!undoStack.length){ el.innerHTML=''; return; }
+  const u=undoStack[undoStack.length-1];
+  el.innerHTML=`<button class="btn sec sm" onclick="doUndo()" title="Ctrl+Z" style="padding:4px 10px; font-size:11.5px; border-color:#fcd34d; background:#fffbeb;">
+    ↩️ בטל: ${esc(u.label)}${undoStack.length>1?` <span class="pill" style="padding:0 6px;">${undoStack.length}</span>`:''}</button>`;
+}
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&(e.key==='z'||e.key==='Z')&&!/^(INPUT|TEXTAREA|SELECT)$/.test((e.target||{}).tagName||'')){
+    e.preventDefault(); doUndo();
+  }
+});
+
+/* ============ מבחני כיתה (לחיזוי בלבד — לא חלק מהציון הרשמי) ============ */
+function testsOf(st,sid){ const t=(st.tests||{})[sid]; if(t===undefined||t===null) return []; return Array.isArray(t)?t.filter(x=>typeof x==='number'):[t]; }
+function testAvg(st,sid){ const a=testsOf(st,sid); if(!a.length) return null; return Math.round(a.reduce((x,y)=>x+y,0)/a.length*10)/10; }
+function setTest(id,sid,val){
+  const st=state.students.find(s=>s.id===id); if(!st) return;
+  st.tests=st.tests||{};
+  if(val===''||val===null) delete st.tests[sid];
+  else st.tests[sid]=Math.max(0,Math.min(100,+val));
+  save(); render();
+}
+function setTestMulti(id,sid){
+  const st=state.students.find(s=>s.id===id); if(!st) return;
+  const cur=testsOf(st,sid).join(', ');
+  const v=prompt('ציוני מבחנים בכיתה במקצוע זה (מופרדים בפסיק) — משמשים לחיזוי בלבד:',cur);
+  if(v===null) return;
+  const arr=v.split(/[,;\s]+/).map(x=>+x).filter(x=>!isNaN(x)&&x>=0&&x<=100);
+  st.tests=st.tests||{};
+  if(!arr.length) delete st.tests[sid]; else st.tests[sid]=arr;
+  save(); render();
+  toast(arr.length?`נשמרו ${arr.length} ציוני מבחנים · ממוצע ${testAvg(st,sid)}`:'ציוני המבחנים נוקו');
+}
+// כיול אוטומטי: הפער הממוצע בין בחינה למגן במקצוע, מתוך הנתונים שכבר קיימים
+function autoGap(sid){
+  let sum=0,n=0;
+  state.students.forEach(st=>{
+    const g=st.grades||{};
+    Object.keys(g).forEach(k=>{
+      if(!k.startsWith(sid+'.')||!k.endsWith('.m')) return;
+      const e=g[k.slice(0,-2)+'.e'];
+      if(typeof e!=='number'||typeof g[k]!=='number') return;
+      if(g[k]===0&&e===0) return;
+      sum+=e-g[k]; n++;
+    });
+  });
+  return n>=5?Math.round(sum/n*10)/10:null;
+}
+function predOffset(sid){
+  const lv=state.predLevel;
+  if(lv==='auto'){ const a=autoGap(sid); return a===null?0:a; }
+  return +lv||0;
+}
 
 /* ============ מנוע חישוב ============ */
 function getUnits(st,subj){
@@ -852,7 +995,11 @@ function calcSubject(st,subj,opts){
       if(val===null) missing++;
     }else{
       let m=num(g[key+'.m']), e=num(g[key+'.e']);
-      if(opts.predict && e===null && m!==null){ e=m; predictedUsed=true; }
+      if(opts.predict && e===null){
+        const tv=testAvg(st,subj.id);
+        if(tv!==null){ e=tv; predictedUsed=true; }                       // ציון מבחן כיתתי — האינדיקטור הטוב ביותר
+        else if(m!==null){ e=Math.max(0,Math.min(100,m+predOffset(subj.id))); predictedUsed=true; }
+      }
       if(opts.bonus && e!==null){ e=Math.min(100,e+opts.bonus); }
       let s=(opts.split!==null&&opts.split!==undefined)?opts.split:c.s;
       // חוק ההיפוך: כשציון הבחינה גבוה מהמגן — המשקל הגדול עובר לבחינה
@@ -928,10 +1075,6 @@ function studentAlerts(st,r){
   else if(r.potential) A.push({sev:'pot',text:`${st.name}: פוטנציאל הצטיינות (ממוצע ${r.avg})`});
   if(r.complete&&r.blockers.length===0&&r.avg>=state.thresholds.potential&&!r.unitsOk)
     A.push({sev:'pot',text:`${st.name}: ממוצע ${r.avg} אך אינה עומדת בתנאי היח"ל להצטיינות (נדרש: מתמטיקה 4-5 יח"ל + אנגלית 5 יח"ל)`});
-  const gs=st.gstat||{};
-  const nR=Object.values(gs).filter(v=>v==='r').length, nB=Object.values(gs).filter(v=>v==='b').length;
-  if(nR) A.push({sev:'warn',text:`${st.name}: ${nR} ציונים אמיתיים שטרם דווחו למשרד (מסומנים באדום)`});
-  if(nB) A.push({sev:'info',text:`${st.name}: ${nB} ציונים פיקטיביים/הערכות בשימוש (מסומנים בכחול) — לא ציונים סופיים`});
   if(r.missing.length>0&&r.missing.length<=3) A.push({sev:'miss',text:`${st.name}: חסרים ציונים ב: ${r.missing.map(s=>s.name).join(', ')}`});
   else if(r.missing.length>3) A.push({sev:'miss',text:`${st.name}: חסרים ציונים ב-${r.missing.length} מקצועות`});
   return A;
@@ -1041,6 +1184,64 @@ async function removeLock(){
   scheduleFileSave(); render(); toast('🔓 הנעילה הוסרה');
 }
 
+/* ============ אייקונים (SVG מצויר, ללא תלות חיצונית) ============ */
+const ICONS={
+ dash:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+ users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+ edit:'<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/>',
+ flask:'<path d="M10 2v7.31L4.7 18.6A2 2 0 0 0 6.43 21.6h11.14a2 2 0 0 0 1.73-3L14 9.3V2"/><path d="M8.5 2h7"/><path d="M7 15h10"/>',
+ file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h8"/>',
+ bell:'<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+ gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+ help:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+ search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>',
+ save:'<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/>',
+ folder:'<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2z"/>',
+ down:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
+ up:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ star:'<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/>',
+ lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+ print:'<path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
+ mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>',
+ chart:'<path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="8" rx="1"/><rect x="12" y="6" width="3" height="12" rx="1"/><rect x="17" y="13" width="3" height="5" rx="1"/>',
+ target:'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+ sparkles:'<path d="M12 3l1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
+ palette:'<circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.5-.7 1.5-1.5 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.8.7-1.5 1.5-1.5H16c3.3 0 6-2.7 6-6 0-4.9-4.5-8.8-10-8.8z"/>',
+ school:'<path d="m22 9-10-5L2 9l10 5 10-5z"/><path d="M6 11.5V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-4.5"/>',
+ type:'<path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>',
+ shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+ clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+ trash:'<path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
+ expand:'<path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M16 21h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>',
+};
+function ic(n,sz,cls){
+  const p=ICONS[n]; if(!p) return '';
+  return `<svg class="ic ${cls||''}" width="${sz||18}" height="${sz||18}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+}
+
+/* ============ בורר גופנים ============ */
+const FONTS=[
+ {id:'rubik',   nm:'Rubik + Assistant',  head:'Rubik',            body:'Assistant',        num:'Rubik',            d:'מודרני ונקי — ברירת המחדל'},
+ {id:'heebo',   nm:'Heebo',              head:'Heebo',            body:'Heebo',            num:'Heebo',            d:'גיאומטרי וחד, מצוין למספרים'},
+ {id:'assistant',nm:'Assistant',         head:'Assistant',        body:'Assistant',        num:'Assistant',        d:'רך ואוורירי, קריא מאוד'},
+ {id:'varela',  nm:'Varela Round',       head:'Varela Round',     body:'Assistant',        num:'Varela Round',     d:'עגול וידידותי'},
+ {id:'noto',    nm:'Noto Sans Hebrew',   head:'Noto Sans Hebrew', body:'Noto Sans Hebrew', num:'Noto Sans Hebrew', d:'סטנדרט בינלאומי, ניטרלי'},
+ {id:'secular', nm:'Secular One',        head:'Secular One',      body:'Assistant',        num:'Rubik',            d:'כותרות דרמטיות ובולטות'},
+ {id:'frank',   nm:'Frank Ruhl Libre',   head:'Frank Ruhl Libre', body:'Assistant',        num:'Rubik',            d:'קלאסי ורשמי (מסורתי)'},
+];
+function setFont(id){
+  const f=FONTS.find(x=>x.id===id)||FONTS[0];
+  const r=document.documentElement.style;
+  r.setProperty('--font-head',"'"+f.head+"'");
+  r.setProperty('--font-body',"'"+f.body+"'");
+  r.setProperty('--font-num',"'"+f.num+"'");
+  try{ localStorage.setItem('bagrutFont',f.id); }catch(e){}
+  if(currentTab==='settings') render();
+}
+function initFont(){ let id='rubik'; try{ id=localStorage.getItem('bagrutFont')||'rubik'; }catch(e){} setFont(id); }
+function currentFontId(){ try{ return localStorage.getItem('bagrutFont')||'rubik'; }catch(e){ return 'rubik'; } }
+
 /* ============ ערכת צבע ============ */
 const ACCENTS=[['indigo','סגול','#4f46e5'],['ocean','ים','#0284c7'],['emerald','ירוק','#059669'],['rose','ורוד','#e11d48'],['sunset','שקיעה','#ea580c']];
 function setAccent(a){
@@ -1137,11 +1338,65 @@ document.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&(e.key==='k'||e.key==='K')){ e.preventDefault(); openCmd(); }
 });
 
+/* ============ לשוניות ============ */
+const TABS=[['dash','דשבורד','dash'],['students','תלמידות','users'],['entry','הזנת ציונים','edit'],
+            ['sim','סימולציה','flask'],['reports','דוחות','file'],['alerts','התראות','bell'],
+            ['settings','הגדרות','gear'],['help','מדריך','help']];
+function renderHeaderCenter(){
+  const el=document.getElementById('hdrCenter'); if(!el) return;
+  el.innerHTML=`
+    <div class="glassIcon">${ic('school',28)}</div>
+    <div class="ttl">
+      <h1 id="appH1" style="line-height:1.15;">${esc(appTitle())}</h1>
+      <div class="sub">חישוב זכאות · איתור מצטיינות · סימולציות ודוחות</div>
+      ${state.coord?`<div class="coordLine">${ic('users',13)} רכזת פדגוגית: ${esc(state.coord)}</div>`:''}
+    </div>`;
+}
+function renderHdrBtns(){
+  const s=document.getElementById('btnSearch');
+  if(s) s.innerHTML=ic('search',16)+'<span class="hide-sm">חיפוש</span><kbd class="hide-sm" style="background:rgba(255,255,255,.2); border-color:rgba(255,255,255,.3); color:#fff;">Ctrl K</kbd>';
+  const m=document.getElementById('btnMenu');
+  if(m) m.innerHTML=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span class="hide-sm">תפריט</span>`;
+  const el=document.getElementById('hdrMenu'); if(!el) return;
+  const fileItems = !FS_OK
+    ? `<div class="mi" style="opacity:.55; cursor:default;">${ic('save',17)}שמירה אוטומטית לא נתמכת בדפדפן זה</div>`
+    : (fileState==='on'
+      ? `<div class="mi" onclick="hideMenu();fileConnectOpen()">${ic('folder',17)}פתיחת קובץ נתונים אחר</div>
+         <div class="mi" onclick="hideMenu();fileDisconnect()" style="color:var(--bad);">${ic('trash',17)}ניתוק מהקובץ</div>`
+      : `<div class="mi" onclick="hideMenu();fileConnectNew()">${ic('save',17)}חיבור קובץ נתונים (שמירה אוטומטית)</div>
+         <div class="mi" onclick="hideMenu();fileConnectOpen()">${ic('folder',17)}פתיחת קובץ נתונים קיים</div>`);
+  el.innerHTML=`
+    <div class="lbl">קובץ הנתונים</div>
+    ${fileItems}
+    <div class="sep"></div>
+    <div class="lbl">גיבוי</div>
+    <div class="mi" onclick="hideMenu();exportJSON()">${ic('down',17)}גיבוי לקובץ</div>
+    <div class="mi" onclick="hideMenu();document.getElementById('jsonFile').click()">${ic('up',17)}שחזור מגיבוי</div>
+    <div class="sep"></div>
+    <div class="lbl">אקסל</div>
+    <div class="mi" onclick="hideMenu();exportExcel()">${ic('down',17)}ייצוא לאקסל</div>
+    <div class="mi" onclick="hideMenu();document.getElementById('xlsxFile').click()">${ic('up',17)}ייבוא מאקסל</div>`;
+}
+function toggleMenu(e){
+  e.stopPropagation();
+  const el=document.getElementById('hdrMenu');
+  renderHdrBtns();
+  el.classList.toggle('show');
+}
+function hideMenu(){ const el=document.getElementById('hdrMenu'); if(el) el.classList.remove('show'); }
+document.addEventListener('click',()=>hideMenu());
+function renderTabs(){
+  const n=document.getElementById('tabs'); if(!n) return;
+  n.innerHTML=TABS.map(([id,label,icon])=>
+    `<button data-tab="${id}" class="${currentTab===id?'active':''}" onclick="setTab('${id}')">${ic(icon)}${label}</button>`).join('');
+}
+
 /* ============ ניווט ============ */
 let currentTab='dash', charts={};
 function setTab(t){
+  if((simFull&&t!=='sim')||(entryFull&&t!=='entry')){ simFull=false; entryFull=false; document.body.style.overflow=''; }
   currentTab=t;
-  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
+  renderTabs();
   render();
 }
 function destroyCharts(){ Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}}); charts={}; }
@@ -1156,12 +1411,13 @@ function render(){
   else if(currentTab==='alerts') renderAlerts(m);
   else if(currentTab==='settings') renderSettings(m);
   else if(currentTab==='help') renderHelp(m);
-  renderSaveInd(); renderNag(); animateCounters();
+  renderSaveInd(); renderNag(); renderHeaderCenter(); renderUndo(); animateCounters();
 }
 function classFilterHtml(id,val){
   return `<select id="${id}" onchange="render()"><option value="">כל השכבה</option>${state.classes.map(c=>`<option ${val===c?'selected':''}>${c}</option>`).join('')}</select>`;
 }
-let dashClass='', entryClass='', entrySubj='lashon', reportClass='', alertClass='';
+let alertFilter='all';
+let dashClass='', entryClass='', entrySubj='lashon', reportClass='', alertClass='', entryFull=false, entryDense=false;
 function filteredStudents(cls){
   return state.students.filter(s=>!cls||s.cls===cls);
 }
@@ -1202,17 +1458,17 @@ function renderDash(m){
     </div>
   </div>`:''}
   <div class="kpis">
-    <div class="kpi k1">${kpiNum(n)}<div class="t">תלמידות</div></div>
-    <div class="kpi k2">${kpiNum(elig)}<div class="t">זכאיות לבגרות${n?` · ${Math.round(elig/n*100)}%`:''}</div></div>
-    <div class="kpi k3">${kpiNum(exc)}<div class="t">מצטיינות (מעל ${state.thresholds.excel}) ⭐</div></div>
-    <div class="kpi k4">${kpiNum(pot)}<div class="t">פוטנציאל (${state.thresholds.potential} עד ${state.thresholds.excel})</div></div>
-    <div class="kpi k5">${kpiNum(blocked)}<div class="t">עם מקצועות מעכבים</div></div>
-    <div class="kpi k6">${kpiNum(avgAll,'',true)}<div class="t">ממוצע שכבתי משוקלל</div></div>
+    <div class="kpi k1"><div class="ico">${ic('users',24)}</div><div class="txt">${kpiNum(n)}<div class="t">תלמידות</div></div></div>
+    <div class="kpi k2"><div class="ico">${ic('shield',24)}</div><div class="txt">${kpiNum(elig)}<div class="t">זכאיות${n?` · ${Math.round(elig/n*100)}%`:''}</div></div></div>
+    <div class="kpi k4"><div class="ico">${ic('star',24)}</div><div class="txt">${kpiNum(exc)}<div class="t">מצטיינות (מעל ${state.thresholds.excel})</div></div></div>
+    <div class="kpi k3"><div class="ico">${ic('sparkles',24)}</div><div class="txt">${kpiNum(pot)}<div class="t">פוטנציאל (${state.thresholds.potential}–${state.thresholds.excel})</div></div></div>
+    <div class="kpi k5"><div class="ico">${ic('bell',24)}</div><div class="txt">${kpiNum(blocked)}<div class="t">עם מקצועות מעכבים</div></div></div>
+    <div class="kpi k6"><div class="ico">${ic('chart',24)}</div><div class="txt">${kpiNum(avgAll,'',true)}<div class="t">ממוצע שכבתי</div></div></div>
   </div>
   ${n?`<div class="card" style="margin-bottom:16px;"><div class="ring-wrap">
     ${ring(elig/n*100,'זכאות','#10b981',elig+' מתוך '+n)}
-    ${ring(exc/n*100,'מצטיינות','#f59e0b',exc+' תלמידות')}
-    ${ring(pot/n*100,'פוטנציאל','#a855f7',pot+' תלמידות')}
+    ${ring(exc/n*100,'מצטיינות','#9333ea',exc+' תלמידות')}
+    ${ring(pot/n*100,'פוטנציאל','#f59e0b',pot+' תלמידות')}
     ${ring(blocked/n*100,'עם מעכבים','#f43f5e',blocked+' תלמידות')}
     ${ring(Math.max(0,Math.min(100,avgAll||0)),'ממוצע שכבתי','#4f46e5',avgAll===null?'—':String(avgAll))}
   </div></div>`:''}
@@ -1235,12 +1491,12 @@ function avgOf(arr){ return arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.l
 function topTable(results){
   const rows=results.filter(x=>x.r.avg!==null).sort((a,b)=>b.r.avg-a.r.avg).slice(0,15);
   if(!rows.length) return '<div class="note">אין עדיין ציונים</div>';
-  return `<table class="tbl"><thead><tr><th>#</th><th>שם</th><th>כיתה</th><th>ממוצע משוקלל</th><th>יח"ל</th><th>סטטוס</th></tr></thead><tbody>
+  return `<table class="tbl grades"><thead><tr><th>#</th><th>שם</th><th>כיתה</th><th>ממוצע משוקלל</th><th>יח"ל</th><th>סטטוס</th></tr></thead><tbody>
   ${rows.map((x,i)=>`<tr><td>${i+1}</td><td><span class="name-link" onclick="openStudent('${x.st.id}')">${esc(x.st.name)}</span></td><td>${esc(x.st.cls)}</td>
    <td class="${gradeClass(x.r.avg)}">${x.r.avg}</td><td>${x.r.totalUnits}</td><td class="status-cell"><span class="badge ${x.r.cls}">${x.r.status}</span></td></tr>`).join('')}
   </tbody></table>`;
 }
-const PALETTE=['#f59e0b','#8b5cf6','#10b981','#f43f5e','#94a3b8','#64748b'];
+const PALETTE=['#9333ea','#f59e0b','#10b981','#f43f5e','#94a3b8','#64748b'];
 function drawDashCharts(results,cls){
   const order=['מצטיינת','פוטנציאל','זכאית','מעכבים','חסר נתונים'];
   const cnt=[results.filter(x=>x.r.excellent).length, results.filter(x=>x.r.potential).length,
@@ -1289,9 +1545,9 @@ function renderStudents(m){
       <div>${state.classes.map(c=>`<span class="pill" style="margin:3px; display:inline-block;">${esc(c)} · ${state.students.filter(s=>s.cls===c).length} תלמידות
         <a style="color:var(--bad); cursor:pointer; font-weight:800;" onclick="delClass('${esc(c)}')">✕</a></span>`).join('')||'<span class="note">אין כיתות — צרי כיתה למעלה, או ייבאי קובץ אקסל והכיתה תיווצר אוטומטית</span>'}</div>
       <div style="margin-top:10px;"><button class="btn sec sm" onclick="loadDemo()" title="יוצר 24 תלמידות בדיוניות בכיתות יב-1/יב-2 — להתנסות בלבד">🎲 נתוני הדגמה (שמות בדיוניים)</button>
-      <button class="btn bad sm" onclick="if(confirm('למחוק את כל התלמידות (הכיתות יישארו)?')){state.students=[];save();render();}">🗑️ מחיקת כל התלמידות</button>
-      <button class="btn bad sm" onclick="if(confirm('למחוק את כל הכיתות ואת כל התלמידות בסימולטור הזה?')){state.students=[];state.classes=[];save();render();}">🧹 מחיקת כיתות + תלמידות</button>
-      <button class="btn bad sm" onclick="factoryReset()" title="מוחק את כל הסימולטורים והנתונים במכשיר הזה ומחזיר תוכנה נקייה">🗑️ איפוס מלא (הכול)</button></div>
+      <button class="btn bad sm" onclick="if(confirm('למחוק את כל התלמידות (הכיתות יישארו)?')){pushUndo('מחיקת כל התלמידות');state.students=[];save();render();}">🗑️ מחיקת כל התלמידות</button>
+      <button class="btn bad sm" onclick="if(confirm('למחוק את כל הכיתות ואת כל התלמידות בסימולטור הזה?')){pushUndo('מחיקת כיתות ותלמידות');state.students=[];state.classes=[];save();render();}">🧹 מחיקת כיתות + תלמידות</button>
+      <button class="btn bad sm" onclick="factoryReset()" title="מוחק את כל הסימולטורים והנתונים במכשיר הזה ומחזיר תוכנה נקייה">${ic('trash',15)}איפוס מלא (הכול)</button></div>
     </div>
   </div>
   <div class="card" style="margin-top:14px;">
@@ -1302,7 +1558,7 @@ function renderStudents(m){
 function allStudentsTable(){
   if(!state.students.length) return '<div class="note">עדיין אין תלמידות</div>';
   const rows=state.students.map(st=>({st,r:calcStudent(st)})).sort((a,b)=>a.st.cls.localeCompare(b.st.cls)||a.st.name.localeCompare(b.st.name));
-  return `<table class="tbl"><thead><tr><th>שם</th><th>כיתה</th><th>ממוצע</th><th>יח"ל</th><th>מעכבים</th><th>חסרים</th><th>סטטוס</th><th></th></tr></thead><tbody>
+  return `<table class="tbl grades"><thead><tr><th>שם</th><th>כיתה</th><th>ממוצע</th><th>יח"ל</th><th>מעכבים</th><th>חסרים</th><th>סטטוס</th><th></th></tr></thead><tbody>
   ${rows.map(x=>`<tr>
     <td><span class="name-link" onclick="openStudent('${x.st.id}')">${esc(x.st.name)}</span></td>
     <td><select onchange="setStudentClass('${x.st.id}',this.value)">${state.classes.map(c=>`<option ${x.st.cls===c?'selected':''}>${esc(c)}</option>`).join('')}</select></td>
@@ -1345,6 +1601,7 @@ function addClass(){
 function delClass(c){
   const cnt=state.students.filter(s=>s.cls===c).length;
   if(!confirm(`למחוק את כיתה ${c}${cnt?` יחד עם ${cnt} תלמידותיה`:''}?`)) return;
+  pushUndo('מחיקת כיתה — '+c);
   state.classes=state.classes.filter(x=>x!==c);
   state.students=state.students.filter(s=>s.cls!==c);
   save(); render();
@@ -1358,6 +1615,7 @@ function setStudentClass(id,val){
 function delStudent(id){
   const st=state.students.find(s=>s.id===id);
   if(!confirm(`למחוק את ${st.name}?`)) return;
+  pushUndo('מחיקת תלמידה — '+st.name);
   state.students=state.students.filter(s=>s.id!==id); save(); render();
 }
 
@@ -1368,16 +1626,20 @@ function openStudent(id){
   const box=document.getElementById('studentBox');
   const r=calcStudent(st);
   box.innerHTML=`
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+  <div class="stHead">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
     <h2 class="sec" style="margin:0;">✏️ ${esc(st.name)}
       <select onchange="setStudentClass('${st.id}',this.value)" style="margin-inline-start:4px;">${state.classes.map(c=>`<option ${st.cls===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
       <span class="badge ${r.cls}" style="margin-inline-start:8px;">${r.status}</span>
       <span class="pill">ממוצע: ${fmt(r.avg)}</span><span class="pill">${r.totalUnits} יח"ל</span></h2>
     <button class="btn sec sm" onclick="closeStudent()">סגירה ✕</button>
   </div>
-  <div style="margin-bottom:10px;">${statusLegend()}</div>
+  <div>${statusLegend()}</div>
+  </div>
+  <div class="stBody">
   ${SUBJECTS.map(subj=>studentSubjEditor(st,subj)).join('')}
-  <div style="text-align:left; margin-top:10px;"><button class="btn" onclick="closeStudent()">שמירה וסגירה</button></div>`;
+  <div style="text-align:left; margin-top:10px;"><button class="btn" onclick="closeStudent()">שמירה וסגירה</button></div>
+  </div>`;
   document.getElementById('studentModal').classList.add('show');
 }
 function studentSubjEditor(st,subj){
@@ -1394,7 +1656,9 @@ function studentSubjEditor(st,subj){
     const stOv=st.ov||{}, codes=st.codes||{};
     body=`<div class="comp-grid">${comps.map((c,i)=>{
       // במקצועות מוגברים וברכיב "עבודה נוספת" מציגים גם רכיבים במשקל 0 כדי לאפשר הפעלה; בשאר מסתירים
-      if(!c.w&&!subj.named&&!c.b) return '';
+      if(isHidden(st,subj.id+'.'+i)) return '';
+      // מציגים רכיב גם כשמשקלו 0 אם: מקצוע מוגבר · עבודה נוספת · או שהמשקל אופס ידנית (כדי שאפשר יהיה להחזירו)
+      if(!c.w&&!subj.named&&!c.b&&!(baseComps[i]&&baseComps[i].w>0)) return '';
       const key=subj.id+'.'+i, g=st.grades||{};
       const po=stOv[key]||{};
       const wOv=po.w!==undefined&&po.w!==null&&po.w!=='';
@@ -1404,7 +1668,8 @@ function studentSubjEditor(st,subj){
       const stBtn=k=>{ const s=gstatOf(st,k); const ic=s?GSTAT[s].ic:'⚫';
         return `<button class="btn sec sm" style="padding:2px 6px; font-size:11px;" onclick="cycleGstat('${st.id}','${k}')" title="${s?esc(GSTAT[s].lbl):'דווח למשרד'} — לחצי להחלפה">${ic}</button>`; };
       if(c.t==='i'){
-        return `<div class="comp-box" ${wOv?'style="border-color:var(--brand2);"':c.b?'style="background:#f0fdf4; border-color:#86efac;"':''}><div class="cn">${esc(c.n)}${c.b&&!c.w?' <span class="pill" style="background:#dcfce7; color:#166534;">לשיפור ציון — הזיני משקל להפעלה</span>':''}</div>
+        return `<div class="comp-box" ${wOv?'style="border-color:var(--brand2);"':c.b?'style="background:#f0fdf4; border-color:#86efac;"':''}>
+        <button class="compHide" onclick="hideComp('${st.id}','${key}',${c.w||0},'${esc(c.n).replace(/'/g,"")}')" title="הסרת הרכיב">✕</button><div class="cn">${esc(c.n)}${c.b&&!c.w?' <span class="pill" style="background:#dcfce7; color:#166534;">לשיפור ציון — הזיני משקל להפעלה</span>':''}</div>
         <div class="comp-row"><span class="lbl">ציון</span><input type="number" min="0" max="100" class="${gstatCls(st,key).trim()}" value="${g[key]??''}" onchange="setGrade('${st.id}','${key}',this.value)">${stBtn(key)}
         ${(()=>{const dv=(r.details||[])[i]; const v=dv&&dv.val!==null&&dv.val!==undefined?dv.val:null;
           return (v!==null&&c.w)?`<span class="pill" title="תרומה לציון הסופי">= ${Math.round(v*c.w/100*10)/10} נק׳ מתוך ${c.w}</span>`:'';})()}</div>
@@ -1427,22 +1692,50 @@ function studentSubjEditor(st,subj){
       </div>`;
       const rowM=eff>0?`<div class="comp-row"><span class="lbl">ציון מגן</span><input type="number" min="0" max="100" class="${gstatCls(st,key+'.m').trim()}" value="${g[key+'.m']??''}" onchange="setGrade('${st.id}','${key}.m',this.value)">${stBtn(key+'.m')}<span class="pill">${eff}%</span></div>`:'';
       const rowE=eff<100?`<div class="comp-row"><span class="lbl">ציון בחינה</span><input type="number" min="0" max="100" class="${gstatCls(st,key+'.e').trim()}" value="${g[key+'.e']??''}" onchange="setGrade('${st.id}','${key}.e',this.value)">${stBtn(key+'.e')}<span class="pill">${100-eff}%</span>${eff===0?' <span class="pill" style="background:#e0e7ff; color:#3730a3;">ללא מגן — 100% בחינה</span>':''}</div>`:'';
-      return `<div class="comp-box" ${(wOv||sOv)?'style="border-color:var(--brand2); box-shadow:0 0 0 1px var(--brand2);"':''}><div class="cn">${esc(c.n)}${c.w?'':' <span class="pill">כבוי — הזיני משקל להפעלה</span>'}${flBadge}</div>
+      return `<div class="comp-box" ${(wOv||sOv)?'style="border-color:var(--brand2); box-shadow:0 0 0 1px var(--brand2);"':''}>
+      <button class="compHide" onclick="hideComp('${st.id}','${key}',${c.w||0},'${esc(c.n).replace(/'/g,"")}')" title="הסרת הרכיב">✕</button><div class="cn">${esc(c.n)}${c.w?'':' <span class="pill">כבוי — הזיני משקל להפעלה</span>'}${flBadge}</div>
       ${rowM}${rowE}${rowFinal}
       <div class="comp-row"><span class="lbl">חלוקה</span>${sSel}</div>
       <div class="comp-row"><span class="lbl">משקל</span>${wIn}</div>
       <div class="comp-row"><span class="lbl">סמל</span>${codeSelect(st,key)}</div></div>`;
     }).join('')}</div>`;
+    const hid=comps.map((c,i)=>({c,i})).filter(x=>isHidden(st,subj.id+'.'+x.i));
+    if(hid.length) body+=`<div class="hiddenChips"><span class="note" style="align-self:center;">רכיבים שהוסרו:</span>
+      ${hid.map(x=>`<button onclick="showComp('${st.id}','${subj.id}.${x.i}')" title="החזרת הרכיב">➕ ${esc(x.c.n)}</button>`).join('')}</div>`;
     if(Math.round(r.wSum)!==100&&!subj.internalOnly) body+=`<div class="note" style="color:var(--warn); font-weight:700;">ℹ️ סה"כ משקלי הרכיבים: ${r.wSum}% — הציון הסופי מחושב בחלוקה יחסית (למשל אחרי הוספת עבודה נוספת)</div>`;
   }
   const finalHtml=u===0?'':`${subj.internalOnly&&!state.includeInternal?'<span class="pill">לא נכלל בממוצע</span> ':''}${custom?'<span class="badge b-pot">מותאם אישית</span> ':''}<span class="${gradeClass(r.final)}" style="font-size:15px; font-weight:800;" title="${r.raw!==null?'לפני עיגול: '+r.raw:''}">${fmt(r.final)}</span>${r.blocker&&!subj.internalOnly?' <span class="badge b-bad">מעכב</span>':''}${r.missing?' <span class="badge b-miss">חסר</span>':''}`;
   const resetBtn=custom?`<button class="btn sec sm" onclick="event.stopPropagation();resetOv('${st.id}','${subj.id}')" title="ביטול ההתאמות האישיות במקצוע זה">↩️ איפוס התאמות</button>`:'';
+  const tA=testAvg(st,subj.id), tNn=testsOf(st,subj.id).length;
+  const testChip=(u!==0&&!subj.internalOnly)?`<button class="btn sec sm" onclick="event.stopPropagation();setTestMulti('${st.id}','${subj.id}')" title="ציוני מבחנים בכיתה — לחיזוי בלבד, לא נכנסים לציון" style="${tNn?'border-color:#c4b5fd; background:#faf5ff; color:#6d28d9;':''}">📝 מבחני כיתה${tNn?`: ${tA}${tNn>1?` (${tNn})`:''}`:''}</button>`:'';
   const presetSel=subj.named?`<select onclick="event.stopPropagation()" onchange="applyMugbarPreset('${st.id}','${subj.id}',this.value)" style="font-size:11.5px;" title="החלת מבנה משקלים וסמלי שאלונים מקטלוג בית הספר">
     <option value="">📋 מבנה מהקטלוג...</option>
     ${Object.keys(MUGBAR_PRESETS).map(p=>`<option>${esc(p)}</option>`).join('')}</select>`:'';
-  return `<div class="subj-card open"><div class="subj-head"><span>${esc(subj.name)} ${nameInput} ${unitsSel} ${presetSel} ${resetBtn}</span><span>${finalHtml}</span></div>
+  return `<div class="subj-card open"><div class="subj-head"><span>${esc(subj.name)} ${nameInput} ${unitsSel} ${presetSel} ${testChip} ${resetBtn}</span><span>${finalHtml}</span></div>
   <div class="subj-body">${body}</div></div>`;
 }
+function hideComp(id,key,w,name){
+  const st=state.students.find(s=>s.id===id); if(!st) return;
+  if(w>0){
+    if(!confirm(`לרכיב "${name}" יש משקל ${w}% בציון.\n\nהסרה תאפס את משקלו — האחוזים יתחלקו מחדש בין שאר הרכיבים והציון עשוי להשתנות.\n\nלהסיר?`)) return;
+    pushUndo('הסרת רכיב — '+name);
+    st.ov=st.ov||{}; st.ov[key]=Object.assign({},st.ov[key],{w:0});
+  }
+  st.hid=st.hid||{}; st.hid[key]=1;
+  save(); refreshOpenViews(id); toast('הרכיב הוסר — אפשר להחזירו מהשורה התחתונה במקצוע');
+}
+function showComp(id,key){
+  const st=state.students.find(s=>s.id===id); if(!st) return;
+  if(st.hid) delete st.hid[key];
+  // אם המשקל אופס בעת ההסרה — מחזירים אותו לברירת המחדל
+  if(st.ov&&st.ov[key]&&st.ov[key].w===0){
+    delete st.ov[key].w;
+    if(!Object.keys(st.ov[key]).length) delete st.ov[key];
+    toast('הרכיב הוחזר יחד עם משקל ברירת המחדל');
+  }else toast('הרכיב הוחזר');
+  save(); refreshOpenViews(id);
+}
+function isHidden(st,key){ return !!((st.hid||{})[key]); }
 function setOv(id,key,field,val){
   const st=state.students.find(s=>s.id===id); if(!st) return;
   st.ov=st.ov||{};
@@ -1522,7 +1815,16 @@ function renderEntry(m){
       <button class="btn ok sm" onclick="applyEntryColor()">🎨 החל על ${filteredStudents(entryClass).length} תלמידות</button>
     </div>
   </div>
-  <div class="card"><div class="scroll">${entryGrid(subj,studs)}</div></div>`;
+  <div class="card ${entryFull?'tblfull':''} ${entryDense?'dense':''}" id="entryCard">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px;">
+      <span class="pill">${studs.length} תלמידות</span>
+      <div style="display:flex; gap:6px;">
+        <button class="btn sec sm" onclick="entryDense=!entryDense;render()">${entryDense?'↕️ שורות רגילות':'📋 תצוגה צפופה'}</button>
+        <button class="btn ${entryFull?'warn':'sec'} sm" onclick="toggleEntryFull()">${entryFull?'✕ יציאה ממסך מלא':'⛶ מסך מלא'}</button>
+      </div>
+    </div>
+    <div class="scroll" style="max-height:${entryFull?'calc(100vh - 150px)':'70vh'};">${entryGrid(subj,studs)}</div>
+  </div>`;
 }
 function entryGrid(subj,studs){
   if(!studs.length) return '<div class="note">אין תלמידות — הוסיפי בלשונית "תלמידות"</div>';
@@ -1561,11 +1863,11 @@ function entryGrid(subj,studs){
     tds+=`<td class="${gradeClass(u===0?null:r.final)}" id="fin-${st.id}" style="font-weight:800;">${u===0?'—':fmt(r.final)}${flIc}</td><td>${stat}</td>`;
     return `<tr>${tds}</tr>`;
   }).join('');
-  return `<table class="tbl"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
+  return `<table class="tbl grades"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
 }
 
 /* ============ ייבוא ציונים למקצוע בודד (הדבקה מוורד/אקסל או קובץ) ============ */
-let gi={subj:'',comp:0,target:'e',rows:[],map:{},color:''};
+let gi={subj:'',comp:0,target:'e',rows:[],map:{},color:'',order:'auto',detected:''};
 function normName(s){
   return String(s||'').replace(/["'`׳״]/g,'').replace(/\s+/g,' ').trim();
 }
@@ -1584,7 +1886,7 @@ function matchStudent(name,pool){
   return part.length===1?part[0]:null;
 }
 function openGradeImport(){
-  gi.subj=entrySubj; gi.comp=0; gi.target='e'; gi.rows=[]; gi.map={}; gi.color='';
+  gi.subj=entrySubj; gi.comp=0; gi.target='e'; gi.rows=[]; gi.map={}; gi.color=''; gi.order='auto'; gi.detected='';
   renderGradeImport();
   document.getElementById('giModal').classList.add('show');
 }
@@ -1601,6 +1903,20 @@ function renderGradeImport(){
   const cur=comps.find(c=>c.i===gi.comp)||comps[0]||{t:'i',s:0};
   const isExt=cur.t==='e';
   const pool=state.students.filter(s=>!entryClass||s.cls===entryClass);
+  const curName=(comps.find(c=>c.i===gi.comp)||{}).n||'';
+  const tgtTxt=isExt?(gi.target==='m'?'ציון מגן':'ציון בחינה'):'הערכה פנימית (ציון אחד)';
+  const colTxt=gi.color==='r'?'🔴 אדום — טרם דווח':gi.color==='b'?'🔵 כחול — פיקטיבי':'⚫ שחור — דווח למשרד';
+  const warn=`<div style="background:linear-gradient(135deg,#fef3c7,#fffbeb); border:2.5px solid #f59e0b; border-radius:16px; padding:13px 16px; margin:12px 0;">
+    <div style="font-size:14.5px; font-weight:900; color:#92400e; margin-bottom:7px;">⚠️ שימי לב — אילו ציונים עומדים להתעדכן?</div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; font-size:13px;">
+      <span class="badge" style="background:#fff; border:1.5px solid #f59e0b; color:#7c2d12; font-size:12.5px;">מקצוע: <b>${esc(subj.name)}</b></span>
+      <span class="badge" style="background:#fff; border:1.5px solid #f59e0b; color:#7c2d12; font-size:12.5px;">רכיב: <b>${esc(curName)}</b></span>
+      <span class="badge" style="background:#fff; border:1.5px solid #dc2626; color:#991b1b; font-size:12.5px;">סוג: <b>${esc(tgtTxt)}</b></span>
+      <span class="badge" style="background:#fff; border:1.5px solid #f59e0b; color:#7c2d12; font-size:12.5px;">כיתה: <b>${esc(entryClass||'כל השכבה')}</b></span>
+      <span class="badge" style="background:#fff; border:1.5px solid #f59e0b; color:#7c2d12; font-size:12.5px;">צבע: <b>${colTxt}</b></span>
+    </div>
+    <div style="font-size:12px; color:#92400e; margin-top:7px;">ציונים קיימים ברכיב זה <b>יידרסו</b>. אם טעית — יש כפתור <b>↩️ בטל</b> בסרגל העליון מיד לאחר מכן.</div>
+  </div>`;
   let preview='';
   if(gi.rows.length){
     const rows=gi.rows.map((r,idx)=>{
@@ -1629,7 +1945,7 @@ function renderGradeImport(){
     </tr>`).join('')}
     </tbody></table></div>
     <div class="toolbar" style="margin-top:10px;">
-      <button class="btn ok" onclick="giApply()">✅ החלת ${okN} ציונים${gi.color?(gi.color==='r'?' 🔴':' 🔵'):''}</button>
+      <button class="btn ok" onclick="giApply()">✅ החלת ${okN} ציונים · ${esc(subj.name)} · ${esc(tgtTxt)}</button>
       <button class="btn sec" onclick="gi.rows=[];gi.map={};renderGradeImport()">ניקוי</button>
     </div>`;
   }
@@ -1658,8 +1974,17 @@ function renderGradeImport(){
   </div>
   <div class="grid2" style="margin-top:10px;">
     <div>
-      <label style="font-weight:700; font-size:13px;">הדבקה (שם + ציון בכל שורה):</label>
-      <textarea id="giText" rows="8" style="width:100%; margin-top:6px; border:1px solid #cbd5e1; border-radius:8px; padding:8px; font-family:inherit;" placeholder="שרה כהן	88&#10;רבקה לוי	92&#10;או: שרה כהן 88"></textarea>
+      <label style="font-weight:700; font-size:13px;">הדבקה — שם וציון בכל שורה (בכל סדר):</label>
+      <div class="toolbar" style="margin:5px 0;">
+        <label style="font-size:12px;">סדר:</label>
+        <select onchange="gi.order=this.value;if(gi.rows.length)giParseText();" style="font-size:12px;">
+          <option value="auto" ${gi.order==='auto'?'selected':''}>זיהוי אוטומטי</option>
+          <option value="name" ${gi.order==='name'?'selected':''}>שם ← ציון</option>
+          <option value="grade" ${gi.order==='grade'?'selected':''}>ציון ← שם</option>
+        </select>
+        ${gi.detected?`<span class="pill">זוהה: ${gi.detected==='grade'?'ציון ← שם':'שם ← ציון'}</span>`:''}
+      </div>
+      <textarea id="giText" rows="8" style="width:100%; margin-top:6px; border:1px solid #cbd5e1; border-radius:8px; padding:8px; font-family:inherit;" placeholder="שרה כהן	88&#10;92	רבקה לוי&#10;— שתי הצורות נתמכות —"></textarea>
       <button class="btn sm" style="margin-top:6px;" onclick="giParseText()">🔍 בדיקה וזיהוי</button>
     </div>
     <div>
@@ -1669,6 +1994,7 @@ function renderGradeImport(){
       <div class="note" style="margin-top:8px;">מוורד: סמנו את הטבלה ← העתקה ← הדבקה בשדה שמשמאל.</div>
     </div>
   </div>
+  ${warn}
   ${preview}`;
 }
 function giSetMap(idx,val){
@@ -1677,17 +2003,30 @@ function giSetMap(idx,val){
 }
 function giParseText(){
   const t=(document.getElementById('giText')||{}).value||'';
-  const rows=[];
-  t.split('\n').forEach(line=>{
-    const s=line.trim(); if(!s) return;
-    const m=s.match(/^(.+?)[\t,;]+\s*(\d{1,3}(?:\.\d+)?)\s*$/)||s.match(/^(.+?)\s+(\d{1,3}(?:\.\d+)?)\s*$/);
-    if(!m) return;
-    const g=+m[2];
-    if(g<0||g>100) return;
-    rows.push({name:m[1].trim(),grade:g});
+  const rows=[]; let nameFirst=0, gradeFirst=0;
+  const lines=t.split('\n').map(x=>x.trim()).filter(Boolean);
+  // זיהוי הסדר: שם→ציון או ציון→שם
+  lines.forEach(s=>{
+    if(/^\d{1,3}(?:\.\d+)?[\t,;\s]+\D/.test(s)) gradeFirst++;
+    else if(/[\t,;\s]\d{1,3}(?:\.\d+)?\s*$/.test(s)) nameFirst++;
   });
-  if(!rows.length){ toast('לא זוהו שורות — ודאי שכל שורה היא: שם ואחריו ציון'); return; }
-  gi.rows=rows; gi.map={}; renderGradeImport();
+  const mode=gi.order==='auto'?(gradeFirst>nameFirst?'grade':'name'):gi.order;
+  lines.forEach(s=>{
+    let name=null,g=null;
+    if(mode==='grade'){
+      const m=s.match(/^(\d{1,3}(?:\.\d+)?)[\t,;\s]+(.+)$/);
+      if(m){ g=+m[1]; name=m[2].trim(); }
+    }else{
+      const m=s.match(/^(.+?)[\t,;]+\s*(\d{1,3}(?:\.\d+)?)\s*$/)||s.match(/^(.+?)\s+(\d{1,3}(?:\.\d+)?)\s*$/);
+      if(m){ name=m[1].trim(); g=+m[2]; }
+    }
+    if(name===null||g===null||isNaN(g)||g<0||g>100||!name) return;
+    rows.push({name,grade:g});
+  });
+  if(!rows.length){ toast('לא זוהו שורות — כל שורה צריכה להכיל שם וציון (בכל סדר)'); return; }
+  gi.rows=rows; gi.map={}; gi.detected=mode;
+  renderGradeImport();
+  toast(`זוהו ${rows.length} שורות · סדר: ${mode==='grade'?'ציון ואז שם':'שם ואז ציון'}`);
 }
 function giParseFile(input){
   const file=input.files[0]; if(!file) return;
@@ -1723,6 +2062,17 @@ function giParseFile(input){
   rd.readAsArrayBuffer(file);
 }
 function giApply(){
+  const subjP=SUBJ_MAP[gi.subj]||SUBJECTS[0];
+  const compsP=giCompOptions();
+  const curP=compsP.find(c=>c.i===gi.comp)||compsP[0];
+  const tgtP=curP.t==='e'?(gi.target==='m'?'ציון מגן':'ציון בחינה'):'הערכה פנימית';
+  const poolP=state.students.filter(s=>!entryClass||s.cls===entryClass);
+  let willN=0;
+  gi.rows.forEach((r,idx)=>{ const mn=gi.map[idx];
+    if(mn==='__skip') return;
+    if(mn?poolP.find(s=>s.id===mn):matchStudent(r.name,poolP)) willN++; });
+  if(!confirm(`אישור אחרון — עדכון ציונים\n\n📘 מקצוע: ${subjP.name}\n📝 רכיב: ${curP.n}\n🎯 סוג הציון: ${tgtP}\n🏫 כיתה: ${entryClass||'כל השכבה'}\n👩‍🎓 תלמידות שיתעדכנו: ${willN}\n\nציונים קיימים ברכיב זה יידרסו. להמשיך?`)) return;
+  pushUndo(`ייבוא ${subjP.name} · ${tgtP}`);
   const subj=SUBJ_MAP[gi.subj]||SUBJECTS[0];
   const comps=giCompOptions();
   const cur=comps.find(c=>c.i===gi.comp)||comps[0];
@@ -1759,6 +2109,7 @@ function applyEntryColor(){
   const cTxt=color==='r'?'🔴 אדום (טרם דווח)':color==='b'?'🔵 כחול (פיקטיבי)':'⚫ שחור (דווח למשרד)';
   const sTxt=scope==='all'?'כל הציונים במקצוע':'הרכיב שנבחר';
   if(!confirm(`לצבוע ${sTxt} ב${subj.name} אצל ${studs.length} תלמידות בצבע ${cTxt}?\n(רק ציונים שהוזנו — תאים ריקים לא ישתנו)`)) return;
+  pushUndo('צביעה גורפת — '+subj.name);
   let n=0;
   studs.forEach(st=>{
     const u=getUnits(st,subj); if(u===0) return;
@@ -1783,7 +2134,19 @@ function applyEntryColor(){
 }
 
 /* ============ סימולציה — סביבה עצמאית שלא נוגעת בציונים האמיתיים ============ */
-let simSplit='', simPredict=false, simBonus=0, simClass='', simSubj='lashon';
+let simSplit='', simPredict=false, simBonus=0, simClass='', simSubj='lashon', simFull=false, simDense=false;
+function toggleEntryFull(){
+  entryFull=!entryFull;
+  document.body.style.overflow=entryFull?'hidden':'';
+  render();
+}
+function toggleSimFull(){
+  simFull=!simFull;
+  document.body.style.overflow=simFull?'hidden':'';
+  render();
+  if(simFull) setTimeout(()=>{ const c=document.getElementById('simCard'); if(c) c.scrollTop=0; },50);
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&(simFull||entryFull)){ simFull=false; entryFull=false; document.body.style.overflow=''; render(); } });
 function renderSim(m){
   const opts={split:simSplit===''?null:+simSplit, predict:simPredict, bonus:+simBonus, sim:true};
   const studs=filteredStudents(simClass);
@@ -1808,7 +2171,8 @@ function renderSim(m){
     <div style="font-size:13.5px; line-height:1.8;">
       <b>1.</b> הטבלה למטה היא <b>העתק ניסוי</b> של הציונים האמיתיים — שני בה מה שתרצי. כל שינוי נצבע <span style="background:#fff7ed; border:1px solid #f59e0b; color:#b45309; padding:1px 6px; border-radius:6px; font-weight:700;">בכתום</span> ו<b>לא נוגע</b> בטבלת הציונים האמיתית.<br>
       <b>2.</b> רוצה חיזוי אוטומטי? סמני 🔮 למטה — כל בחינה שחסרה תושלם לפי ציון המגן. (ברירת המחדל: ידני — את שולטת.)<br>
-      <b>3.</b> התוצאות למטה משוות תמיד: <b>מצב אמיתי ← מול ← התרחיש שלך.</b>
+      <b>3.</b> עמודת <b>מבחני כיתה</b> (סגולה) — מזינים ציוני מבחנים שנעשו בכיתה. הם <b>אינם חלק מהציון הרשמי</b>, אבל החיזוי משתמש בהם במקום המגן — וזה מדייק אותו משמעותית.<br>
+      <b>4.</b> התוצאות למטה משוות תמיד: <b>מצב אמיתי ← מול ← התרחיש שלך.</b>
     </div>
     <div class="toolbar" style="margin-top:10px; margin-bottom:0;">
       <span class="pill" style="${nSim?'background:#fff7ed; border-color:#f59e0b; color:#b45309; font-weight:700;':''}">${nSim} שינויי ניסוי</span>
@@ -1816,18 +2180,33 @@ function renderSim(m){
       <button class="btn ok sm" onclick="commitSim()">💾 העברת השינויים לטבלה האמיתית</button>
     </div>
   </div>
-  <div class="card" style="margin-bottom:14px;">
-    <h3 class="sec">✏️ טבלת הניסוי — שני ציונים חופשי</h3>
+  <div class="card ${simFull?'tblfull':''} ${simDense?'dense':''}" id="simCard" style="margin-bottom:14px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+      <h3 class="sec" style="margin:0;">✏️ טבלת הניסוי — שני ציונים חופשי</h3>
+      <div style="display:flex; gap:6px;">
+        <button class="btn sec sm" onclick="simDense=!simDense;render()" title="שורות צפופות — יותר תלמידות במסך">${simDense?'↕️ שורות רגילות':'📋 תצוגה צפופה'}</button>
+        <button class="btn ${simFull?'warn':'sec'} sm" onclick="toggleSimFull()" title="מסך מלא (Esc ליציאה)">${simFull?'✕ יציאה ממסך מלא':'⛶ מסך מלא'}</button>
+      </div>
+    </div>
     <div class="toolbar">
       <label>מקצוע:</label><select onchange="simSubj=this.value;render()">${SUBJECTS.filter(s=>!s.internalOnly).map(s=>`<option value="${s.id}" ${s.id===simSubj?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
       <label>כיתה:</label><select onchange="simClass=this.value;render()"><option value="">כל השכבה</option>${state.classes.map(c=>`<option ${simClass===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+      <span class="pill">${studs.length} תלמידות</span>
+      ${simFull?'<span class="pill" style="background:#fff7ed; border-color:#f59e0b;">מסך מלא — Esc ליציאה</span>':''}
     </div>
-    <div class="scroll" style="max-height:45vh;">${simGrid(simSubjObj,studs.slice().sort((a,b)=>a.name.localeCompare(b.name)))}</div>
+    <div class="scroll" style="max-height:${simFull?'calc(100vh - 190px)':(simDense?'62vh':'52vh')};">${simGrid(simSubjObj,studs.slice().sort((a,b)=>a.name.localeCompare(b.name)))}</div>
   </div>
   <div class="card" style="margin-bottom:14px;">
     <h3 class="sec">⚙️ תרחישים כלליים (אופציונלי)</h3>
     <div class="toolbar" style="margin-bottom:0;">
-      <label><input type="checkbox" ${simPredict?'checked':''} onchange="simPredict=this.checked;render()"> 🔮 חיזוי אוטומטי: בחינה חסרה = ציון המגן</label>
+      <label><input type="checkbox" ${simPredict?'checked':''} onchange="simPredict=this.checked;render()"> 🔮 חיזוי אוטומטי</label>
+      <label>רמת החיזוי:</label>
+      <select onchange="state.predLevel=(this.value==='auto'?'auto':+this.value);save();render()" ${simPredict?'':'disabled'}>
+        <option value="0" ${state.predLevel===0?'selected':''}>אופטימי — בחינה = מגן</option>
+        <option value="-5" ${state.predLevel===-5?'selected':''}>מציאותי — מגן פחות 5</option>
+        <option value="-10" ${state.predLevel===-10?'selected':''}>זהיר — מגן פחות 10</option>
+        <option value="auto" ${state.predLevel==='auto'?'selected':''}>🎯 כיול אוטומטי לפי הנתונים</option>
+      </select>
       <label>חלוקת מגן/בחינה בכל הבחינות:</label>
       <select onchange="simSplit=this.value;render()">
         <option value="" ${simSplit===''?'selected':''}>לפי ההגדרות הקיימות</option>
@@ -1844,8 +2223,8 @@ function renderSim(m){
   ${simPredict?predictionPanel(studs):''}
   <div class="kpis">
     <div class="kpi k2"><div class="n">${sE}${delta(bE,sE)}</div><div class="t">זכאיות בתרחיש (אמיתי: ${bE})</div></div>
-    <div class="kpi k3"><div class="n">${sX}${delta(bX,sX)}</div><div class="t">מצטיינות בתרחיש (אמיתי: ${bX})</div></div>
-    <div class="kpi k4"><div class="n">${sP}${delta(bP,sP)}</div><div class="t">פוטנציאל בתרחיש (אמיתי: ${bP})</div></div>
+    <div class="kpi k4"><div class="n">${sX}${delta(bX,sX)}</div><div class="t">מצטיינות בתרחיש (אמיתי: ${bX})</div></div>
+    <div class="kpi k3"><div class="n">${sP}${delta(bP,sP)}</div><div class="t">פוטנציאל בתרחיש (אמיתי: ${bP})</div></div>
     <div class="kpi k5"><div class="n">${sB}${delta(bB,sB)}</div><div class="t">עם מעכבים בתרחיש (אמיתי: ${bB})</div></div>
   </div>
   <div class="card">
@@ -1866,7 +2245,7 @@ function simGrid(subj,studs){
   const headComps=subj.comps(maxU);
   let head=`<tr><th>שם</th>${subj.opts.length>1?'<th>יח"ל</th>':''}`;
   headComps.forEach(c=>{ head+=c.t==='i'?`<th>${esc(c.n)}</th>`:`<th>${esc(c.n)}<br><small>${c.s===0?'100% בחינה':'מגן '+c.s+'%'}</small></th>`; });
-  head+='<th>ציון אמיתי</th><th>ציון בניסוי</th></tr>';
+  head+='<th style="background:#f5f3ff;">מבחני כיתה<br><small>לחיזוי בלבד</small></th><th>ציון אמיתי</th><th>ציון בניסוי</th></tr>';
   const rows=studs.map(st=>{
     const u=getUnits(st,subj);
     const comps=u===0?[]:getCompsFor(st,subj,u);
@@ -1897,12 +2276,20 @@ function simGrid(subj,studs){
         tds+=`<td>${rM}${rE}</td>`;
       }
     });
+    // מבחני כיתה — לא נכנסים לציון הרשמי, רק משפרים את החיזוי
+    const tAvg=testAvg(st,subj.id), tN=testsOf(st,subj.id).length;
+    tds+=`<td style="background:#faf8ff;"><div class="gcell">
+      <input type="number" min="0" max="100" value="${tN===1?testsOf(st,subj.id)[0]:(tAvg??'')}" placeholder="—"
+        style="border-color:#c4b5fd; background:#fdfcff;" title="ציון מבחן כיתתי — משמש לחיזוי בלבד"
+        onchange="setTest('${st.id}','${subj.id}',this.value)">
+      <button class="btn sec sm" style="padding:1px 7px; font-size:10.5px;" onclick="setTestMulti('${st.id}','${subj.id}')" title="הזנת כמה ציוני מבחנים">${tN>1?`${tN} מבחנים · ממוצע ${tAvg}`:'+ עוד'}</button>
+    </div></td>`;
     const diff=u!==0&&rReal.final!==rSim.final;
     tds+=`<td class="${gradeClass(u===0?null:rReal.final)}">${u===0?'—':fmt(rReal.final)}</td>
     <td class="${gradeClass(u===0?null:rSim.final)}" style="font-weight:800; ${diff?'background:#fff7ed;':''}">${u===0?'—':fmt(rSim.final)}${diff?' 🔶':''}</td>`;
     return `<tr>${tds}</tr>`;
   }).join('');
-  return `<table class="tbl"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
+  return `<table class="tbl grades"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
 }
 
 /* ============ מחשבון "כמה צריך בהערכה הפנימית" ============ */
@@ -1975,17 +2362,7 @@ function neededInternalAll(st,target){
 }
 function calcPanel(studs){
   const T=state.thresholds;
-  const passT=Math.ceil(T.pass); // ציון עובר בפועל (55)
-  const failRows=[];
-  studs.forEach(st=>{
-    SUBJECTS.forEach(subj=>{
-      if(subj.internalOnly) return;
-      const r=calcSubject(st,subj);
-      if(!r.active||r.final===null||r.final>=T.pass) return;
-      const need=neededInternalForSubject(st,subj,passT);
-      failRows.push({st,subj,cur:r.final,need});
-    });
-  });
+  // מדור "כדי לעבור" הוסר — המספר הנדרש מוצג כתג ירוק צמוד לשדה בטבלת הניסוי
   const excRows=[];
   studs.forEach(st=>{
     const r=calcStudent(st);
@@ -1997,19 +2374,12 @@ function calcPanel(studs){
     excRows.push({st,avg:r.avg,n,nAll,unitsOk:r.unitsOk});
   });
   excRows.sort((a,b)=>b.avg-a.avg);
-  if(!failRows.length&&!excRows.length) return '';
+  if(!excRows.length) return '';
   return `<div class="card" style="margin-bottom:14px; border:2px solid var(--ok);">
-    <h3 class="sec">🎯 מחשבון: כמה צריך בהערכה הפנימית?</h3>
-    <div class="note" style="margin-bottom:10px;">המספר הירוק = <b>בדיוק מה שצריך להזין</b> בהערכה הפנימית. הוא מופיע גם כתג ירוק צמוד לשדה עצמו בטבלת הניסוי למטה.</div>
-    ${failRows.length?`<h3 class="sec" style="font-size:14px; color:var(--bad);">🔴 כדי לעבור (${passT}) — ${failRows.length} מקצועות מעכבים</h3>
-    <div class="scroll" style="max-height:34vh; margin-bottom:12px;"><table class="tbl">
-    <thead><tr><th>תלמידה</th><th>מקצוע</th><th>ציון המקצוע</th><th>להזין בהערכה הפנימית</th></tr></thead><tbody>
-    ${failRows.map(f=>`<tr><td><span class="name-link" onclick="openStudent('${f.st.id}')">${esc(f.st.name)}</span></td>
-      <td>${esc(f.subj.name)}${f.need.ok?` <span class="pill">${esc(f.need.comp)}</span>`:''}</td>
-      <td class="grade-bad">${f.cur}</td>
-      <td>${f.need.ok?`<span style="font-size:22px; font-weight:900; color:var(--ok); font-family:'Rubik',sans-serif;">${f.need.x}</span>`:`<span class="badge b-bad">${esc(f.need.reason)}</span>`}</td>
-    </tr>`).join('')}</tbody></table></div>`:''}
-    ${excRows.length?`<h3 class="sec" style="font-size:14px; color:var(--gold);">⭐ כדי להצטיין (ממוצע מעל ${T.excel}) — ${excRows.length} תלמידות בטווח</h3>
+    <h3 class="sec">⭐ כמה צריך כדי להצטיין (מעל ${T.excel})</h3>
+    <div class="note" style="margin-bottom:10px;">המספר הירוק = בדיוק מה שצריך להזין בהערכה הפנימית. <span class="pill">כדי לעבור — התג הירוק "צריך X" מופיע צמוד לשדה בטבלת הניסוי</span></div>
+
+    ${excRows.length?`
     <div class="scroll" style="max-height:34vh;"><table class="tbl">
     <thead><tr><th>תלמידה</th><th>ממוצע</th><th>איפה להעלות</th><th>להזין</th><th>יח"ל</th></tr></thead><tbody>
     ${excRows.map(x=>`<tr><td><span class="name-link" onclick="openStudent('${x.st.id}')">${esc(x.st.name)}</span></td>
@@ -2017,8 +2387,8 @@ function calcPanel(studs){
       <td>${x.n?esc(x.n.subj.name)+' · '+esc(x.n.comp)
             :(x.nAll?`<b>העלאת כל ההערכות הפנימיות</b> <span class="pill">${x.nAll.changed} מתוך ${x.nAll.total} רכיבים</span>`
                     :'<span class="badge b-bad">לא ניתן להגיע דרך ההערכות הפנימיות</span>')}</td>
-      <td>${x.n?`<span style="font-size:22px; font-weight:900; color:var(--ok); font-family:'Rubik',sans-serif;">${x.n.x}</span>`
-             :(x.nAll?`<span style="font-size:22px; font-weight:900; color:var(--ok); font-family:'Rubik',sans-serif;">${x.nAll.x}</span>`:'—')}</td>
+      <td>${x.n?`<span style="font-size:22px; font-weight:900; color:var(--ok); font-family:var(--font-num,'Rubik'),sans-serif;">${x.n.x}</span>`
+             :(x.nAll?`<span style="font-size:22px; font-weight:900; color:var(--ok); font-family:var(--font-num,'Rubik'),sans-serif;">${x.nAll.x}</span>`:'—')}</td>
       <td>${x.unitsOk?'✓':'<span class="badge b-warn">✗ לא עומדת</span>'}</td>
     </tr>`).join('')}</tbody></table></div>`:''}
   </div>`;
@@ -2042,10 +2412,14 @@ function predictionPanel(studs){
   };
   return `<div class="card" style="margin-bottom:14px; border:2px solid var(--brand2);">
     <h3 class="sec">🔮 חיזוי סוף שנה — מי צפויה להיות מצטיינת</h3>
-    <div class="note" style="margin-bottom:10px;">בתחילת השנה מזינים לכל רכיב את ציון המגן / הערכת המורה — והחיזוי משלים אוטומטית כל בחינה חסרה לפי המגן. ככל שמוזנים ציונים אמיתיים במהלך השנה, החיזוי מתעדכן ומתדייק.</div>
+    <div class="note" style="margin-bottom:10px;">
+      החיזוי משלים כל בחינה חסרה לפי סדר העדיפויות: <b>1)</b> ציון מבחן כיתתי אם הוזן · <b>2)</b> ציון המגן בתוספת רמת החיזוי שנבחרה.<br>
+      ${state.predLevel==='auto'?`<b>🎯 כיול אוטומטי פעיל</b> — הפער בין בחינה למגן נלמד מהנתונים הקיימים: ${SUBJECTS.filter(s=>!s.internalOnly).map(s=>{const g=autoGap(s.id); return g===null?null:`${esc(s.name)} ${g>0?'+':''}${g}`;}).filter(Boolean).join(' · ')||'אין עדיין מספיק נתונים — מתנהג כאופטימי'}`
+        :(state.predLevel?`רמת החיזוי: <b>מגן ${state.predLevel}</b> נקודות.`:'רמת החיזוי: <b>אופטימי</b> — בחינה = מגן. שימי לב שבפועל הבחינה נוטה להיות נמוכה מהמגן.')}
+    </div>
     <div class="kpis">
-      <div class="kpi k3"><div class="n">${exc.length}</div><div class="t">מצטיינות צפויות ⭐</div></div>
-      <div class="kpi k4"><div class="n">${pot.length}</div><div class="t">פוטנציאל צפוי (${T.potential} עד ${T.excel})</div></div>
+      <div class="kpi k4"><div class="n">${exc.length}</div><div class="t">מצטיינות צפויות ⭐</div></div>
+      <div class="kpi k3"><div class="n">${pot.length}</div><div class="t">פוטנציאל צפוי (${T.potential} עד ${T.excel})</div></div>
       <div class="kpi k1"><div class="n">${close.length}</div><div class="t">במרחק נגיעה (87+)</div></div>
       <div class="kpi k6"><div class="n">${noUnits.length}</div><div class="t">ממוצע גבוה בלי תנאי היח"ל</div></div>
     </div>
@@ -2068,20 +2442,52 @@ function predictionPanel(studs){
 /* ============ התראות ============ */
 function renderAlerts(m){
   const studs=filteredStudents(alertClass);
-  let all=[];
-  studs.forEach(st=>{ all=all.concat(studentAlerts(st,calcStudent(st)).map(a=>({...a,st}))); });
-  const sevOrder={bad:0,warn:1,pot:2,info:3,miss:4};
-  all.sort((a,b)=>sevOrder[a.sev]-sevOrder[b.sev]);
-  const groups=[['bad','🔴 מעכבים — טיפול דחוף'],['warn','🟠 גבוליים, פערים חריגים וציונים שטרם דווחו'],['pot','🟣 פוטנציאל הצטיינות'],['info','🔵 ציונים פיקטיביים בשימוש'],['miss','⚪ ציונים חסרים']];
+  const rows=[];
+  studs.forEach(st=>{
+    const r=calcStudent(st);
+    const items=[];
+    r.blockers.forEach(s=>items.push({sev:'bad',t:`${s.name} ${r.per[s.id].final}`,ttl:'ציון מעכב'}));
+    r.borderlines.forEach(s=>items.push({sev:'warn',t:`${s.name} ${r.per[s.id].final}`,ttl:'ציון גבולי'}));
+    r.gaps.forEach(g=>g.gaps.forEach(x=>items.push({sev:'warn',t:`${g.subj.name} · פער ${x.m}→${x.e}`,ttl:'פער חריג בין מגן לבחינה'})));
+    if(r.complete&&!r.blockers.length&&r.unitsOk&&r.avg!==null&&r.avg>=88&&r.avg<=state.thresholds.excel)
+      items.push({sev:'pot',t:`ממוצע ${r.avg} — קרובה להצטיינות`,ttl:'חסרות מעט נקודות'});
+    if(r.missing.length) items.push({sev:'miss',t:`חסרים ציונים ב-${r.missing.length} מקצועות`,ttl:r.missing.map(s=>s.name).join(', ')});
+    if(items.length) rows.push({st,r,items,
+      pri: items.some(x=>x.sev==='bad')?0 : items.some(x=>x.sev==='warn')?1 : items.some(x=>x.sev==='pot')?2 : 3});
+  });
+  rows.sort((a,b)=>a.pri-b.pri||(b.r.avg||0)-(a.r.avg||0));
+  const cnt=s=>rows.reduce((a,x)=>a+x.items.filter(i=>i.sev===s).length,0);
+  const nBad=cnt('bad'), nWarn=cnt('warn'), nPot=cnt('pot'), nMiss=cnt('miss');
+  const show=rows.filter(x=>alertFilter==='all'?true:x.items.some(i=>i.sev===alertFilter));
+  const chip=(f,label,n,cls)=>`<button class="btn ${alertFilter===f?'':'sec'} sm" onclick="alertFilter='${f}';render()"
+      style="${alertFilter===f?'':'opacity:'+(n?1:.45)}">${label} ${n?`<b>${n}</b>`:''}</button>`;
   m.innerHTML=`
-  <div class="toolbar"><label>כיתה:</label><select onchange="alertClass=this.value;render()"><option value="">כל השכבה</option>${state.classes.map(c=>`<option ${alertClass===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
-  <span class="pill">${all.length} התראות</span></div>
-  ${groups.map(([sev,title])=>{
-    const items=all.filter(a=>a.sev===sev);
-    if(!items.length) return '';
-    return `<div class="card" style="margin-bottom:14px;"><h3 class="sec">${title} (${items.length})</h3>
-    ${items.map(a=>`<div class="alert-item al-${a.sev}"><span class="name-link" onclick="openStudent('${a.st.id}')">${esc(a.st.name)}</span> · ${esc(a.text.replace(a.st.name+': ',''))}</div>`).join('')}</div>`;
-  }).join('')||'<div class="card"><div class="note">אין התראות 🎉</div></div>'}`;
+  <div class="card" style="margin-bottom:14px;">
+    <div class="toolbar" style="margin-bottom:0;">
+      <label>כיתה:</label><select onchange="alertClass=this.value;render()"><option value="">כל השכבה</option>${state.classes.map(c=>`<option ${alertClass===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+      <span style="width:8px;"></span>
+      ${chip('all','הכול',rows.length)}
+      ${chip('bad','🔴 מעכבים',nBad)}
+      ${chip('warn','🟠 גבוליים ופערים',nWarn)}
+      ${chip('pot','⭐ קרובות להצטיינות',nPot)}
+      ${chip('miss','⚪ חסרים',nMiss)}
+    </div>
+  </div>
+  ${show.length?`<div class="card"><div class="scroll" style="max-height:70vh;">
+    <table class="tbl"><thead><tr><th>תלמידה</th><th>ממוצע</th><th>מה דורש טיפול</th></tr></thead><tbody>
+    ${show.map(x=>{
+      const its=alertFilter==='all'?x.items:x.items.filter(i=>i.sev===alertFilter);
+      const col={bad:'b-bad',warn:'b-warn',pot:'b-pot',miss:'b-miss'};
+      return `<tr>
+        <td><span class="name-link" onclick="openStudent('${x.st.id}')">${esc(x.st.name)}</span><br><small style="color:var(--muted)">${esc(x.st.cls)}</small></td>
+        <td class="${gradeClass(x.r.avg)}">${fmt(x.r.avg)}</td>
+        <td style="text-align:right;"><div style="display:flex; gap:5px; flex-wrap:wrap;">
+          ${its.map(i=>`<span class="badge ${col[i.sev]}" title="${esc(i.ttl)}">${esc(i.t)}</span>`).join('')}
+        </div></td></tr>`;
+    }).join('')}
+    </tbody></table></div>
+    <div class="note" style="margin-top:8px;">${show.length} תלמידות · לחיצה על שם פותחת את כרטיס התלמידה. ציונים שטרם דווחו למשרד מסומנים באדום בטבלאות ואינם מופיעים כאן.</div>
+  </div>`:'<div class="card"><div class="note" style="text-align:center; padding:20px;">✨ אין התראות בקטגוריה זו</div></div>'}`;
 }
 
 /* ============ דוחות ============ */
@@ -2089,8 +2495,8 @@ function renderReports(m){
   m.innerHTML=`
   <div class="toolbar">
     <label>דוח עבור:</label><select onchange="reportClass=this.value;render()"><option value="">כל השכבה</option>${state.classes.map(c=>`<option ${reportClass===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
-    <button class="btn" onclick="printReport()">🖨️ הדפסה / PDF</button>
-    <button class="btn ok" onclick="emailReport()">📧 שליחה במייל</button>
+    <button class="btn" onclick="printReport()">${ic('print',15)}הדפסה / PDF</button>
+    <button class="btn ok" onclick="emailReport()">${ic('mail',15)}שליחה במייל</button>
     <button class="btn sec" onclick="copyReport()">📋 העתקת סיכום</button>
     <button class="btn sec" onclick="exportExcel(reportClass)">📥 אקסל של הדוח</button>
   </div>
@@ -2122,14 +2528,14 @@ function buildReportHtml(cls){
   <div class="kpis">
     <div class="kpi k1"><div class="n">${n}</div><div class="t">תלמידות</div></div>
     <div class="kpi k2"><div class="n">${elig} (${Math.round(elig/n*100)}%)</div><div class="t">זכאיות</div></div>
-    <div class="kpi k3"><div class="n">${exc.length}</div><div class="t">מצטיינות</div></div>
-    <div class="kpi k4"><div class="n">${pot.length}</div><div class="t">פוטנציאל</div></div>
+    <div class="kpi k4"><div class="n">${exc.length}</div><div class="t">מצטיינות</div></div>
+    <div class="kpi k3"><div class="n">${pot.length}</div><div class="t">פוטנציאל</div></div>
     <div class="kpi k5"><div class="n">${blocked.length}</div><div class="t">עם מעכבים</div></div>
     <div class="kpi k6"><div class="n">${avgAll===null?'—':avgAll}</div><div class="t">ממוצע</div></div>
   </div>
   <h3 class="sec">טבלת תלמידות מפורטת</h3>
   <div class="scroll" style="max-height:none;">
-  <table class="tbl"><thead><tr><th>שם</th><th>כיתה</th>${SUBJECTS.map(s=>`<th>${esc(s.name)}</th>`).join('')}<th>ממוצע</th><th>סטטוס</th></tr></thead><tbody>
+  <table class="tbl grades"><thead><tr><th>שם</th><th>כיתה</th>${SUBJECTS.map(s=>`<th>${esc(s.name)}</th>`).join('')}<th>ממוצע</th><th>סטטוס</th></tr></thead><tbody>
   ${results.map(x=>`<tr><td style="font-weight:700;">${esc(x.st.name)}</td><td>${esc(x.st.cls)}</td>
     ${SUBJECTS.map(s=>{const r=x.r.per[s.id]; if(!r||!r.active)return '<td style="color:#cbd5e1;">—</td>'; return `<td class="${gradeClass(r.final)}">${fmt(r.final)}</td>`;}).join('')}
     <td class="${gradeClass(x.r.avg)}" style="font-weight:800;">${fmt(x.r.avg)}</td>
@@ -2138,9 +2544,9 @@ function buildReportHtml(cls){
   <div class="grid2" style="margin-top:16px;">
     <div>
       <h3 class="sec">⭐ מצטיינות (${exc.length})</h3>
-      ${exc.length?exc.sort((a,b)=>b.r.avg-a.r.avg).map(x=>`<div class="alert-item al-pot">${esc(x.st.name)} · ${esc(x.st.cls)} · ממוצע ${x.r.avg}</div>`).join(''):'<div class="note">אין עדיין</div>'}
+      ${exc.length?exc.sort((a,b)=>b.r.avg-a.r.avg).map(x=>`<div class="alert-item" style="background:#faf5ff; border-right:4px solid #9333ea;">${esc(x.st.name)} · ${esc(x.st.cls)} · ממוצע ${x.r.avg}</div>`).join(''):'<div class="note">אין עדיין</div>'}
       <h3 class="sec" style="margin-top:12px;">💜 פוטנציאל הצטיינות (${pot.length})</h3>
-      ${pot.length?pot.sort((a,b)=>b.r.avg-a.r.avg).map(x=>`<div class="alert-item al-info">${esc(x.st.name)} · ${esc(x.st.cls)} · ממוצע ${x.r.avg} · נדרש מעל ${state.thresholds.excel}</div>`).join(''):'<div class="note">אין</div>'}
+      ${pot.length?pot.sort((a,b)=>b.r.avg-a.r.avg).map(x=>`<div class="alert-item" style="background:#fffbeb; border-right:4px solid #f59e0b;">${esc(x.st.name)} · ${esc(x.st.cls)} · ממוצע ${x.r.avg} · נדרש מעל ${state.thresholds.excel}</div>`).join(''):'<div class="note">אין</div>'}
     </div>
     <div>
       <h3 class="sec">🚨 דורשות התייחסות (${alerts.length})</h3>
@@ -2186,8 +2592,8 @@ function renderSettings(m){
   const T=state.thresholds;
   m.innerHTML=`
   <div class="card" style="margin-bottom:14px; border:2px solid var(--ok);">
-    <h2 class="sec">💾 מצב השמירה — האם הנתונים שלי בטוחים?</h2>
-    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>1.5</b> · 01.09.2026</span>
+    <h2 class="sec">${ic('save',19)}מצב השמירה — האם הנתונים שלי בטוחים?</h2>
+    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>2.6</b> · 01.09.2026</span>
     <span class="note">אחרי העלאת גרסה חדשה — רעננו את הדף (Ctrl+F5) וּודאו שהמספר כאן התעדכן.</span></div>
     <div id="storageBox">${storageStatusHtml()}</div>
     ${(()=>{const b=lastBackupInfo(); const cur=countAllStudents();
@@ -2209,7 +2615,7 @@ function renderSettings(m){
     <div class="note">"איפוס מלא" מוחק את כל הנתונים ששמורים בדפדפן במכשיר הזה ומחזיר תוכנה נקייה לגמרי. מומלץ ללחוץ "💾 גיבוי" קודם.</div>
   </div>
   <div class="card" style="margin-bottom:14px;">
-    <h2 class="sec">🗂️ ניהול סימולטורים</h2>
+    <h2 class="sec">${ic('folder',19)}ניהול סימולטורים</h2>
     <div class="toolbar">
       <span class="pill">סימולטור נוכחי: <b>${esc((profiles.find(p=>p.id===currentProfileId)||{}).name||'(ללא שם)')}</b></span>
       <button class="btn ok sm" onclick="newProfile()">➕ סימולטור חדש לשנתון/כיתה</button>
@@ -2219,7 +2625,7 @@ function renderSettings(m){
     <div class="note">כל סימולטור הוא סביבה נפרדת לחלוטין — תלמידות, כיתות, ציונים והגדרות משלו. מעבר בין סימולטורים דרך התפריט בכותרת העליונה. כך אפשר לנהל במקביל את יב, יא, ושנתונים קודמים.</div>
   </div>
   <div class="card" style="margin-bottom:14px;">
-    <h2 class="sec">🔒 נעילת הקובץ (אופציונלי)</h2>
+    <h2 class="sec">${ic('lock',19)}נעילת הקובץ (אופציונלי)</h2>
     <div class="toolbar" style="margin-bottom:6px;">
       ${lockHash?`<span class="badge b-ok">🔒 נעילה פעילה</span>
         <button class="btn sec sm" onclick="changeLock()">שינוי סיסמה</button>
@@ -2230,7 +2636,18 @@ function renderSettings(m){
     </div>
     <div class="note" style="margin-bottom:14px;">מסך כניסה שמונע פתיחה מזדמנת של הקובץ במחשב משותף. <b>אינה הצפנה</b> — משתמש מקצועי יוכל לעקוף אותה.<br>
     <b>סיסמה שנשכחה לעולם לא תגרום לאובדן נתונים:</b> בעת ההפעלה נוצר <b>קוד שחזור</b> שיורד כקובץ ונשמר גם בכל גיבוי. במסך הנעילה יש "שכחתי סיסמה" שמסיר את הנעילה בעזרתו.</div>
-    <h2 class="sec">🎨 ערכת צבע</h2>
+    <h2 class="sec">${ic('type',19)}גופן</h2>
+    <div class="note" style="margin-bottom:8px;">בחרי גופן — התצוגה מתעדכנת מיד. כל דוגמה מוצגת בגופן עצמו.</div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; margin-bottom:16px;">
+      ${FONTS.map(f=>{const sel=currentFontId()===f.id;
+        return `<div onclick="setFont('${f.id}')" style="cursor:pointer; border:${sel?'2.5px solid var(--brand)':'1.5px solid var(--line)'}; border-radius:14px; padding:11px 13px; background:${sel?'linear-gradient(135deg,#f5f3ff,#fff)':'#fff'}; transition:all .15s ease;"
+          onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          <div style="font-family:'${f.head}',sans-serif; font-size:17px; font-weight:800;">${esc(f.nm)} ${sel?'✓':''}</div>
+          <div style="font-family:'${f.body}',sans-serif; font-size:13px; color:var(--muted); margin:3px 0;">${esc(f.d)}</div>
+          <div style="font-family:'${f.num}',sans-serif; font-size:19px; font-weight:800; letter-spacing:1px;">85 · 94.5 · 100</div>
+        </div>`;}).join('')}
+    </div>
+    <h2 class="sec">${ic('palette',19)}ערכת צבע</h2>
     <div class="toolbar" style="margin-bottom:14px;">
       ${ACCENTS.map(([id,nm,col])=>`<button onclick="setAccent('${id}')" title="${esc(nm)}"
         style="width:42px; height:42px; border-radius:14px; border:${(document.documentElement.getAttribute('data-accent')||'indigo')===id?'3px solid var(--ink)':'2px solid rgba(0,0,0,.08)'};
@@ -2238,7 +2655,7 @@ function renderSettings(m){
         onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform=''"></button>`).join('')}
       <span class="note">הצבע משפיע על הכותרת, הכפתורים והלשוניות.</span>
     </div>
-    <h2 class="sec">🏫 זהות בית הספר</h2>
+    <h2 class="sec">${ic('school',19)}זהות בית הספר</h2>
     <div class="toolbar">
       <label><b>שם בית הספר:</b></label>
       <input type="text" id="schName" value="${esc(schoolName)}" placeholder="למשל: אולפנת הראל / תיכון רמון" style="width:210px;">
@@ -2249,7 +2666,7 @@ function renderSettings(m){
     <div class="toolbar">
       <label><b>רכזת פדגוגית (לסימולטור הנוכחי):</b></label>
       <input type="text" id="coordName" value="${esc(state.coord||'')}" placeholder="שם הרכזת" style="width:190px;">
-      <button class="btn ok sm" onclick="state.coord=document.getElementById('coordName').value.trim();save();render();toast(state.coord?('רכזת: '+state.coord):'נוקה');">שמירה</button>
+      <button class="btn ok sm" onclick="state.coord=document.getElementById('coordName').value.trim();save();renderHeaderCenter();render();toast(state.coord?('רכזת פדגוגית: '+state.coord):'שם הרכזת נוקה');">שמירה</button>
       <span class="note">מופיע בראש כל דוח ובייצוא לאקסל.</span>
     </div>
     <div class="toolbar">
@@ -2260,7 +2677,7 @@ function renderSettings(m){
     </div>
   </div>
   <div class="card" style="margin-bottom:14px;">
-    <h2 class="sec">⭐ תנאי הצטיינות</h2>
+    <h2 class="sec">${ic('star',19)}תנאי הצטיינות</h2>
     <div class="toolbar">
       <label><input type="checkbox" ${state.reqUnits?'checked':''} onchange="state.reqUnits=this.checked;save();render();">
       "מצטיינת" ו"פוטנציאל הצטיינות" רק לתלמידות עם מתמטיקה 4/5 יח"ל <b>וגם</b> אנגלית 5 יח"ל</label>
@@ -2269,7 +2686,7 @@ function renderSettings(m){
     תלמידה עם ממוצע גבוה שאינה עומדת בתנאי היח"ל תסומן "זכאית" ותקבל התראה מתאימה בלשונית ההתראות.</div>
   </div>
   <div class="card" style="margin-bottom:14px;">
-    <h2 class="sec">⚙️ ספי חישוב</h2>
+    <h2 class="sec">${ic('target',19)}ספי חישוב</h2>
     <div class="toolbar">
       <label>ציון מעכב מתחת ל: <input type="number" value="${T.pass}" step="0.5" onchange="T_set('pass',this.value)"></label>
       <label>סף הצטיינות (נדרש ממוצע <b>מעל</b> הערך): <input type="number" value="${T.excel}" onchange="T_set('excel',this.value)"></label>
@@ -2290,7 +2707,7 @@ function renderSettings(m){
     <div class="note">בקובץ המקורי מקצועות אלה מוזנים אך אינם נכללים בממוצע המשוקלל — לכן ברירת המחדל כבויה.</div>
   </div>
   <div class="card" style="margin-bottom:14px;">
-    <h2 class="sec">📖 קטלוג שאלונים — בגרות גמישה (מהקובץ הבית-ספרי)</h2>
+    <h2 class="sec">${ic('file',19)}קטלוג שאלונים — בגרות גמישה (מהקובץ הבית-ספרי)</h2>
     <div class="note" style="margin-bottom:8px;">המבנים והסמלים מוטמעים כברירת מחדל בכל המקצועות. במגמות — בחלון עריכת תלמידה יש "📋 מבנה מהקטלוג" שמחיל משקלים וסמלים בקליק.</div>
     <div class="toolbar"><label>סינון לפי מקצוע:</label>
       <select onchange="catFilter=this.value;render()">
@@ -2301,7 +2718,7 @@ function renderSettings(m){
     <div class="scroll" style="max-height:55vh;">${catalogTable()}</div>
   </div>
   <div class="card" style="margin-bottom:14px; border:2px solid var(--brand2);">
-    <h2 class="sec">🔧 שינוי גורף — מקצוע שלם, כל התלמידות בבת אחת</h2>
+    <h2 class="sec">${ic('gear',19)}שינוי גורף — מקצוע שלם, כל התלמידות בבת אחת</h2>
     <div class="note" style="margin-bottom:10px;">כאן משנים <b>לכל התלמידות בבת אחת</b>: סמלי שאלונים, חלוקת מגן/בחינה ומשקלים. בחרי מקצוע, מלאי בשורות הרלוונטיות ולחצי "החל" (או "🏷️ החלת כל הסמלים" לכל השורות יחד). השינוי <b>דורס גם התאמות אישיות קיימות</b>, כולל כאלה שנקלטו מהאקסל.</div>
     <div class="toolbar">
       <label>מקצוע:</label>
@@ -2362,6 +2779,7 @@ function bulkApply(i){
   if(!targets.length){ toast('אין תלמידות בבחירה'); return; }
   const what=[cVal?`סמל ${cVal}`:'',sVal!==''?`מגן ${sVal}%/בחינה ${100-sVal}%`:'',wVal!==''?`משקל ${wVal}%`:''].filter(Boolean).join(' · ');
   if(!confirm(`להחיל על ${targets.length} תלמידות ב${esc(subj.name)} — ${esc(String(what))}?`)) return;
+  pushUndo('שינוי גורף — '+subj.name);
   targets.forEach(st=>{
     if(cVal){ st.codes=st.codes||{}; st.codes[key]=cVal; }
     if(sVal!==''||wVal!==''){
@@ -2385,6 +2803,7 @@ function bulkCodesAll(){
   });
   if(!picks.length){ toast('בחרי סמלים בעמודת "סמל שאלון לכולן"'); return; }
   if(!confirm(`להחיל ${picks.length} סמלי שאלון על ${targets.length} תלמידות ב${subj.name}?\n\n`+picks.map(x=>'• '+x[2]+' ← '+x[1]).join('\n'))) return;
+  pushUndo('סמלי שאלונים גורף');
   targets.forEach(st=>{ st.codes=st.codes||{}; picks.forEach(([k,v])=>{ st.codes[k]=v; }); });
   save(); render(); toast(`הוחלו ${picks.length} סמלים על ${targets.length} תלמידות`);
 }
@@ -2394,6 +2813,7 @@ function bulkClear(){
   const n=targets.filter(s=>Object.keys(s.ov||{}).some(k=>k.indexOf(subj.id+'.')===0)).length;
   if(!n){ toast('אין התאמות אישיות במקצוע זה'); return; }
   if(!confirm(`לנקות את ההתאמות האישיות ב${subj.name} אצל ${n} תלמידות ולחזור לברירת המחדל?`)) return;
+  pushUndo('ניקוי התאמות — '+subj.name);
   targets.forEach(st=>{ if(!st.ov)return; Object.keys(st.ov).filter(k=>k.indexOf(subj.id+'.')===0).forEach(k=>delete st.ov[k]); });
   save(); render(); toast('נוקו התאמות אצל '+n+' תלמידות');
 }
@@ -2567,6 +2987,7 @@ function importSimulator(wb){
   if(!state.classes.includes(cls)) state.classes.push(cls);
   const pf=profiles.find(x=>x.id===currentProfileId);
   if(pf&&(pf.unnamed||!pf.name)){ pf.name=cls; delete pf.unnamed; saveProfiles(); renderProfileBar(); }
+  pushUndo('ייבוא מקובץ סימולטור');
   let added=0, updated=0;
   const seen={};
   parsed.forEach(p=>{
@@ -2823,6 +3244,12 @@ function renderHelp(m){
     בלשונית <b>✏️ הזנת ציונים</b> בוחרים מקצוע וכיתה ומזינים בטבלה — מגן ובחינה לכל שאלון.<br>
     לחיצה על <b>שם תלמידה</b> (בכל מקום באפליקציה) פותחת כרטיס מלא: כל המקצועות, יח"ל, סמלי שאלונים מרשימה נפתחת, ומשקלים.<br>
     <b>צבעים:</b> <span class="grade-bad">אדום = מעכב (מתחת ל-55)</span> · <span class="grade-warn">כתום = גבולי</span> · <span class="grade-exc">זהב = 90+</span> · משבצת מקווקוות = ציון חסר.`)}
+  ${step('🔮','חיזוי אוטומטי — איך הוא עובד וכמה לסמוך עליו',`
+    <b>הרעיון:</b> בתחילת השנה יש רק מגינים והערכות. החיזוי משלים כל בחינה חסרה ומחשב ממוצע וסטטוס צפויים — כך רואים כבר עכשיו מי מועמדת להצטיינות.<br>
+    <b>סדר העדיפויות של החיזוי:</b> 1) <b>ציון מבחן כיתתי</b> אם הוזן · 2) ציון המגן בתוספת רמת החיזוי.<br>
+    <b>ארבע רמות חיזוי:</b> <b>אופטימי</b> (בחינה = מגן) · <b>מציאותי</b> (מגן פחות 5) · <b>זהיר</b> (מגן פחות 10) · <b>🎯 כיול אוטומטי</b> — הכלי לומד מהנתונים שכבר יש בקובץ מה הפער הממוצע בין בחינה למגן בכל מקצוע, ומחיל אותו.<br>
+    <b>למה זה חשוב:</b> בפועל הבחינה נוטה להיות נמוכה מהמגן — ובמתמטיקה ואנגלית הפער גדול במיוחד. חיזוי "אופטימי" יראה תמונה ורודה מדי. מומלץ להתחיל ב"כיול אוטומטי" ברגע שיש כמה ציוני בחינות בקובץ.<br>
+    <b>📝 מבחני כיתה:</b> בעמודה הסגולה בטבלת הניסוי (וגם בכרטיס התלמידה) אפשר להזין ציוני מבחנים שנעשו בכיתה — אפילו כמה, והכלי לוקח את הממוצע. הם <b>לא נכנסים לציון הרשמי</b> ולא משפיעים על הזכאות, אלא רק מחדדים את החיזוי — כי מבחן אמיתי הוא מנבא טוב יותר ממגן.`)}
   ${step('🎯','כמה צריך בהערכה הפנימית? (מחשבון בסימולציה)',`
     בלשונית <b>🧪 סימולציה</b> יש כרטיס <b>🎯 מחשבון: כמה צריך בהערכה הפנימית</b> — הוא עושה את החשבון במקומך:<br>
     <b>🔴 כדי לעבור:</b> לכל תלמידה עם ציון מעכב מוצג בדיוק איזה ציון בהערכה הפנימית יביא את המקצוע ל-55. דוגמה: מגן 85 ובחינה 24 → ציון המקצוע 39; המחשבון יראה ש<b>נדרש 54</b> בהערכה הפנימית כדי להגיע ל-55 (ועם 53 היא עוד נכשלת).<br>
@@ -2834,7 +3261,13 @@ function renderHelp(m){
     בוחרים מקצוע, רכיב (איזו בחינה) ואם זה ציון בחינה או מגן — ומקבלים <b>תצוגה מקדימה</b>: מי זוהתה, מי לא, ורק אז מאשרים.<br>
     הזיהוי חכם: מסתדר עם רווחים כפולים, גרשיים, וגם עם שם הפוך ("שרה כהן" מול "כהן שרה").<br>
     <b>שם שלא זוהה?</b> בתצוגה המקדימה יש תפריט "התלמידה במערכת" בכל שורה — אפשר לבחור ידנית את התלמידה הנכונה, לתקן זיהוי שגוי, או לסמן "⏭️ לדלג".<br>
-    <b>צבע גורף:</b> לפני ההחלה בוחרים באיזה צבע ייכנסו כל הציונים — ⚫ שחור (דווח), 🔴 אדום (טרם דווח) או 🔵 כחול (פיקטיבי).`)}
+    <b>צבע גורף:</b> לפני ההחלה בוחרים באיזה צבע ייכנסו כל הציונים — ⚫ שחור (דווח), 🔴 אדום (טרם דווח) או 🔵 כחול (פיקטיבי).<br>
+    <b>שני סדרים נתמכים:</b> "שרה כהן 88" וגם "88 שרה כהן" — הכלי מזהה לבד, ואפשר גם לכפות סדר בבורר.<br>
+    <b>⚠️ הגנה מפני טעויות:</b> לפני ההחלה מוצגת <b>הערת אזהרה צהובה</b> עם בדיוק מה עומד להתעדכן — מקצוע, רכיב, מגן או בחינה, כיתה וצבע. ואז מופיע חלון אישור אחרון עם אותם פרטים ומספר התלמידות.`)}
+  ${step('↩️','ביטול פעולה (Undo)',`
+    כל פעולה שמשנה הרבה נתונים בבת אחת נשמרת אוטומטית לפני הביצוע: ייבוא ציונים, שינוי גורף, צביעה גורפת, ייבוא מאקסל, מחיקות והעברת ניסוי.<br>
+    אם טעית — בסרגל העליון יופיע כפתור <b>↩️ בטל: [שם הפעולה]</b>. לחיצה אחת מחזירה את המצב לרגע שלפני. אפשר גם <b>Ctrl+Z</b>.<br>
+    נשמרות 12 הפעולות האחרונות, כך שאפשר לחזור כמה צעדים אחורה. (הביטול פועל עד סגירת הדפדפן — לגיבוי ארוך טווח יש 💾 גיבוי.)`)}
   ${step('🔢','עיגול ציונים ובחינות ללא מגן',`
     <b>עיגול:</b> הציון הסופי בכל מקצוע מעוגל למספר שלם — 85.5 ← <b>86</b>, 85.4 ← <b>85</b>. במעבר עכבר על הציון רואים את הערך המדויק לפני העיגול.<br>
     <b>בחינות ללא מגן:</b> במקצועות רבי-המלל (היסטוריה, מחשבת ישראל, אזרחות, תנ"ך, תושב"ע) הבחינות והמשימות המבוקרות הן <b>100% ציון הבחינה</b> — אין ציון מגן, ולכן מוצגת שורת "ציון בחינה" בלבד. אם במקצוע מסוים כן יש מגן, אפשר לשנות את החלוקה בשורת "חלוקה" (או גורף לכל הכיתה בהגדרות).`)}
@@ -2847,6 +3280,11 @@ function renderHelp(m){
     <span style="color:#111; font-weight:800;">■ שחור</span> — ציון שכבר דווח למשרד החינוך · <span style="color:#dc2626; font-weight:800;">■ אדום</span> — ציון אמיתי ונכון שטרם דווח · <span style="color:#1d4ed8; font-weight:800;">■ כחול</span> — ציון פיקטיבי / הערכה.<br>
     הצבעים מוצגים בטבלת ההזנה ובכרטיס התלמידה. לשינוי: <b>לחיצה ימנית</b> על הציון בטבלה, או כפתור העיגול הצבעוני בכרטיס התלמידה (⚫→🔴→🔵).<br>
     בלשונית ההתראות תקבלי סיכום: כמה ציונים טרם דווחו וכמה פיקטיביים — וגם בייצוא לאקסל יש עמודת "סימון".`)}
+  ${step('➖','הסרה והחזרה של רכיבים',`
+    לא צריך רכיב מסוים אצל תלמידה? מעבירים עכבר על הקובייה ולוחצים על <b>✕</b> בפינה.<br>
+    רכיב ללא משקל (כמו "עבודה נוספת" שלא בשימוש) פשוט נעלם מהתצוגה — הציון לא משתנה.<br>
+    לרכיב עם משקל תופיע אזהרה: משקלו יתאפס והאחוזים יתחלקו מחדש בין השאר.<br>
+    בתחתית המקצוע מופיעה שורת <b>"רכיבים שהוסרו"</b> — לחיצה על ➕ מחזירה את הרכיב יחד עם משקל ברירת המחדל שלו.`)}
   ${step('💜','התאמה אישית לתלמידה',`
     בכרטיס התלמידה אפשר לשנות <b>רק אצלה</b>: חלוקת מגן/בחינה (למשל נבחנה בשנה אחרת), משקל כל רכיב, וסמל שאלון. רכיב מותאם נצבע סגול, ותג "מותאם אישית" מופיע במקצוע. <b>↩️ איפוס התאמות</b> מחזיר לרגיל.<br>
     במגמות (פיזיקה, ביולוגיה...) — <b>📋 מבנה מהקטלוג</b> מחיל בקליק את כל המשקלים והסמלים הנכונים.`)}
@@ -2904,10 +3342,12 @@ try{
     }
   }
 }catch(e){}
-(function(){ const t=document.getElementById('appH1'); if(t) t.textContent=appTitle();
-  const f=document.getElementById('appFoot'); if(f) f.textContent=appTitle();
-  document.title=appTitle(); })();
+(function(){ const f=document.getElementById('appFoot'); if(f) f.textContent=appTitle(); document.title=appTitle(); })();
 initAccent();
+initFont();
+renderTabs();
+renderHdrBtns();
+renderHeaderCenter();
 if(isLocked()&&sessionStorage.getItem('bagrutUnlocked')!=='1') showLock();
 renderProfileBar();
 renderLogo();
