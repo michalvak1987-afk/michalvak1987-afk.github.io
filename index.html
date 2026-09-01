@@ -176,6 +176,10 @@ table.tbl tr:hover td{background:#f2f6ff;}
 .grade-warn{color:var(--warn); font-weight:700;}
 .grade-bad{color:var(--bad); font-weight:800;}
 .grade-miss{color:#94a3b8;}
+.grade-part{color:#475569; font-style:italic; border-bottom:2px dotted #94a3b8; cursor:help;}
+.rep-part{opacity:.5; font-style:italic; font-weight:700;}
+.rep-part sup{font-size:9px; opacity:.9;}
+.partTag{background:#f1f5f9; border:1px dashed #cbd5e1; color:#475569; border-radius:99px; padding:1px 7px; font-size:10px; font-weight:700; white-space:nowrap;}
 input[type=number], select, input[type=text], textarea{border:1.5px solid #d6deec; border-radius:9px; padding:6px 9px; font-size:13px; font-family:inherit; background:#fff; color:var(--ink); transition:border-color .15s ease, box-shadow .15s ease;}
 input[type=number]:hover, select:hover, input[type=text]:hover{border-color:#a9b8d4;}
 input[type=number]{width:62px; text-align:center;}
@@ -355,7 +359,7 @@ body.print-mode #printArea{display:block; padding:20px; background:#fff;}
   <div class="hint"><span><kbd>↑</kbd><kbd>↓</kbd> ניווט</span><span><kbd>Enter</kbd> פתיחה</span><span><kbd>Esc</kbd> סגירה</span><span style="margin-inline-start:auto;">Ctrl+K</span></div>
 </div></div>
 <div class="toast" id="toast"></div>
-<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 3.0</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
+<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 3.3</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
 <script>
 "use strict";
 /* ============ מודל המקצועות ============ */
@@ -577,7 +581,7 @@ function applyLegacyStructure(st){
 }
 
 /* ============ מצב ושמירה ============ */
-const DEFAULT_STATE={classes:[], students:[], custom:{}, coord:'', predLevel:0, includeInternal:false, reqUnits:true, flipFav:true, logo:null, thresholds:{pass:54.5, excel:90, potential:85, gap:20}};
+const DEFAULT_STATE={classes:[], students:[], custom:{}, coord:'', predLevel:0, countBlue:true, includeInternal:false, reqUnits:true, flipFav:true, logo:null, thresholds:{pass:54.5, excel:90, potential:85, gap:20}};
 /* ============ שכבת הניסוי של הסימולציה (חיה רק בלשונית הסימולציה, לא נוגעת במקור) ============ */
 function gradesOf(st,sim){
   if(sim&&st.simg&&Object.keys(st.simg).length) return Object.assign({},st.grades||{},st.simg);
@@ -1160,11 +1164,12 @@ function calcSubject(st,subj,opts){
     if(!c.w){details.push(null); return;}
     const key=subj.id+'.'+i;
     let val=null;
+    const skipBlue=k=>(state.countBlue===false&&gstatOf(st,k)==='b');   // כחול = פיקטיבי
     if(c.t==='i'){
-      val=num(g[key]);
+      val=skipBlue(key)?null:num(g[key]);
       if(val===null) missing++;
     }else{
-      let m=num(g[key+'.m']), e=num(g[key+'.e']);
+      let m=skipBlue(key+'.m')?null:num(g[key+'.m']), e=skipBlue(key+'.e')?null:num(g[key+'.e']);
       if(opts.predict && e===null){
         const tv=testAvg(st,subj.id);
         if(tv!==null){ e=tv; predictedUsed=true; }                       // ציון מבחן כיתתי — האינדיקטור הטוב ביותר
@@ -1191,11 +1196,16 @@ function calcSubject(st,subj,opts){
     details.push({comp:c,val:val===null?null:Math.round(val*10)/10});
   });
   const wSum=comps.reduce((a,c)=>a+(+c.w||0),0);
+  // ציון חלקי — לפי הרכיבים שכבר הוזנו בלבד (לתצוגה בלבד, לא נכנס לזכאות ולממוצע)
+  let wDone=0;
+  comps.forEach((c,i)=>{ if(!c.w) return; const d=details[i]; if(d&&d.val!==null&&d.val!==undefined) wDone+=(+c.w||0); });
+  const partial=(wDone>0)?Math.round(sum/wDone*100):null;
+  const covered=wSum>0?Math.round(wDone/wSum*100):0;
   // נרמול: אם סך המשקלים שונה מ-100 (למשל אחרי הוספת עבודה נוספת) — האחוזים מתחלקים יחסית
   // ציון סופי מעוגל לשלם: 85.5 ← 86 · 85.4 ← 85
   const raw=(missing>0||wSum<=0)?null:sum/wSum*100;
   const final=raw===null?null:Math.round(raw);
-  return {active:true,u,final,raw:raw===null?null:Math.round(raw*100)/100,missing,gaps,flips,details,predictedUsed,wSum,
+  return {active:true,u,final,partial,covered,raw:raw===null?null:Math.round(raw*100)/100,missing,gaps,flips,details,predictedUsed,wSum,
           internalOnly:!!subj.internalOnly,
           blocker: final!==null&&final<state.thresholds.pass,
           borderline: final!==null&&final>=state.thresholds.pass&&final<60};
@@ -1255,6 +1265,34 @@ function gradeClass(v){
   if(v<60) return 'grade-warn';
   if(v>state.thresholds.excel) return 'grade-exc';
   return 'grade-ok';
+}
+// תצוגת ציון: סופי, או חלקי מסומן כשעדיין חסרים רכיבים
+function scoreCell(r){
+  if(!r||!r.active) return '<span style="color:#cbd5e1;">—</span>';
+  if(r.final!==null) return `<span class="${gradeClass(r.final)}">${r.final}</span>`;
+  if(r.partial!==null) return `<span class="grade-part" title="ציון חלקי — מבוסס על ${r.covered}% מהמשקל בלבד. הציון הסופי יחושב כשכל הרכיבים יוזנו.">${r.partial}</span> <span class="partTag">חלקי ${r.covered}%</span>`;
+  return '<span class="grade-miss">—</span>';
+}
+// תצוגת ציון בדוח — חלקי מוצג שקוף ונטוי עם כוכבית (עובד גם בהדפסה בשחור-לבן)
+function subjNote(st,sid){
+  const ns=st.notes||{};
+  const parts=[];
+  if((ns[sid]||'').trim()) parts.push(ns[sid].trim());
+  Object.keys(ns).forEach(k=>{
+    if(k===sid||k.indexOf(sid+'.')!==0) return;
+    const t=(ns[k]||'').trim(); if(!t) return;
+    const subj=SUBJ_MAP[sid], idx=+k.split('.')[1];
+    let lbl='';
+    if(subj){ const cs=subj.comps(getUnits(st,subj)||subj.opts[subj.opts.length-1]); if(cs[idx]) lbl=cs[idx].n+': '; }
+    parts.push(lbl+t);
+  });
+  return parts.join(' · ');
+}
+function scoreCellReport(r){
+  if(!r||!r.active) return '<span style="color:#cbd5e1;">—</span>';
+  if(r.final!==null) return `<span class="${gradeClass(r.final)}">${r.final}</span>`;
+  if(r.partial!==null) return `<span class="rep-part" title="ציון חלקי — ${r.covered}% מהמשקל">${r.partial}<sup>*</sup></span>`;
+  return '<span style="color:#cbd5e1;">—</span>';
 }
 function fmt(v){ return (v===null||v===undefined)?'—':(Math.round(v*10)/10); }
 
@@ -1902,7 +1940,7 @@ function studentSubjEditor(st,subj){
       ${hid.map(x=>`<button onclick="showComp('${st.id}','${subj.id}.${x.i}')" title="החזרת הרכיב">➕ ${esc(x.c.n)}</button>`).join('')}</div>`;
     if(Math.round(r.wSum)!==100&&!subj.internalOnly) body+=`<div class="note" style="color:var(--warn); font-weight:700;">ℹ️ סה"כ משקלי הרכיבים: ${r.wSum}% — הציון הסופי מחושב בחלוקה יחסית (למשל אחרי הוספת עבודה נוספת)</div>`;
   }
-  const finalHtml=u===0?'':`${subj.internalOnly&&!state.includeInternal?'<span class="pill">לא נכלל בממוצע</span> ':''}${custom?'<span class="badge b-pot">מותאם אישית</span> ':''}<span class="${gradeClass(r.final)}" style="font-size:15px; font-weight:800;" title="${r.raw!==null?'לפני עיגול: '+r.raw:''}">${fmt(r.final)}</span>${r.blocker&&!subj.internalOnly?' <span class="badge b-bad">מעכב</span>':''}${r.missing?' <span class="badge b-miss">חסר</span>':''}`;
+  const finalHtml=u===0?'':`${subj.internalOnly&&!state.includeInternal?'<span class="pill">לא נכלל בממוצע</span> ':''}${custom?'<span class="badge b-pot">מותאם אישית</span> ':''}<span style="font-size:15px; font-weight:800;" title="${r.raw!==null?'לפני עיגול: '+r.raw:''}">${scoreCell(r)}</span>${r.blocker&&!subj.internalOnly?' <span class="badge b-bad">מעכב</span>':''}${r.missing?` <span class="badge b-miss">חסרים ${r.missing}</span>`:''}`;
   const resetBtn=custom?`<button class="btn sec sm" onclick="event.stopPropagation();resetOv('${st.id}','${subj.id}')" title="ביטול ההתאמות האישיות במקצוע זה">↩️ איפוס התאמות</button>`:'';
   const tA=testAvg(st,subj.id), tNn=testsOf(st,subj.id).length;
   const testChip=(u!==0&&!subj.internalOnly)?`<button class="btn sec sm" onclick="event.stopPropagation();openTestsDlg('${st.id}','${subj.id}')" title="ציוני מבחנים בכיתה — לחיזוי בלבד, לא נכנסים לציון" style="${tNn?'border-color:#c4b5fd; background:#faf5ff; color:#6d28d9;':''}">📝 מבחנים${tNn?`: ${tA} (${tNn})`:''}</button>`:'';
@@ -2096,8 +2134,8 @@ function entryGrid(subj,studs){
       }
     });
     const flIc=(r.flips&&r.flips.length)?' <span title="היפוך אחוזים לטובת הבחינה ב: '+esc(r.flips.map(f=>f.comp).join(', '))+'">🔀</span>':'';
-    const stat=u===0?'—':r.blocker?'<span class="badge b-bad">מעכב</span>':r.missing?'<span class="badge b-miss">חסר</span>':r.borderline?'<span class="badge b-warn">גבולי</span>':(r.final>state.thresholds.excel?'<span class="badge b-exc">מצוין</span>':'<span class="badge b-ok">תקין</span>');
-    tds+=`<td class="${gradeClass(u===0?null:r.final)}" id="fin-${st.id}" style="font-weight:800;">${u===0?'—':fmt(r.final)}${flIc}</td><td>${stat}</td>`;
+    const stat=u===0?'—':r.blocker?'<span class="badge b-bad">מעכב</span>':r.missing?`<span class="badge b-miss">חסרים ${r.missing}</span>`:r.borderline?'<span class="badge b-warn">גבולי</span>':(r.final>state.thresholds.excel?'<span class="badge b-exc">מצוין</span>':'<span class="badge b-ok">תקין</span>');
+    tds+=`<td id="fin-${st.id}" style="font-weight:800;">${u===0?'<span style="color:#cbd5e1;">—</span>':scoreCell(r)}${flIc}</td><td>${stat}</td>`;
     return `<tr>${tds}</tr>`;
   }).join('');
   return `<table class="tbl grades"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
@@ -2543,8 +2581,8 @@ function simGrid(subj,studs){
       <button class="btn sec sm" style="padding:1px 8px; font-size:10.5px; border-color:#c4b5fd; color:#6d28d9;" onclick="event.stopPropagation();openTestsDlg('${st.id}','${subj.id}')" title="ניהול מבחנים, בחנים ועבודות">${tN?'✏️ ניהול':'➕ הוספה'}</button>
     </div></td>`;
     const diff=u!==0&&rReal.final!==rSim.final;
-    tds+=`<td class="${gradeClass(u===0?null:rReal.final)}">${u===0?'—':fmt(rReal.final)}</td>
-    <td class="${gradeClass(u===0?null:rSim.final)}" style="font-weight:800; ${diff?'background:#fff7ed;':''}">${u===0?'—':fmt(rSim.final)}${diff?' 🔶':''}</td>`;
+    tds+=`<td>${u===0?'<span style="color:#cbd5e1;">—</span>':scoreCell(rReal)}</td>
+    <td style="font-weight:800; ${diff?'background:#fff7ed;':''}">${u===0?'<span style="color:#cbd5e1;">—</span>':scoreCell(rSim)}${diff?' 🔶':''}</td>`;
     return `<tr>${tds}</tr>`;
   }).join('');
   return `<table class="tbl grades"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
@@ -2795,10 +2833,15 @@ function buildReportHtml(cls){
   <div class="scroll" style="max-height:none;">
   <table class="tbl grades"><thead><tr><th>שם</th><th>כיתה</th>${SUBJECTS.map(s=>`<th>${esc(s.name)}</th>`).join('')}<th>ממוצע</th><th>סטטוס</th></tr></thead><tbody>
   ${results.map(x=>`<tr><td style="font-weight:700;">${esc(x.st.name)}</td><td>${esc(x.st.cls)}</td>
-    ${SUBJECTS.map(s=>{const r=x.r.per[s.id]; if(!r||!r.active)return '<td style="color:#cbd5e1;">—</td>'; return `<td class="${gradeClass(r.final)}">${fmt(r.final)}</td>`;}).join('')}
-    <td class="${gradeClass(x.r.avg)}" style="font-weight:800;">${fmt(x.r.avg)}</td>
+    ${SUBJECTS.map(s=>{const r=x.r.per[s.id]; if(!r||!r.active)return '<td style="color:#cbd5e1;">—</td>';
+      const nt=subjNote(x.st,s.id);
+      return `<td ${nt?`class="hasNote" title="${esc(nt)}"`:''}>${scoreCellReport(r)}${nt?' <span style="color:#f59e0b; font-size:11px;" title="'+esc(nt)+'">📝</span>':''}</td>`;}).join('')}
+    <td class="${gradeClass(x.r.avg)}" style="font-weight:800;">${fmt(x.r.avg)}${(!x.r.complete&&x.r.avg!==null)?'<sup style="opacity:.55;">*</sup>':''}</td>
     <td><span class="badge ${x.r.cls}">${x.r.status}</span></td></tr>`).join('')}
   </tbody></table></div>
+  ${(()=>{const np=results.reduce((a,x)=>a+SUBJECTS.filter(s=>{const r=x.r.per[s.id]; return r&&r.active&&r.final===null&&r.partial!==null;}).length,0);
+    return np?`<div class="note" style="margin-top:6px;">📝 — יש הערה (מעבר עכבר מציג אותה; הרשימה המלאה בהמשך) &nbsp;·&nbsp; <span class="rep-part">00<sup>*</sup></span> — <b>ציון חלקי</b>: טרם הוזנו כל רכיבי המקצוע. ציונים אלה אינם נכללים בממוצע, בזכאות ובספירת המצטיינות (${np} מקצועות).</div>`
+      :(results.some(x=>SUBJECTS.some(s=>subjNote(x.st,s.id)))?`<div class="note" style="margin-top:6px;">📝 — יש הערה על המקצוע (מעבר עכבר מציג אותה; הרשימה המלאה בהמשך).</div>`:'');})()}
   <div class="grid2" style="margin-top:16px;">
     <div>
       <h3 class="sec">⭐ מצטיינות (${exc.length})</h3>
@@ -2836,6 +2879,9 @@ function reportText(cls){
   let t=`${reportTitle()} — ${cls||'כל השכבה'} (${new Date().toLocaleDateString('he-IL')})\n`;
   if(state.coord) t+=`רכזת פדגוגית: ${state.coord}\n`;
   t+=`תלמידות: ${n} | זכאיות: ${elig} (${Math.round(elig/n*100)}%) | מצטיינות: ${exc.length} | פוטנציאל: ${pot.length} | עם מעכבים: ${blocked.length} | ממוצע: ${avgAll??'—'}\n\n`;
+  const partN=results.reduce((a,x)=>a+SUBJECTS.filter(s=>{const r=x.r.per[s.id]; return r&&r.active&&r.final===null&&r.partial!==null;}).length,0);
+  if(partN) t+=`(${partN} מקצועות עם ציון חלקי — טרם הוזנו כל הרכיבים)\n`;
+  t+='\n';
   if(exc.length) t+='⭐ מצטיינות:\n'+exc.sort((a,b)=>b.r.avg-a.r.avg).map(x=>`  ${x.st.name} (${x.st.cls}) — ${x.r.avg}`).join('\n')+'\n\n';
   if(pot.length) t+='💜 פוטנציאל הצטיינות:\n'+pot.sort((a,b)=>b.r.avg-a.r.avg).map(x=>`  ${x.st.name} (${x.st.cls}) — ${x.r.avg}`).join('\n')+'\n\n';
   if(blocked.length) t+='🚨 עם מקצועות מעכבים:\n'+blocked.map(x=>`  ${x.st.name} (${x.st.cls}) — ${x.r.blockers.map(s=>s.name).join(', ')}`).join('\n')+'\n';
@@ -2855,7 +2901,7 @@ function renderSettings(m){
   m.innerHTML=`
   <div class="card" style="margin-bottom:14px; border:2px solid var(--ok);">
     <h2 class="sec">${ic('save',19)}מצב השמירה — האם הנתונים שלי בטוחים?</h2>
-    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>3.0</b> · 01.09.2026</span>
+    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>3.3</b> · 01.09.2026</span>
     <span class="note">אחרי העלאת גרסה חדשה — רעננו את הדף (Ctrl+F5) וּודאו שהמספר כאן התעדכן.</span></div>
     <div id="storageBox">${storageStatusHtml()}</div>
     ${(()=>{const b=lastBackupInfo(); const cur=countAllStudents();
@@ -2957,6 +3003,11 @@ function renderSettings(m){
     </div>
     <div class="note"><b>עיגול:</b> הציון הסופי בכל מקצוע מעוגל למספר שלם — 85.5 ← 86, 85.4 ← 85. הממוצע המשוקלל מחושב מהציונים המעוגלים ומוצג בדיוק של ספרה אחת.</div>
     <div class="note">ברירת המחדל למעכב היא 54.5 (כלומר ציון סופי 55 ומעלה נחשב עובר) — כפי שמוגדר בסימולטור המקורי.</div>
+    <div class="toolbar" style="margin-top:8px; background:#f8fafc; padding:8px 10px; border-radius:10px; border:1px solid var(--line);">
+      <label><input type="checkbox" ${state.countBlue!==false?'checked':''} onchange="state.countBlue=this.checked;save();render();">
+      לכלול <span class="g-blue">ציונים כחולים (פיקטיביים)</span> בחישוב הציון והזכאות</label>
+    </div>
+    <div class="note">ציונים <b>שחורים</b> (דווחו למשרד) ו<b>אדומים</b> (אמיתיים שטרם דווחו) נספרים <b>תמיד</b> — הצבע הוא סימון ניהולי בלבד. רק הכחולים ניתנים להחרגה: כשהאפשרות כבויה הם נחשבים כ"לא הוזן" והמקצוע יוצג כחלקי.</div>
     <div class="toolbar" style="margin-top:8px; background:#fffbeb; padding:8px 10px; border-radius:10px; border:1px solid #fcd34d;">
       <label><input type="checkbox" ${state.flipFav?'checked':''} onchange="state.flipFav=this.checked;save();render();">
       <b>🔀 היפוך אחוזים לטובת הבחינה</b> — כשציון הבחינה גבוה מציון המגן, המשקל הגדול עובר לבחינה</label>
@@ -3546,11 +3597,18 @@ function renderHelp(m){
     <span style="color:#111; font-weight:800;">■ שחור</span> — ציון שכבר דווח למשרד החינוך · <span style="color:#dc2626; font-weight:800;">■ אדום</span> — ציון אמיתי ונכון שטרם דווח · <span style="color:#1d4ed8; font-weight:800;">■ כחול</span> — ציון פיקטיבי / הערכה.<br>
     הצבעים מוצגים בטבלת ההזנה ובכרטיס התלמידה. לשינוי: <b>לחיצה ימנית</b> על הציון בטבלה, או כפתור העיגול הצבעוני בכרטיס התלמידה (⚫→🔴→🔵).<br>
     בלשונית ההתראות תקבלי סיכום: כמה ציונים טרם דווחו וכמה פיקטיביים — וגם בייצוא לאקסל יש עמודת "סימון".`)}
+  ${step('🔢','ציון חלקי — רואים גם באמצע הדרך',`
+    כשעדיין לא הוזנו כל הרכיבים במקצוע, מוצג <b>ציון חלקי</b> — מודגש בקו מקווקו עם תג "חלקי 30%", כלומר הציון מבוסס על 30% מהמשקל בלבד (למשל רק ההערכה הפנימית).<br>
+    <b>למה הוא נראה אחרת?</b> כדי שלא יתבלבל עם ציון סופי. הציון החלקי הוא <b>לא</b> תחזית ו<b>לא</b> נכנס לממוצע, לזכאות או לספירת המצטיינות — שם נספרים רק מקצועות שהושלמו במלואם.<br>
+    רוצה לראות תחזית מלאה גם למקצועות חסרים? זה בדיוק תפקיד <b>🔮 החיזוי האוטומטי</b> בלשונית הסימולציה.`)}
   ${step('📝','הערות לכל ציון',`
     בכל קובייה, בשורת הסמל, יש כפתור <b>📝</b>. לחיצה פותחת חלון כתיבה חופשי — "נעדרה מהמבחן, מועד ב'", "אישור ועדת חריגים", "הציון טרם סופי".<br>
     כשיש הערה הכפתור נצבע כתום עם נקודה, ובטבלת ההזנה מופיע <b>משולש כתום</b> בפינת התא — כך רואים מיד שיש הערה בלי להיכנס לכרטיס (מעבר עכבר מציג אותה).<br>
     יש גם <b>הערה כללית למקצוע</b> — הכפתור 📝 שליד שם המקצוע בכותרת.<br>
-    כל ההערות נכללות ב<b>ייצוא לאקסל</b> וב<b>דוח המודפס</b>, בטבלה ייעודית בסופו.`)}
+    <b>בדוחות:</b> ליד ציון המקצוע מופיע סימן <b>📝</b> ומשולש כתום בפינה; מעבר עכבר מציג את ההערה המלאה (כולל הערות הרכיבים והערת המקצוע יחד). בסוף הדוח יש טבלת "📝 הערות" עם כולן, וגם בייצוא לאקסל.`)}
+  ${step('🎨','אילו צבעים נספרים בחישוב',`
+    <b>שחור</b> (דווח למשרד) ו<b>אדום</b> (אמיתי, טרם דווח) — נספרים <b>תמיד</b>. הצבע הוא סימון ניהולי בלבד ואינו משנה ציון.<br>
+    <b>כחול</b> (פיקטיבי / הערכה) — כברירת מחדל גם הוא נספר, אבל בהגדרות אפשר לכבות: אז הוא נחשב כ"לא הוזן", והמקצוע יוצג כ<b>חלקי</b> עד שיגיע הציון האמיתי. שימושי כשרוצים לראות את התמונה האמיתית בלבד.`)}
   ${step('➖','הסרה והחזרה של רכיבים',`
     לא צריך רכיב מסוים אצל תלמידה? מעבירים עכבר על הקובייה ולוחצים על <b>✕</b> בפינה.<br>
     רכיב ללא משקל פשוט נעלם מהתצוגה — הציון לא משתנה.<br>
