@@ -345,7 +345,7 @@ body.print-mode #printArea{display:block; padding:20px; background:#fff;}
   <div class="hint"><span><kbd>↑</kbd><kbd>↓</kbd> ניווט</span><span><kbd>Enter</kbd> פתיחה</span><span><kbd>Esc</kbd> סגירה</span><span style="margin-inline-start:auto;">Ctrl+K</span></div>
 </div></div>
 <div class="toast" id="toast"></div>
-<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 2.7</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
+<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 2.8</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
 <script>
 "use strict";
 /* ============ מודל המקצועות ============ */
@@ -880,6 +880,43 @@ function renderSaveInd(){
 }
 function uid(){ return 's'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
+
+/* ============ זיהוי כפל שמות ============ */
+function dupGroups(){
+  const byKey={}, byName={};
+  state.students.forEach(s=>{
+    const n=normName(s.name);
+    if(!n) return;
+    (byKey[s.cls+'|'+n]=byKey[s.cls+'|'+n]||[]).push(s);   // אותה כיתה — חמור
+    (byName[n]=byName[n]||[]).push(s);                      // כל הסימולטור
+  });
+  const sameClass=Object.values(byKey).filter(a=>a.length>1);
+  const crossClass=Object.values(byName).filter(a=>a.length>1&&!sameClass.some(g=>g[0]===a[0]));
+  return {sameClass,crossClass};
+}
+function dupBanner(){
+  const d=dupGroups();
+  if(!d.sameClass.length&&!d.crossClass.length) return '';
+  const line=(g,cross)=>`<div class="alert-item ${cross?'al-warn':'al-bad'}">
+    <b>${esc(g[0].name)}</b> — ${g.length} תלמידות ${cross?`בכיתות: ${g.map(s=>esc(s.cls)).join(', ')}`:`באותה כיתה (${esc(g[0].cls)})`}
+    <span style="margin-inline-start:auto; display:flex; gap:5px;">
+      ${g.map((s,i)=>`<button class="btn sec sm" style="padding:2px 8px; font-size:11px;" onclick="openStudent('${s.id}')">פתיחת #${i+1}</button>`).join('')}
+      <button class="btn sec sm" style="padding:2px 8px; font-size:11px;" onclick="renameDup('${g[g.length-1].id}')">✏️ שינוי שם</button>
+    </span></div>`;
+  return `<div class="card" style="margin-bottom:14px; border:2px solid var(--bad);">
+    <h3 class="sec" style="color:var(--bad);">⚠️ נמצאו שמות כפולים</h3>
+    <div class="note" style="margin-bottom:8px;">שתי תלמידות עם אותו שם עלולות לגרום לטעויות בייבוא ציונים — הציון עלול להיכתב לתלמידה הלא נכונה. מומלץ להוסיף אות או שם משפחה מלא כדי להבחין ביניהן.</div>
+    ${d.sameClass.map(g=>line(g,false)).join('')}
+    ${d.crossClass.map(g=>line(g,true)).join('')}
+  </div>`;
+}
+function renameDup(id){
+  const st=state.students.find(s=>s.id===id); if(!st) return;
+  const v=prompt('שם חדש לתלמידה:',st.name);
+  if(v===null||!v.trim()) return;
+  pushUndo('שינוי שם — '+st.name);
+  st.name=v.trim(); save(); render(); toast('השם עודכן');
+}
 
 /* ============ ביטול פעולה (Undo) ============ */
 let undoStack=[];
@@ -1519,6 +1556,7 @@ function renderDash(m){
       <button class="btn sec" onclick="setTab('help')">❓ מדריך למשתמש</button>
     </div>
   </div>`:''}
+  ${dupBanner()}
   <div class="kpis">
     <div class="kpi k1"><div class="ico">${ic('users',24)}</div><div class="txt">${kpiNum(n)}<div class="t">תלמידות</div></div></div>
     <div class="kpi k2"><div class="ico">${ic('shield',24)}</div><div class="txt">${kpiNum(elig)}<div class="t">זכאיות${n?` · ${Math.round(elig/n*100)}%`:''}</div></div></div>
@@ -1612,6 +1650,7 @@ function renderStudents(m){
       <button class="btn bad sm" onclick="factoryReset()" title="מוחק את כל הסימולטורים והנתונים במכשיר הזה ומחזיר תוכנה נקייה">${ic('trash',15)}איפוס מלא (הכול)</button></div>
     </div>
   </div>
+  ${dupBanner()}
   <div class="card" style="margin-top:14px;">
     <h3 class="sec">כל התלמידות (${state.students.length})</h3>
     <div class="scroll">${allStudentsTable()}</div>
@@ -1639,6 +1678,8 @@ function addStudent(){
   const cls=sel?sel.value:'';
   if(!name){toast('נא להזין שם');return;}
   if(!cls){toast('קודם צרי כיתה — בחלונית "ניהול כיתות" משמאל');return;}
+  const ex=state.students.filter(s=>normName(s.name)===normName(name));
+  if(ex.length&&!confirm(`⚠️ כבר קיימת תלמידה בשם "${name}"${ex.some(s=>s.cls===cls)?' באותה כיתה':' (בכיתה '+ex[0].cls+')'}.\n\nשמות כפולים עלולים לגרום לטעויות בייבוא ציונים.\nלהוסיף בכל זאת?`)) return;
   state.students.push({id:uid(),name,cls,units:{},mugbarNames:{},grades:{}});
   save(); render(); toast('נוספה: '+name);
 }
@@ -1648,6 +1689,9 @@ function bulkAdd(){
   if(!cls){toast('קודם צרי כיתה — בחלונית "ניהול כיתות" משמאל');return;}
   const names=document.getElementById('bulkNames').value.split('\n').map(s=>s.trim()).filter(Boolean);
   if(!names.length){toast('לא הודבקו שמות');return;}
+  const dups=names.filter(n=>state.students.some(s=>normName(s.name)===normName(n))||names.filter(x=>normName(x)===normName(n)).length>1);
+  if(dups.length&&!confirm(`⚠️ ${[...new Set(dups)].length} שמות כפולים ברשימה או קיימים כבר:\n${[...new Set(dups)].slice(0,8).join(', ')}\n\nלהוסיף בכל זאת?`)) return;
+  pushUndo('הוספת '+names.length+' תלמידות');
   names.forEach(name=>state.students.push({id:uid(),name,cls,units:{},mugbarNames:{},grades:{}}));
   save(); render(); toast(`נוספו ${names.length} תלמידות ל${cls}`);
 }
@@ -1726,13 +1770,13 @@ function studentSubjEditor(st,subj){
       const wOv=po.w!==undefined&&po.w!==null&&po.w!=='';
       const sOv=po.s!==undefined&&po.s!==null&&po.s!=='';
       const codeIn=`<div class="comp-inputs" style="margin-top:4px;">סמל ${codeSelect(st,key)}</div>`;
-      const wIn=`משקל <input type="number" min="0" max="100" style="width:52px; ${wOv?'border-color:var(--brand2); background:#f5f3ff; font-weight:700;':''}" value="${wOv?po.w:''}" placeholder="${baseComps[i].w}" title="ברירת מחדל: ${baseComps[i].w}% — הזנת ערך יוצרת התאמה אישית לתלמידה זו" onchange="setOv('${st.id}','${key}','w',this.value)">%`;
+      const wIn=`משקל <input type="number" min="0" max="100" data-k="w:${key}" style="width:52px; ${wOv?'border-color:var(--brand2); background:#f5f3ff; font-weight:700;':''}" value="${wOv?po.w:''}" placeholder="${baseComps[i].w}" title="ברירת מחדל: ${baseComps[i].w}% — הזנת ערך יוצרת התאמה אישית לתלמידה זו" onchange="setOv('${st.id}','${key}','w',this.value)">%`;
       const stBtn=k=>{ const s=gstatOf(st,k); const ic=s?GSTAT[s].ic:'⚫';
-        return `<button class="btn sec sm" style="padding:2px 6px; font-size:11px;" onclick="cycleGstat('${st.id}','${k}')" title="${s?esc(GSTAT[s].lbl):'דווח למשרד'} — לחצי להחלפה">${ic}</button>`; };
+        return `<button class="btn sec sm" data-k="s:${k}" style="padding:2px 6px; font-size:11px;" onclick="cycleGstat('${st.id}','${k}')" title="${s?esc(GSTAT[s].lbl):'דווח למשרד'} — לחצי להחלפה">${ic}</button>`; };
       if(c.t==='i'){
         return `<div class="comp-box" ${wOv?'style="border-color:var(--brand2);"':c.b?'style="background:#f0fdf4; border-color:#86efac;"':''}>
         <button class="compHide" onclick="hideComp('${st.id}','${key}',${c.w||0},'${esc(c.n).replace(/'/g,"")}')" title="הסרת הרכיב">✕</button><div class="cn">${esc(c.n)}${c.b&&!c.w?' <span class="pill" style="background:#dcfce7; color:#166534;">לשיפור ציון — הזיני משקל להפעלה</span>':''}</div>
-        <div class="comp-row"><span class="lbl">ציון</span><input type="number" min="0" max="100" class="${gstatCls(st,key).trim()}" value="${g[key]??''}" onchange="setGrade('${st.id}','${key}',this.value)">${stBtn(key)}
+        <div class="comp-row"><span class="lbl">ציון</span><input type="number" min="0" max="100" data-k="${key}" class="${gstatCls(st,key).trim()}" value="${g[key]??''}" onchange="setGrade('${st.id}','${key}',this.value)">${stBtn(key)}
         ${(()=>{const dv=(r.details||[])[i]; const v=dv&&dv.val!==null&&dv.val!==undefined?dv.val:null;
           return (v!==null&&c.w)?`<span class="pill" title="תרומה לציון הסופי">= ${Math.round(v*c.w/100*10)/10} נק׳ מתוך ${c.w}</span>`:'';})()}</div>
         <div class="comp-row"><span class="lbl">משקל</span>${wIn}</div>
@@ -1752,8 +1796,8 @@ function studentSubjEditor(st,subj){
         <span class="${gradeClass(cVal)}" style="font-size:14px;">${cVal===null?'—':cVal}</span>
         ${contrib!==null?`<span class="pill" title="תרומת הרכיב לציון הסופי במקצוע: ${cVal} × ${c.w}%">= ${contrib} נק׳ מתוך ${c.w}</span>`:''}
       </div>`;
-      const rowM=eff>0?`<div class="comp-row"><span class="lbl">ציון מגן</span><input type="number" min="0" max="100" class="${gstatCls(st,key+'.m').trim()}" value="${g[key+'.m']??''}" onchange="setGrade('${st.id}','${key}.m',this.value)">${stBtn(key+'.m')}<span class="pill">${eff}%</span></div>`:'';
-      const rowE=eff<100?`<div class="comp-row"><span class="lbl">ציון בחינה</span><input type="number" min="0" max="100" class="${gstatCls(st,key+'.e').trim()}" value="${g[key+'.e']??''}" onchange="setGrade('${st.id}','${key}.e',this.value)">${stBtn(key+'.e')}<span class="pill">${100-eff}%</span>${eff===0?' <span class="pill" style="background:#e0e7ff; color:#3730a3;">ללא מגן — 100% בחינה</span>':''}</div>`:'';
+      const rowM=eff>0?`<div class="comp-row"><span class="lbl">ציון מגן</span><input type="number" min="0" max="100" data-k="${key}.m" class="${gstatCls(st,key+'.m').trim()}" value="${g[key+'.m']??''}" onchange="setGrade('${st.id}','${key}.m',this.value)">${stBtn(key+'.m')}<span class="pill">${eff}%</span></div>`:'';
+      const rowE=eff<100?`<div class="comp-row"><span class="lbl">ציון בחינה</span><input type="number" min="0" max="100" data-k="${key}.e" class="${gstatCls(st,key+'.e').trim()}" value="${g[key+'.e']??''}" onchange="setGrade('${st.id}','${key}.e',this.value)">${stBtn(key+'.e')}<span class="pill">${100-eff}%</span>${eff===0?' <span class="pill" style="background:#e0e7ff; color:#3730a3;">ללא מגן — 100% בחינה</span>':''}</div>`:'';
       return `<div class="comp-box" ${(wOv||sOv)?'style="border-color:var(--brand2); box-shadow:0 0 0 1px var(--brand2);"':''}>
       <button class="compHide" onclick="hideComp('${st.id}','${key}',${c.w||0},'${esc(c.n).replace(/'/g,"")}')" title="הסרת הרכיב">✕</button><div class="cn">${esc(c.n)}${c.w?'':' <span class="pill">כבוי — הזיני משקל להפעלה</span>'}${flBadge}</div>
       ${rowM}${rowE}${rowFinal}
@@ -1835,7 +1879,21 @@ function setMugbarName(id,sid,val){
 }
 function refreshOpenViews(id,full){
   const modal=document.getElementById('studentModal');
-  if(modal.classList.contains('show')) openStudent(id);
+  if(modal.classList.contains('show')){
+    // שמירת מיקום הגלילה והשדה הפעיל — כדי שלא נקפוץ להתחלה בכל שינוי
+    const body=document.querySelector('#studentBox .stBody');
+    const sc=body?body.scrollTop:0;
+    const ae=document.activeElement;
+    const ak=(ae&&ae.getAttribute)?ae.getAttribute('data-k'):null;
+    const sel=(ae&&ae.selectionStart!==undefined)?ae.selectionStart:null;
+    openStudent(id);
+    const nb=document.querySelector('#studentBox .stBody');
+    if(nb) nb.scrollTop=sc;
+    if(ak){
+      const el=document.querySelector('#studentBox [data-k="'+ak+'"]');
+      if(el){ el.focus(); try{ if(sel!==null&&el.setSelectionRange) el.setSelectionRange(sel,sel); }catch(e){} }
+    }
+  }
   else if(currentTab==='entry'&&full) render();
 }
 function closeStudent(){
@@ -2674,7 +2732,7 @@ function renderSettings(m){
   m.innerHTML=`
   <div class="card" style="margin-bottom:14px; border:2px solid var(--ok);">
     <h2 class="sec">${ic('save',19)}מצב השמירה — האם הנתונים שלי בטוחים?</h2>
-    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>2.7</b> · 01.09.2026</span>
+    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>2.8</b> · 01.09.2026</span>
     <span class="note">אחרי העלאת גרסה חדשה — רעננו את הדף (Ctrl+F5) וּודאו שהמספר כאן התעדכן.</span></div>
     <div id="storageBox">${storageStatusHtml()}</div>
     ${(()=>{const b=lastBackupInfo(); const cur=countAllStudents();
