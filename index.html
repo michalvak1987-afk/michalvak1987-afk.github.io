@@ -2,7 +2,21 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#4f46e5">
+<meta name="apple-mobile-web-app-title" content="בגרות">
+<meta name="application-name" content="בגרות">
+<!-- אייקון למסך הבית. אם קובצי ה-PNG הועלו לצד index.html — הם ישמשו;
+     אחרת נעשה שימוש בגרסה המוטמעת (עובדת באנדרואיד ובדפדפן) -->
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<link rel="manifest" href='data:application/manifest+json,{"name":"%D7%A1%D7%99%D7%9E%D7%95%D7%9C%D7%98%D7%95%D7%A8%20%D7%91%D7%92%D7%A8%D7%95%D7%AA","short_name":"%D7%91%D7%92%D7%A8%D7%95%D7%AA","start_url":".","display":"standalone","orientation":"any","background_color":"%23eef1f9","theme_color":"%234f46e5","dir":"rtl","lang":"he","icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}'>
 <title>סימולטור בגרות</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +37,7 @@
 nav.tabs button .ic{margin-inline-end:6px;}
 .kpi{display:flex; align-items:center; gap:13px;}
 .kpi .ico{width:46px; height:46px; border-radius:14px; display:flex; align-items:center; justify-content:center;
-  background:rgba(255,255,255,.22); border:1px solid rgba(255,255,255,.3); backdrop-filter:blur(6px);
+  background:rgba(255,255,255,.22); border:1px solid rgba(255,255,255,.3); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.35), 0 3px 10px rgba(0,0,0,.12); flex-shrink:0;
   transition:transform .34s cubic-bezier(.34,1.56,.64,1);}
 .kpi .ico svg{width:24px; height:24px; stroke-width:2.1;}
@@ -74,9 +88,9 @@ label:has(input[type=checkbox]){display:inline-flex; align-items:center; gap:9px
 .ring .rn{font-size:27px; font-weight:800; letter-spacing:-1px;}
 .ring .rl{font-size:11.5px; color:var(--muted); font-weight:700; margin-top:1px;}
 /* ===== חיפוש מהיר ===== */
-#cmdk{position:fixed; inset:0; background:rgba(15,23,42,.45); backdrop-filter:blur(6px); z-index:600; display:none; align-items:flex-start; justify-content:center; padding-top:12vh;}
+#cmdk{position:fixed; inset:0; background:rgba(15,23,42,.45); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); z-index:600; display:none; align-items:flex-start; justify-content:center; padding-top:12vh;}
 #cmdk.show{display:flex;}
-#cmdk .panel{background:rgba(255,255,255,.96); backdrop-filter:blur(24px) saturate(180%); width:min(620px,92vw); border-radius:20px;
+#cmdk .panel{background:rgba(255,255,255,.96); -webkit-backdrop-filter:blur(24px) saturate(180%); backdrop-filter:blur(24px) saturate(180%); width:min(620px,92vw); border-radius:20px;
   box-shadow:0 30px 80px rgba(15,23,42,.42); overflow:hidden; animation:sheetUp .22s cubic-bezier(.2,.9,.3,1.1) both; border:1px solid rgba(255,255,255,.7);}
 #cmdk input{width:100%; border:none; border-bottom:1px solid var(--line); border-radius:0; padding:17px 20px; font-size:16.5px; outline:none; background:transparent;}
 #cmdk .res{max-height:48vh; overflow:auto; padding:6px;}
@@ -101,7 +115,7 @@ header.app .sub{opacity:.85; font-size:12.5px;}
 #hdrActions{margin-inline-start:auto; display:flex; gap:8px; align-items:center; z-index:3;}
 .glassIcon{width:56px; height:56px; border-radius:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
   background:linear-gradient(145deg,rgba(255,255,255,.34),rgba(255,255,255,.12));
-  border:1px solid rgba(255,255,255,.45); backdrop-filter:blur(12px) saturate(180%);
+  border:1px solid rgba(255,255,255,.45); -webkit-backdrop-filter:blur(12px) saturate(180%); backdrop-filter:blur(12px) saturate(180%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.6), inset 0 -8px 16px rgba(255,255,255,.09), 0 8px 22px rgba(0,0,0,.22);
   position:relative; overflow:hidden; animation:floaty 4.5s ease-in-out infinite;}
 .glassIcon::before{content:''; position:absolute; top:-60%; left:-30%; width:80%; height:180%;
@@ -109,13 +123,13 @@ header.app .sub{opacity:.85; font-size:12.5px;}
 .glassIcon svg{width:28px; height:28px; stroke-width:2; filter:drop-shadow(0 2px 4px rgba(0,0,0,.25)); position:relative; z-index:1;}
 @keyframes sheen{0%,72%{left:-40%;}88%,100%{left:120%;}}
 .coordLine{display:inline-flex; align-items:center; gap:6px; margin-top:5px; font-size:12px; font-weight:700;
-  background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.3); border-radius:99px; padding:3px 12px; backdrop-filter:blur(8px);}
+  background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.3); border-radius:99px; padding:3px 12px; -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);}
 @media(max-width:1150px){#hdrCenter{position:static; transform:none; margin-inline-start:14px; text-align:right;} #hdrCenter .ttl{text-align:right;}}
 .hbtn{background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.3); color:#fff; border-radius:12px;
   padding:8px 12px; cursor:pointer; font-family:inherit; font-size:13px; font-weight:700; display:flex; align-items:center; gap:7px; transition:all .15s ease;}
 .hbtn:hover{background:rgba(255,255,255,.28); transform:translateY(-1px);}
 #subBar{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:8px 22px; position:relative; z-index:40;
-  background:rgba(255,255,255,.72); backdrop-filter:blur(16px); border-bottom:1px solid var(--line); font-size:12.5px;}
+  background:rgba(255,255,255,.72); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); border-bottom:1px solid var(--line); font-size:12.5px;}
 #profileSlot{display:flex; gap:6px; align-items:center; flex-wrap:wrap;}
 #saveInd{cursor:pointer; background:#eef7f1; border:1px solid #cfe8db; color:#0f5132; border-radius:10px; padding:4px 10px; font-size:11.5px; line-height:1.3; white-space:nowrap;}
 #hdrMenu{display:none; position:absolute; inset-inline-end:0; top:calc(100% + 10px); background:#fff; border:1px solid var(--line);
@@ -125,14 +139,14 @@ header.app .sub{opacity:.85; font-size:12.5px;}
 #hdrMenu .mi:hover{background:var(--soft);}
 #hdrMenu .sep{height:1px; background:var(--line); margin:5px 8px;}
 #hdrMenu .lbl{font-size:11px; color:var(--muted); padding:6px 12px 3px; font-weight:800;}
-nav.tabs{display:flex; gap:5px; background:rgba(255,255,255,.72); backdrop-filter:blur(22px) saturate(180%); -webkit-backdrop-filter:blur(22px) saturate(180%); padding:9px 18px; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:30; overflow-x:auto; box-shadow:0 2px 12px rgba(30,41,80,.05);}
+nav.tabs{display:flex; gap:5px; background:rgba(255,255,255,.72); -webkit-backdrop-filter:blur(22px) saturate(180%); backdrop-filter:blur(22px) saturate(180%); -webkit--webkit-backdrop-filter:blur(22px) saturate(180%); backdrop-filter:blur(22px) saturate(180%); padding:9px 18px; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:30; overflow-x:auto; box-shadow:0 2px 12px rgba(30,41,80,.05);}
 nav.tabs button{border:none; background:transparent; padding:9px 16px; border-radius:10px; font-size:14px; font-weight:600; color:var(--muted); cursor:pointer; white-space:nowrap; font-family:inherit;}
 nav.tabs button{transition:all .18s ease;}
 nav.tabs button.active{background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; box-shadow:0 4px 14px rgba(79,70,229,.35); transform:translateY(-1px);}
 nav.tabs button:hover:not(.active){background:var(--soft); color:var(--ink);}
 main{padding:20px; max-width:1500px; margin:0 auto;}
 .row{display:flex; gap:14px; flex-wrap:wrap;}
-.card{background:rgba(255,255,255,.86); backdrop-filter:blur(14px) saturate(150%); -webkit-backdrop-filter:blur(14px) saturate(150%); border:1px solid rgba(255,255,255,.75); border-radius:20px; padding:17px; box-shadow:var(--sh); animation:fadeUp .3s ease both; transition:box-shadow .2s ease;}
+.card{background:rgba(255,255,255,.86); -webkit-backdrop-filter:blur(14px) saturate(150%); backdrop-filter:blur(14px) saturate(150%); -webkit--webkit-backdrop-filter:blur(14px) saturate(150%); backdrop-filter:blur(14px) saturate(150%); border:1px solid rgba(255,255,255,.75); border-radius:20px; padding:17px; box-shadow:var(--sh); animation:fadeUp .3s ease both; transition:box-shadow .2s ease;}
 .card{transition:transform .34s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease;}
 .card:hover{box-shadow:var(--sh2);}
 .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px;}
@@ -179,6 +193,8 @@ table.tbl tr:hover td{background:#f2f6ff;}
 .grade-part{color:#475569; font-style:italic; border-bottom:2px dotted #94a3b8; cursor:help;}
 .rep-part{opacity:.5; font-style:italic; font-weight:700;}
 .rep-part sup{font-size:9px; opacity:.9;}
+.tipx{cursor:help; text-decoration:underline dotted 1px; text-underline-offset:3px;}
+.tipx:hover{color:var(--brand);}
 .partTag{background:#f1f5f9; border:1px dashed #cbd5e1; color:#475569; border-radius:99px; padding:1px 7px; font-size:10px; font-weight:700; white-space:nowrap;}
 input[type=number], select, input[type=text], textarea{border:1.5px solid #d6deec; border-radius:9px; padding:6px 9px; font-size:13px; font-family:inherit; background:#fff; color:var(--ink); transition:border-color .15s ease, box-shadow .15s ease;}
 input[type=number]:hover, select:hover, input[type=text]:hover{border-color:#a9b8d4;}
@@ -209,7 +225,91 @@ button.btn.sm{padding:5px 10px; font-size:12px; border-radius:8px;}
 .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
 .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
 @media(max-width:1000px){.grid2,.grid3{grid-template-columns:1fr;}}
-@media(max-width:820px){.hide-sm{display:none;} header.app{padding:12px 16px;} #subBar{padding:7px 14px;} header.app h1{font-size:18px;} header.app .sub{display:none;}}
+/* ===================== התאמה לנייד וטאבלט ===================== */
+*{-webkit-tap-highlight-color:rgba(79,70,229,.12);}
+button,select,input,.hbtn,nav.tabs button,.noteBtn,.compHide{touch-action:manipulation;}
+.scroll,nav.tabs{-webkit-overflow-scrolling:touch;}
+body{padding-bottom:env(safe-area-inset-bottom);}
+header.app{padding-top:calc(14px + env(safe-area-inset-top));}
+
+/* עמודת השם דביקה — כדי שלא תיעלם בגלילה אופקית */
+table.tbl.grades th:first-child,table.tbl.grades td:first-child{
+  position:sticky; inset-inline-start:0; z-index:3;
+  background:#fff; box-shadow:1px 0 0 var(--line), -1px 0 0 var(--line);}
+table.tbl.grades thead th:first-child{z-index:5; background:linear-gradient(180deg,#f4f7fd,#eaf0fa);}
+table.tbl.grades tr:hover td:first-child{background:#f2f6ff;}
+
+/* בלחיצה במקום מעבר עכבר: כפתורי הסרה גלויים תמיד במסך מגע */
+@media (hover:none){
+  .comp-box .compHide{display:flex;}
+  .gstatDot{display:inline-flex !important;}
+}
+
+@media(max-width:820px){
+  .hide-sm{display:none;}
+  header.app{padding-inline:14px; min-height:auto; gap:10px;}
+  header.app h1{font-size:17px;}
+  header.app .sub{display:none;}
+  .coordLine{font-size:11px; padding:2px 9px;}
+  .glassIcon{width:42px; height:42px; border-radius:13px;}
+  .glassIcon svg{width:21px; height:21px;}
+  #subBar{padding:6px 12px; gap:7px; font-size:11.5px;}
+  #subBar select{max-width:120px !important;}
+  main{padding:12px 10px;}
+  nav.tabs{padding:7px 10px; gap:4px;}
+  nav.tabs button{padding:9px 12px; font-size:13px; min-height:42px;}
+  nav.tabs button .ic{margin-inline-end:4px;}
+  .card{padding:13px; border-radius:16px;}
+  .kpis{grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:9px;}
+  .kpi{padding:12px 13px; border-radius:18px; gap:10px;}
+  .kpi .n{font-size:24px;}
+  .kpi .ico{width:40px; height:40px; border-radius:12px;}
+  .kpi .ico svg{width:21px; height:21px;}
+  .ring{width:104px; height:104px;}
+  .ring svg{width:104px; height:104px;}
+  .ring .rn{font-size:21px;}
+  .ring-wrap{gap:12px;}
+  .chartbox{height:230px;}
+  h2.sec{font-size:15px;} h3.sec{font-size:13.5px;}
+  /* ⚠️ קריטי לאייפון: פונט קטן מ-16px גורם לספארי להגדיל את כל העמוד בכל הקלקה */
+  input[type=number],input[type=text],select,textarea{font-size:16px !important;}
+  input[type=number]{width:58px; height:42px;}
+  .gcell input[type=number]{width:58px; height:42px; font-size:16px !important;}
+  .comp-row input[type=number]{width:64px; height:40px;}
+  button.btn{padding:10px 15px; min-height:42px;}
+  button.btn.sm{padding:7px 11px; min-height:36px; font-size:12.5px;}
+  table.tbl th,table.tbl td{padding:6px 5px; font-size:12.5px;}
+  .dense .gcell input[type=number]{height:36px; font-size:15px !important;}
+  .comp-grid{grid-template-columns:1fr; gap:9px;}
+  .toolbar{gap:8px;}
+  .toolbar label{font-size:12.5px;}
+  /* חלונות כ"גלילון" מלמטה — סטנדרט iOS */
+  #studentModal,#giModal,#tdModal,#ndModal,#vfModal{align-items:flex-end; padding:0;}
+  #studentModal .box,#giModal .box,#tdModal .box,#ndModal .box,#vfModal .box{
+    border-radius:22px 22px 0 0; max-width:none; max-height:92dvh; padding:16px;
+    padding-bottom:calc(16px + env(safe-area-inset-bottom));}
+  #studentModal .box{padding:0;}
+  .stHead{border-radius:22px 22px 0 0; padding:14px 16px 10px;}
+  .stBody{padding:12px 16px calc(20px + env(safe-area-inset-bottom));}
+  .stHead::before{content:''; display:block; width:38px; height:4px; border-radius:99px; background:#cbd5e1; margin:0 auto 10px;}
+  #wzModal{padding:10px;}
+  #wzModal .box{padding:16px; max-height:94dvh;}
+  #cmdk{padding-top:6vh;}
+  #cmdk .panel{width:96vw;}
+  #cmdk input{font-size:16px;}
+  .card.tblfull .scroll{max-height:calc(100dvh - 150px) !important;}
+  footer{padding:14px 12px calc(14px + env(safe-area-inset-bottom));}
+  .toast{left:12px; right:12px; bottom:calc(14px + env(safe-area-inset-bottom)); text-align:center;}
+}
+@media(max-width:430px){
+  .kpis{grid-template-columns:1fr 1fr;}
+  .kpi .n{font-size:21px;}
+  .kpi .t{font-size:11px;}
+  .ring{width:92px; height:92px;} .ring svg{width:92px; height:92px;} .ring .rn{font-size:18px;}
+  nav.tabs button{padding:9px 10px; font-size:12.5px;}
+  table.tbl th,table.tbl td{font-size:12px; padding:5px 4px;}
+  .grid2,.grid3{grid-template-columns:1fr;}
+}
 .alert-item{display:flex; gap:10px; align-items:center; padding:9px 13px; border-radius:11px; margin-bottom:7px; font-size:13px; transition:transform .12s ease;}
 .alert-item:hover{transform:translateX(-3px);}
 .al-bad{background:#fef2f2; border-right:4px solid var(--bad);}
@@ -229,9 +329,18 @@ button.btn.sm{padding:5px 10px; font-size:12px; border-radius:8px;}
 .delta-dn{color:var(--bad); font-weight:800;}
 .name-link{color:var(--brand); font-weight:700; cursor:pointer; text-decoration:none;}
 .name-link:hover{text-decoration:underline;}
+#wzModal{position:fixed; inset:0; background:rgba(15,23,42,.6); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); z-index:800; display:none; align-items:center; justify-content:center; padding:20px;}
+#wzModal.show{display:flex;}
+#wzModal .box{background:#fff; border-radius:24px; max-width:600px; width:100%; padding:22px; max-height:90vh; overflow:auto; box-shadow:0 30px 80px rgba(15,23,42,.45); animation:sheetUp .3s cubic-bezier(.2,.9,.3,1.1) both;}
+#vfModal{position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:225; display:none; align-items:flex-start; justify-content:center; padding:28px 15px; overflow:auto;}
+#vfModal.show{display:flex;}
+#vfModal .box{background:#fff; border-radius:22px; max-width:760px; width:100%; padding:20px; max-height:90vh; overflow:auto; box-shadow:0 24px 60px rgba(15,23,42,.4); animation:sheetUp .24s cubic-bezier(.2,.9,.3,1.1) both;}
 #ndModal{position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:230; display:none; align-items:flex-start; justify-content:center; padding:40px 15px; overflow:auto;}
 #ndModal.show{display:flex;}
 #ndModal .box{background:#fff; border-radius:22px; max-width:520px; width:100%; padding:20px; box-shadow:0 24px 60px rgba(15,23,42,.4); animation:sheetUp .22s cubic-bezier(.2,.9,.3,1.1) both;}
+.gstatDot{display:none; width:16px; height:16px; border-radius:50%; border:1.5px solid #cbd5e1; background:#111; cursor:pointer; padding:0; flex-shrink:0; vertical-align:middle;}
+.gstatDot.r{background:#dc2626; border-color:#fca5a5;}
+.gstatDot.b{background:#1d4ed8; border-color:#93c5fd;}
 .noteBtn{background:transparent; border:1px solid var(--line); border-radius:8px; padding:2px 6px; cursor:pointer; color:#94a3b8; position:relative; line-height:1;}
 .noteBtn:hover{background:var(--soft); color:var(--brand); border-color:var(--brand);}
 .noteBtn.has{background:#fffbeb; border-color:#f59e0b; color:#b45309;}
@@ -243,10 +352,10 @@ td.hasNote::before{content:''; position:absolute; top:0; inset-inline-end:0; bor
 #tdModal .box{background:#fff; border-radius:22px; max-width:640px; width:100%; padding:20px; max-height:88vh; overflow:auto; box-shadow:0 24px 60px rgba(15,23,42,.4); animation:sheetUp .24s cubic-bezier(.2,.9,.3,1.1) both;}
 #giModal{position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:210; display:none; align-items:flex-start; justify-content:center; padding:30px 15px; overflow:auto;}
 #giModal.show{display:flex;}
-#giModal .box{background:rgba(255,255,255,.97); backdrop-filter:blur(24px) saturate(180%); border-radius:24px; max-width:900px; width:100%; padding:20px; max-height:88vh; overflow:auto;}
+#giModal .box{background:rgba(255,255,255,.97); -webkit-backdrop-filter:blur(24px) saturate(180%); backdrop-filter:blur(24px) saturate(180%); border-radius:24px; max-width:900px; width:100%; padding:20px; max-height:88vh; overflow:auto;}
 #studentModal{position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:200; display:none; align-items:flex-start; justify-content:center; padding:30px 15px; overflow:auto;}
 #studentModal.show{display:flex;}
-#studentModal .box{background:rgba(255,255,255,.97); backdrop-filter:blur(24px) saturate(180%); border-radius:24px; max-width:1000px; width:100%; padding:0; max-height:90vh; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 24px 60px rgba(15,23,42,.4); animation:sheetUp .26s cubic-bezier(.2,.9,.3,1.1) both;}
+#studentModal .box{background:rgba(255,255,255,.97); -webkit-backdrop-filter:blur(24px) saturate(180%); backdrop-filter:blur(24px) saturate(180%); border-radius:24px; max-width:1000px; width:100%; padding:0; max-height:90vh; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 24px 60px rgba(15,23,42,.4); animation:sheetUp .26s cubic-bezier(.2,.9,.3,1.1) both;}
 .stHead{padding:16px 20px 12px; border-bottom:1px solid var(--line); background:linear-gradient(180deg,#fff,#fbfcff); flex-shrink:0; border-radius:24px 24px 0 0;}
 .stBody{overflow:auto; padding:14px 20px 20px; flex:1; min-height:0;}
 .compHide{position:absolute; top:5px; inset-inline-start:5px; width:20px; height:20px; border-radius:50%; border:none;
@@ -280,9 +389,9 @@ table.tbl.grades td{padding:7px 6px;}
 .gcell input[type=number]{width:64px; height:34px; text-align:center; border-radius:10px; font-size:15px;}
 .gcell+.gcell{margin-top:5px; padding-top:5px; border-top:1px dashed #e6eaf4;}
 /* מסך מלא לטבלה */
-.card.tblfull{position:fixed; inset:0; z-index:420; margin:0; border-radius:0; max-width:none; overflow:auto;
-  background:rgba(255,255,255,.99); backdrop-filter:blur(20px); animation:none; box-shadow:none;}
-.card.tblfull .scroll{max-height:calc(100vh - 120px) !important;}
+.card.tblfull{position:fixed; inset:0; padding-top:calc(14px + env(safe-area-inset-top)); z-index:420; margin:0; border-radius:0; max-width:none; overflow:auto;
+  background:rgba(255,255,255,.99); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); animation:none; box-shadow:none;}
+.card.tblfull .scroll{max-height:calc(100dvh - 120px) !important; max-height:calc(100vh - 120px);}
 /* תצוגה צפופה — יותר תלמידות במסך */
 .dense table.tbl td{padding:3px 5px;}
 .dense table.tbl th{padding:5px 6px; font-size:12px;}
@@ -307,8 +416,29 @@ footer{padding:18px; text-align:center; color:var(--muted); font-size:12px; bord
 #printArea{display:none;}
 body.print-mode #printArea{display:block; padding:20px; background:#fff;}
 .status-cell{min-width:110px;}
-.toast{position:fixed; bottom:22px; left:22px; background:rgba(30,41,59,.92); backdrop-filter:blur(18px) saturate(180%); color:#fff; padding:13px 22px; border-radius:14px; z-index:500; font-size:13.5px; box-shadow:0 12px 32px rgba(0,0,0,.32); opacity:0; transform:translateY(12px); transition:all .28s cubic-bezier(.2,.8,.3,1); border:1px solid rgba(255,255,255,.12);}
+.toast{position:fixed; bottom:22px; left:22px; background:rgba(30,41,59,.92); -webkit-backdrop-filter:blur(18px) saturate(180%); backdrop-filter:blur(18px) saturate(180%); color:#fff; padding:13px 22px; border-radius:14px; z-index:500; font-size:13.5px; box-shadow:0 12px 32px rgba(0,0,0,.32); opacity:0; transform:translateY(12px); transition:all .28s cubic-bezier(.2,.8,.3,1); border:1px solid rgba(255,255,255,.12);}
 .toast.show{opacity:1; transform:none;}
+/* ============ אזור פעולות מחיקה מצומצם ============ */
+.dangerZone{margin-top:12px; padding-top:10px; border-top:1px solid var(--line,#e2e8f0);}
+.dzLink{font-size:12.5px; font-weight:700; color:var(--muted,#64748b); cursor:pointer; user-select:none; padding:3px 2px; border-radius:6px; transition:color .15s;}
+.dzLink:hover{color:var(--bad,#ef4444);}
+.dzBody{margin-top:8px; background:rgba(239,68,68,.05); border:1px solid rgba(239,68,68,.2); border-radius:10px; padding:10px 12px;}
+.dzRow{display:flex; align-items:center; gap:10px; padding:6px 0; border-top:1px solid rgba(239,68,68,.12); font-size:13px;}
+.dzRow:first-of-type{border-top:0;}
+.dzRow>span{flex:1; min-width:0;}
+.dzRow i{font-style:normal; color:var(--muted,#64748b); font-size:11.5px;}
+.dzRow .btn{flex:0 0 auto; min-width:64px;}
+@media(max-width:560px){.dzRow{flex-wrap:wrap;}.dzRow .btn{width:100%;}}
+/* ============ יישור עמודת "כיתה" + רמז מקלדת בכפתור החיפוש ============ */
+table.tbl.grades th.cCls,table.tbl.grades td.cCls{text-align:center; vertical-align:middle;}
+table.tbl.grades td.cCls select{text-align:center; text-align-last:center; padding-inline:6px; min-width:82px;}
+table.tbl.grades td.cCls select option{text-align:right;}
+/* רמז "Ctrl K" — מתגלה רק במעבר עכבר על כפתור החיפוש */
+.kbdHint{background:rgba(255,255,255,.2); border-color:rgba(255,255,255,.3); color:#fff;
+  opacity:0; max-width:0; padding-inline:0; margin-inline-start:0; border-width:0; overflow:hidden;
+  white-space:nowrap; transition:opacity .16s ease, max-width .22s ease, padding .22s ease, margin .22s ease;}
+#btnSearch:hover .kbdHint,#btnSearch:focus-visible .kbdHint{opacity:.9; max-width:60px; padding-inline:5px; margin-inline-start:6px; border-width:1px;}
+@media (hover:none){#btnSearch .kbdHint{display:none;}}
 </style>
 </head>
 <body>
@@ -333,6 +463,7 @@ body.print-mode #printArea{display:block; padding:20px; background:#fff;}
     <div id="saveInd" onclick="setTab('settings')" title="פרטי שמירה וגיבוי"></div>
   </div>
 </div>
+<div id="licBar"></div>
 <div id="nagBar" style="display:none; background:linear-gradient(90deg,#fef2f2,#fee2e2); border-bottom:2px solid #dc2626; padding:9px 18px; font-size:13.5px; align-items:center; gap:12px; flex-wrap:wrap;"></div>
 <nav class="tabs" id="tabs"></nav>
 <main id="main"></main>
@@ -340,9 +471,11 @@ body.print-mode #printArea{display:block; padding:20px; background:#fff;}
 <div id="giModal" onclick="if(event.target===this)closeGradeImport()"><div class="box" id="giBox"></div></div>
 <div id="tdModal" onclick="if(event.target===this)closeTestsDlg()"><div class="box" id="tdBox"></div></div>
 <div id="ndModal" onclick="if(event.target===this)closeNote()"><div class="box" id="ndBox"></div></div>
+<div id="vfModal" onclick="if(event.target===this)closeVerify()"><div class="box" id="vfBox"></div></div>
+<div id="wzModal"><div class="box" id="wzBox"></div></div>
 <div id="printArea"></div>
 <div id="lockScreen" style="display:none; position:fixed; inset:0; z-index:900; background:linear-gradient(135deg,#1e1b4b,#4c1d95 55%,#7e22ce); align-items:center; justify-content:center; padding:20px;">
-  <div style="background:rgba(255,255,255,.97); backdrop-filter:blur(24px); border-radius:26px; padding:32px 30px; width:min(400px,92vw); text-align:center; box-shadow:0 30px 80px rgba(0,0,0,.45); animation:sheetUp .3s cubic-bezier(.2,.9,.3,1.1) both;">
+  <div style="background:rgba(255,255,255,.97); -webkit-backdrop-filter:blur(24px); backdrop-filter:blur(24px); border-radius:26px; padding:32px 30px; width:min(400px,92vw); text-align:center; box-shadow:0 30px 80px rgba(0,0,0,.45); animation:sheetUp .3s cubic-bezier(.2,.9,.3,1.1) both;">
     <div style="font-size:52px; line-height:1; margin-bottom:10px;">🔒</div>
     <h2 style="font-size:19px; font-weight:800; margin-bottom:4px;" id="lockTitle">הקובץ נעול</h2>
     <div class="note" style="margin-bottom:18px;">הזיני את הסיסמה כדי להיכנס</div>
@@ -359,9 +492,59 @@ body.print-mode #printArea{display:block; padding:20px; background:#fff;}
   <div class="hint"><span><kbd>↑</kbd><kbd>↓</kbd> ניווט</span><span><kbd>Enter</kbd> פתיחה</span><span><kbd>Esc</kbd> סגירה</span><span style="margin-inline-start:auto;">Ctrl+K</span></div>
 </div></div>
 <div class="toast" id="toast"></div>
-<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 3.5</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
+<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 4.5</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
 <script>
 "use strict";
+/* ===== שכבת אחסון עמידה =====
+   ספארי חוסם localStorage בקבצים מקומיים (file://) ובחלק מהתצוגות המוטמעות, וזורק שגיאה.
+   העטיפה הזו לא זורקת לעולם, ונופלת בחזרה לזיכרון בלבד — כך שהתוכנה תמיד תעלה. */
+// אם משהו נופל — מציגים הודעה מובנת במקום מסך ריק
+window.addEventListener('error',function(ev){
+  try{
+    if(document.getElementById('fatalBox')) return;
+    const d=document.createElement('div');
+    d.id='fatalBox';
+    d.setAttribute('style','position:fixed;inset:0;z-index:99999;background:#fff;padding:24px 18px;overflow:auto;font-family:Arial,sans-serif;direction:rtl;text-align:right;');
+    d.innerHTML='<div style="max-width:620px;margin:0 auto;">'+
+      '<div style="font-size:44px;">😕</div>'+
+      '<h2 style="font-size:20px;margin:8px 0;">התוכנה לא הצליחה לעלות</h2>'+
+      '<p style="font-size:15px;line-height:1.8;color:#334155;">ברוב המקרים זה קורה כשהקובץ נפתח <b>ישירות מהמכשיר</b> (מאפליקציית הקבצים, מווטסאפ או ממייל) — דפדפני נייד מגבילים מצב כזה.</p>'+
+      '<div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:14px;padding:14px;margin:14px 0;font-size:15px;line-height:1.9;">'+
+      '<b>הפתרון:</b><br>1. פתחו את <b>כתובת האינטרנט</b> של התוכנה (מתחילה ב-https) ולא את הקובץ.<br>'+
+      '2. באייפון — ב<b>ספארי</b>; באנדרואיד — ב<b>כרום</b>. לא מתוך וואטסאפ.<br>'+
+      '3. הוסיפו למסך הבית: שיתוף ⬆️ ← "הוספה למסך הבית".</div>'+
+      '<details style="font-size:12px;color:#64748b;"><summary>פרטים טכניים</summary><pre style="white-space:pre-wrap;">'+
+      String((ev&&ev.message)||'')+'\n'+String((ev&&ev.filename)||'')+':'+String((ev&&ev.lineno)||'')+'</pre></details>'+
+      '<p style="font-size:13px;color:#64748b;margin-top:14px;">כתובת נוכחית: '+String(location.protocol)+'</p></div>';
+    document.body.appendChild(d);
+  }catch(e){}
+});
+var STORAGE_OK=true, STORAGE_WHY='';
+var _mem={}, _memS={};
+function _probe(){
+  try{
+    if(typeof localStorage==='undefined'||!localStorage){ STORAGE_OK=false; STORAGE_WHY='האחסון אינו זמין בדפדפן זה'; return; }
+    localStorage.setItem('__probe','1'); localStorage.removeItem('__probe');
+  }catch(e){
+    STORAGE_OK=false;
+    STORAGE_WHY=(location.protocol==='file:')
+      ? 'הקובץ נפתח ישירות מהמכשיר (file://) — ספארי חוסם שמירה במצב זה'
+      : 'הדפדפן חוסם שמירה (ייתכן מצב פרטי/גלישה בסתר)';
+  }
+}
+_probe();
+var LS={
+  getItem:function(k){ try{ return STORAGE_OK?localStorage.getItem(k):(k in _mem?_mem[k]:null); }catch(e){ return (k in _mem?_mem[k]:null); } },
+  setItem:function(k,v){ _mem[k]=String(v); try{ if(STORAGE_OK) localStorage.setItem(k,v); }catch(e){ STORAGE_OK=false; } },
+  removeItem:function(k){ delete _mem[k]; try{ if(STORAGE_OK) localStorage.removeItem(k); }catch(e){} },
+  key:function(i){ try{ return STORAGE_OK?localStorage.key(i):Object.keys(_mem)[i]; }catch(e){ return Object.keys(_mem)[i]; } },
+  get length(){ try{ return STORAGE_OK?localStorage.length:Object.keys(_mem).length; }catch(e){ return Object.keys(_mem).length; } }
+};
+var SS={
+  getItem:function(k){ try{ return sessionStorage.getItem(k); }catch(e){ return (k in _memS?_memS[k]:null); } },
+  setItem:function(k,v){ _memS[k]=String(v); try{ sessionStorage.setItem(k,v); }catch(e){} },
+  removeItem:function(k){ delete _memS[k]; try{ sessionStorage.removeItem(k); }catch(e){} }
+};
 /* ============ מודל המקצועות ============ */
 const I=(n,w)=>({n,t:'i',w});
 const E=(n,w,s)=>({n,t:'e',w,s}); // s = אחוז מגן
@@ -401,6 +584,7 @@ function cycleGstat(id,key){
   const cur=st.gstat[key]||'';
   const nxt=cur===''?'r':(cur==='r'?'b':'');
   if(nxt) st.gstat[key]=nxt; else delete st.gstat[key];
+  logChange('status',st,keyLabel(st,key),cur==='r'?'אדום':cur==='b'?'כחול':'שחור',nxt==='r'?'אדום':nxt==='b'?'כחול':'שחור');
   save();
   const modal=document.getElementById('studentModal');
   if(modal&&modal.classList.contains('show')) refreshOpenViews(id);
@@ -412,7 +596,7 @@ function statusLegend(){
     <span><span style="color:#111; font-weight:800;">■</span> שחור — דווח למשרד</span>
     <span><span style="color:#dc2626; font-weight:800;">■</span> אדום — אמיתי, טרם דווח</span>
     <span><span style="color:#1d4ed8; font-weight:800;">■</span> כחול — פיקטיבי / הערכה</span>
-    <span class="pill">💡 לחיצה ימנית על ציון מחליפה סימון</span>
+    <span class="pill">💡 ${IS_TOUCH?'לחיצה על הנקודה הצבעונית מחליפה סימון':'לחיצה ימנית על ציון מחליפה סימון'}</span>
     ${state.flipFav?'<span class="pill" style="background:#fffbeb; border-color:#fcd34d;">🔀 היפוך אחוזים לטובת הבחינה — פעיל</span>':''}
   </div>`;
 }
@@ -581,7 +765,7 @@ function applyLegacyStructure(st){
 }
 
 /* ============ מצב ושמירה ============ */
-const DEFAULT_STATE={classes:[], students:[], custom:{}, coord:'', predLevel:0, countBlue:true, includeInternal:false, reqUnits:true, flipFav:true, logo:null, thresholds:{pass:54.5, excel:90, potential:85, gap:20}};
+const DEFAULT_STATE={classes:[], students:[], custom:{}, coord:'', predLevel:'auto', countBlue:true, pro:false, wizDone:false, includeInternal:false, reqUnits:true, flipFav:true, logo:null, thresholds:{pass:54.5, excel:90, potential:85, gap:20}};
 /* ============ שכבת הניסוי של הסימולציה (חיה רק בלשונית הסימולציה, לא נוגעת במקור) ============ */
 function gradesOf(st,sim){
   if(sim&&st.simg&&Object.keys(st.simg).length) return Object.assign({},st.grades||{},st.simg);
@@ -591,6 +775,7 @@ function isSimKey(st,key){ return !!(st.simg&&st.simg[key]!==undefined); }
 function simCount(){ return state.students.reduce((a,s)=>a+(s.simg?Object.keys(s.simg).length:0),0); }
 function setGradeSim(id,key,val){
   const st=state.students.find(s=>s.id===id); if(!st) return;
+  calcOn=false;   // ההקלדה מבטלת את המחשבון הכבד — מפעילים אותו מחדש בלחיצה
   st.simg=st.simg||{};
   if(val===''||val===null){ delete st.simg[key]; }
   else{
@@ -622,12 +807,12 @@ function commitSim(){
   save(); render(); toast(n+' ציונים הועברו לטבלה האמיתית');
 }
 let schoolName='';
-try{ schoolName=localStorage.getItem('bagrutSchool')||''; }catch(e){}
+try{ schoolName=LS.getItem('bagrutSchool')||''; }catch(e){}
 function appTitle(){ return schoolName?('סימולטור '+schoolName):'סימולטור בגרות'; }
 function reportTitle(){ return schoolName?(schoolName+' · דוח מצב בגרות'):'דוח מצב בגרות'; }
 function setSchoolName(v){
   schoolName=(v||'').trim();
-  try{ localStorage.setItem('bagrutSchool',schoolName); }catch(e){}
+  try{ LS.setItem('bagrutSchool',schoolName); }catch(e){}
   document.title=appTitle();
   renderHeaderCenter(); render();
   toast(schoolName?('שם בית הספר: '+schoolName):'שם בית הספר נוקה');
@@ -662,21 +847,21 @@ function fullBackupObject(){
   const all={_type:'bagrut-backup',_ver:2,_at:new Date().toISOString(),school:schoolName,lock:lockHash,rec:recCode,rec:recCode,lock:lockHash,profiles:profiles,current:currentProfileId,data:{}};
   profiles.forEach(pr=>{
     const key=pr.id==='main'?'bagrutSimPro':'bagrutSimPro:'+pr.id;
-    try{ const raw=localStorage.getItem(key); if(raw) all.data[pr.id]=JSON.parse(raw); }catch(e){}
+    try{ const raw=LS.getItem(key); if(raw) all.data[pr.id]=JSON.parse(raw); }catch(e){}
   });
   all.data[currentProfileId]=state;
   return all;
 }
 function applyBackupObject(d){
   if(!d||!d.data) return false;
-  if(typeof d.rec==='string'){ recCode=d.rec; try{ if(recCode) localStorage.setItem('bagrutRec',recCode); }catch(e){} }
-  if(typeof d.lock==='string'){ lockHash=d.lock; try{ if(lockHash) localStorage.setItem('bagrutLock',lockHash); else localStorage.removeItem('bagrutLock'); }catch(e){} }
-  if(typeof d.school==='string'){ schoolName=d.school; try{ localStorage.setItem('bagrutSchool',schoolName); }catch(e){}
+  if(typeof d.rec==='string'){ recCode=d.rec; try{ if(recCode) LS.setItem('bagrutRec',recCode); }catch(e){} }
+  if(typeof d.lock==='string'){ lockHash=d.lock; try{ if(lockHash) LS.setItem('bagrutLock',lockHash); else LS.removeItem('bagrutLock'); }catch(e){} }
+  if(typeof d.school==='string'){ schoolName=d.school; try{ LS.setItem('bagrutSchool',schoolName); }catch(e){}
     const f=document.getElementById('appFoot'); if(f) f.textContent=appTitle(); document.title=appTitle();
     renderHeaderCenter(); }
   (d.profiles||[]).forEach(pr=>{
     const key=pr.id==='main'?'bagrutSimPro':'bagrutSimPro:'+pr.id;
-    if(d.data[pr.id]) localStorage.setItem(key,JSON.stringify(d.data[pr.id]));
+    if(d.data[pr.id]) LS.setItem(key,JSON.stringify(d.data[pr.id]));
   });
   profiles=(d.profiles&&d.profiles.length)?d.profiles:[{id:'main',name:'',unnamed:1}];
   currentProfileId=(d.current&&profiles.some(p=>p.id===d.current))?d.current:profiles[0].id;
@@ -729,7 +914,7 @@ async function fileWrite(force){
     await w.write(JSON.stringify(fullBackupObject()));
     await w.close();
     lastFileSave=new Date();
-    try{ localStorage.setItem('bagrutLastBackup',JSON.stringify({at:lastFileSave.toISOString(),n:countAllStudents(),file:fileName})); }catch(e){}
+    try{ LS.setItem('bagrutLastBackup',JSON.stringify({at:lastFileSave.toISOString(),n:countAllStudents(),file:fileName})); }catch(e){}
     renderFileBar();
   }catch(e){
     fileState='need-permission'; renderFileBar();
@@ -781,12 +966,12 @@ async function fileInit(){
 
 /* ============ סימולטורים מרובים (שנתונים/כיתות) ============ */
 let profiles=[], currentProfileId='main';
-try{ profiles=JSON.parse(localStorage.getItem('bagrutProfiles'))||[]; }catch(e){ profiles=[]; }
+try{ profiles=JSON.parse(LS.getItem('bagrutProfiles'))||[]; }catch(e){ profiles=[]; }
 if(!profiles.length) profiles=[{id:'main',name:'',unnamed:1}];
-currentProfileId=localStorage.getItem('bagrutCurrentProfile')||profiles[0].id;
+currentProfileId=LS.getItem('bagrutCurrentProfile')||profiles[0].id;
 if(!profiles.some(p=>p.id===currentProfileId)) currentProfileId=profiles[0].id;
 function profileKey(){ return currentProfileId==='main'?'bagrutSimPro':'bagrutSimPro:'+currentProfileId; }
-function saveProfiles(){ localStorage.setItem('bagrutProfiles',JSON.stringify(profiles)); localStorage.setItem('bagrutCurrentProfile',currentProfileId); }
+function saveProfiles(){ LS.setItem('bagrutProfiles',JSON.stringify(profiles)); LS.setItem('bagrutCurrentProfile',currentProfileId); }
 function renderProfileBar(){
   const s=document.getElementById('profileSlot'); if(!s) return;
   s.innerHTML=`<label style="color:var(--muted); font-size:11.5px; font-weight:700;">סימולטור:</label>
@@ -800,7 +985,7 @@ function renderProfileBar(){
 function switchProfile(id){
   if(!profiles.some(p=>p.id===id)) return;
   currentProfileId=id; saveProfiles();
-  state=loadState(); renderProfileBar(); renderLogo(); render();
+  state=loadState(); loadUndo(); renderProfileBar(); renderLogo(); render();
   toast('עברת לסימולטור: '+profiles.find(p=>p.id===id).name);
 }
 function setProfileName(v){
@@ -833,26 +1018,27 @@ function deleteProfile(){
   if(profiles.length<=1){ toast('חייב להישאר לפחות סימולטור אחד'); return; }
   const p=profiles.find(x=>x.id===currentProfileId);
   if(!confirm(`למחוק לצמיתות את הסימולטור "${p.name}" על כל הנתונים שבו?`)) return;
-  localStorage.removeItem(profileKey());
+  LS.removeItem(profileKey());
   profiles=profiles.filter(x=>x.id!==currentProfileId);
   currentProfileId=profiles[0].id; saveProfiles();
   state=loadState(); renderProfileBar(); renderLogo(); render();
 }
 let state=loadState();
 function loadState(){
-  try{const raw=localStorage.getItem(profileKey()); if(raw){const s=JSON.parse(raw); return Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)),s);}}catch(e){}
+  try{const raw=LS.getItem(profileKey()); if(raw){const s=JSON.parse(raw); return Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)),s);}}catch(e){}
   return JSON.parse(JSON.stringify(DEFAULT_STATE));
 }
 let lastSaveAt=null, saveOk=null;
 function save(){
+  clearCompCache();
   try{
     const json=JSON.stringify(state);
-    localStorage.setItem(profileKey(),json);
+    LS.setItem(profileKey(),json);
     // אימות אמיתי: קוראים בחזרה ומשווים
-    const back=localStorage.getItem(profileKey());
+    const back=LS.getItem(profileKey());
     saveOk=(back===json);
     lastSaveAt=new Date();
-    localStorage.setItem('bagrutLastSave:'+currentProfileId,lastSaveAt.toISOString());
+    LS.setItem('bagrutLastSave:'+currentProfileId,lastSaveAt.toISOString());
     scheduleFileSave();   // כתיבה אוטומטית לקובץ הנתונים
   }catch(e){
     saveOk=false;
@@ -862,8 +1048,19 @@ function save(){
 }
 function storageBytes(){
   let n=0;
-  try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf('bagrut')===0) n+=(k.length+(localStorage.getItem(k)||'').length)*2; } }catch(e){}
+  try{ for(let i=0;i<LS.length;i++){ const k=LS.key(i); if(k&&k.indexOf('bagrut')===0) n+=(k.length+(LS.getItem(k)||'').length)*2; } }catch(e){}
   return n;
+}
+function renderLic(){
+  const el=document.getElementById('licBar'); if(!el) return;
+  let s='';
+  if(!STORAGE_OK){
+    s=`<div style="background:linear-gradient(90deg,#fee2e2,#fef2f2); border-bottom:2px solid #dc2626; padding:9px 16px; font-size:13px; line-height:1.6;">
+      <b>⚠️ הדפדפן חוסם שמירה — הנתונים לא יישמרו!</b><br>
+      <span style="font-size:12px;">${esc(STORAGE_WHY)}. ${location.protocol==='file:'?'פתחו את <b>כתובת האינטרנט</b> של התוכנה (https) במקום את הקובץ.':'צאו ממצב גלישה פרטית.'}
+      אפשר לעבוד כרגיל להתרשמות, אבל <b>הכול יימחק בסגירת הדף</b>.</span></div>`;
+  }
+  el.innerHTML=s+licBanner();
 }
 function renderNag(){
   const el=document.getElementById('nagBar'); if(!el) return;
@@ -888,7 +1085,7 @@ function renderNag(){
 function renderSaveInd(){
   const el=document.getElementById('saveInd'); if(!el) return;
   if(!lastSaveAt){
-    try{ const t=localStorage.getItem('bagrutLastSave:'+currentProfileId); if(t) lastSaveAt=new Date(t); }catch(e){}
+    try{ const t=LS.getItem('bagrutLastSave:'+currentProfileId); if(t) lastSaveAt=new Date(t); }catch(e){}
   }
   const n=state.students.length;
   const t=lastSaveAt?lastSaveAt.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'}):'—';
@@ -898,11 +1095,281 @@ function renderSaveInd(){
 function uid(){ return 's'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
 
+/* ============ רישוי ============ */
+// מפתח נגזר משם בית הספר. אינו הגנה קריפטוגרפית — נועד ליצור בעלות מסודרת,
+// לתעד למי הרישיון הונפק, ולמנוע העברה מזדמנת בין מוסדות.
+let licName='', licKey='';
+try{ licName=LS.getItem('bagrutLicName')||''; licKey=LS.getItem('bagrutLicKey')||''; }catch(e){}
+function licExpected(nm){
+  const s='HRL·'+String(nm||'').replace(/\s+/g,' ').trim();
+  let a=0x811c9dc5;
+  for(let i=0;i<s.length;i++){ a^=s.charCodeAt(i); a=Math.imul(a,0x01000193)>>>0; }
+  let b=0x2166136b;
+  for(let i=s.length-1;i>=0;i--){ b^=s.charCodeAt(i); b=Math.imul(b,0x85ebca6b)>>>0; }
+  const raw=(a.toString(36)+b.toString(36)).toUpperCase().replace(/[^A-Z0-9]/g,'');
+  return (raw+'XXXXXXXXXXXX').slice(0,12).replace(/(.{4})(.{4})(.{4})/,'$1-$2-$3');
+}
+function isLicensed(){ return !!licName && licKey===licExpected(licName); }
+function activateLic(){
+  const nm=prompt('שם המוסד שהרישיון הונפק עבורו (בדיוק כפי שנמסר):',licName||schoolName||'');
+  if(nm===null) return;
+  const k=prompt('מפתח הרישיון (12 תווים, בפורמט XXXX-XXXX-XXXX):',licKey||'');
+  if(k===null) return;
+  const nn=nm.trim(), kk=k.trim().toUpperCase().replace(/\s/g,'');
+  if(kk!==licExpected(nn)){ alert('❌ המפתח אינו תואם לשם המוסד.\n\nודאו שהשם הוקלד בדיוק כפי שנמסר, כולל רווחים.'); return; }
+  licName=nn; licKey=kk;
+  try{ LS.setItem('bagrutLicName',nn); LS.setItem('bagrutLicKey',kk); }catch(e){}
+  if(!schoolName) setSchoolName(nn);
+  render(); alert('✅ הרישיון הופעל עבור: '+nn);
+}
+function removeLic(){
+  if(!confirm('להסיר את הרישיון מהמכשיר הזה?')) return;
+  licName=''; licKey='';
+  try{ LS.removeItem('bagrutLicName'); LS.removeItem('bagrutLicKey'); }catch(e){}
+  render();
+}
+function licBanner(){
+  if(isLicensed()) return '';
+  return `<div style="background:linear-gradient(90deg,#fef3c7,#fffbeb); border-bottom:2px solid #f59e0b; padding:7px 18px; font-size:12.5px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+    <b>גרסת התנסות</b> — כל היכולות פעילות. להפעלת רישיון למוסד:
+    <button class="btn sec sm" style="padding:3px 10px; font-size:11.5px;" onclick="activateLic()">הפעלת רישיון</button>
+    <span class="note" style="margin-inline-start:auto;">© סימולטור בגרות</span></div>`;
+}
+
+/* ============ מצב פשוט / מקצועי ============ */
+function isPro(){ return !!state.pro; }
+function togglePro(){
+  state.pro=!state.pro; save(); render();
+  toast(state.pro?'מצב מקצועי — כל היכולות פתוחות':'מצב פשוט — מוצגות רק היכולות הבסיסיות');
+}
+/* ============ אשף פתיחה ============ */
+let wizStep=1;
+function openWizard(){ wizStep=1; document.getElementById('wzModal').classList.add('show'); renderWizard(); }
+function closeWizard(skip){
+  document.getElementById('wzModal').classList.remove('show');
+  if(!skip){ state.wizDone=true; save(); }
+  render();
+}
+function renderWizard(){
+  const nStud=state.students.length, nCls=state.classes.length;
+  const steps=[
+   {t:'ברוכים הבאים',ic:'school',b:`
+     <p style="font-size:14.5px; line-height:1.9;">הכלי מחשב <b>זכאות לבגרות</b>, מאתר <b>מצטיינות</b> ומאפשר <b>סימולציות</b> — במקום גיליון אקסל.<br>
+     שלושה דברים שכדאי לדעת לפני שמתחילים:</p>
+     <div class="alert-item al-info">1️⃣ הנתונים נשמרים <b>אצלכם</b> — בדפדפן ובקובץ במחשב. לא נשלחים לאף מקום.</div>
+     <div class="alert-item al-info">2️⃣ ההזנה נעשית פעם אחת, ומשם הכול אוטומטי: ציונים, ממוצעים, התראות ודוחות.</div>
+     <div class="alert-item al-warn">3️⃣ <b>גיבוי פעם בשבוע</b> — זה הדבר היחיד שחשוב לזכור.</div>`},
+   {t:'שלב 1 — הכנסת התלמידות',ic:'users',b:`
+     <p style="font-size:14px; line-height:1.9;">שתי דרכים:</p>
+     <div class="alert-item al-info"><b>יש לכם קובץ סימולטור באקסל?</b> זו הדרך המהירה — הכול נקלט אוטומטית, כולל ציונים, יח"ל וסמלי שאלונים.</div>
+     <div class="toolbar"><button class="btn" onclick="closeWizard(true);document.getElementById('xlsxFile').click()">📤 ייבוא מאקסל עכשיו</button></div>
+     <div class="alert-item al-info" style="margin-top:8px;"><b>מתחילים מאפס?</b> יוצרים כיתה ומוסיפים שמות (או מדביקים רשימה).</div>
+     <div class="toolbar"><button class="btn sec" onclick="closeWizard(true);setTab('students')">👩‍🎓 מסך התלמידות</button></div>
+     <div class="note" style="margin-top:8px;">מצב נוכחי: ${nCls} כיתות · ${nStud} תלמידות</div>`},
+   {t:'שלב 2 — הזנת ציונים',ic:'edit',b:`
+     <p style="font-size:14px; line-height:1.9;">בלשונית <b>הזנת ציונים</b> בוחרים מקצוע ומזינים בטבלה — מגן ובחינה.<br>
+     יש לכם קובץ ציונים של מקצוע שלם? <b>📋 ייבוא ציונים למקצוע</b> קולט אותו בהדבקה אחת.</p>
+     <div class="alert-item al-info">לחיצה על <b>שם תלמידה</b> בכל מקום פותחת כרטיס מלא עם כל המקצועות שלה.</div>
+     <div class="alert-item al-info">🎨 צבע הציון = סטטוס הדיווח: <b>שחור</b> דווח · <b style="color:#dc2626">אדום</b> טרם דווח · <b style="color:#1d4ed8">כחול</b> הערכה.</div>`},
+   {t:'שלב 3 — לראות תוצאות',ic:'dash',b:`
+     <div class="alert-item al-info">📊 <b>דשבורד</b> — זכאות, מצטיינות, פוטנציאל וגרפים.</div>
+     <div class="alert-item al-info">🚨 <b>התראות</b> — מי דורשת טיפול: מעכבים, גבוליים, קרובות להצטיינות.</div>
+     <div class="alert-item al-info">🧪 <b>סימולציה</b> — לשחק בציונים בלי לפגוע בנתונים, ולחזות מי תהיה מצטיינת.</div>
+     <div class="alert-item al-info">📄 <b>דוחות</b> — דוח מסודר להדפסה, למייל או לאקסל.</div>`},
+   {t:'שלב 4 — שמירה ובטיחות',ic:'save',b:`
+     <div class="alert-item al-warn"><b>הכי חשוב:</b> חברו <b>קובץ נתונים</b> (תפריט ☰ ← חיבור קובץ נתונים) — ומאז כל שינוי נשמר אוטומטית לקובץ במחשב, כמו באקסל.</div>
+     <div class="alert-item al-info">שמרו אותו בתיקיית <b>Google Drive</b> — וכך הוא מגובה בענן אוטומטית.</div>
+     <div class="alert-item al-info">בכל טעות: <b>↩️ בטל</b> בסרגל העליון (או Ctrl+Z). יש גם נקודות שמירה יומיות בהגדרות.</div>
+     <div class="alert-item al-info">🔍 <b>Ctrl+K</b> — חיפוש מהיר של תלמידה מכל מקום.</div>
+     <p style="margin-top:10px; font-size:14px;">התוכנה נפתחת ב<b>מצב פשוט</b> שמציג רק את הבסיס. כשתרצו יכולות מתקדמות — מדליקים <b>מצב מקצועי</b> בהגדרות.</p>`},
+  ];
+  const s=steps[wizStep-1];
+  document.getElementById('wzBox').innerHTML=`
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+      <div class="glassIcon" style="width:46px; height:46px; border-radius:14px; background:linear-gradient(145deg,var(--brand),var(--brand2)); animation:none;">${ic(s.ic,24)}</div>
+      <div><h2 class="sec" style="margin:0; font-size:17px;">${esc(s.t)}</h2>
+        <div class="note">שלב ${wizStep} מתוך ${steps.length}</div></div>
+      <button class="btn sec sm" style="margin-inline-start:auto;" onclick="closeWizard()">דלג ✕</button>
+    </div>
+    <div style="min-height:190px;">${s.b}</div>
+    <div style="display:flex; gap:8px; align-items:center; margin-top:14px;">
+      ${steps.map((_,i)=>`<span style="width:${i===wizStep-1?'22px':'8px'}; height:8px; border-radius:99px; background:${i===wizStep-1?'var(--brand)':'#dbe3f2'}; transition:all .25s;"></span>`).join('')}
+      <span style="margin-inline-start:auto; display:flex; gap:8px;">
+        ${wizStep>1?`<button class="btn sec" onclick="wizStep--;renderWizard()">→ הקודם</button>`:''}
+        ${wizStep<steps.length?`<button class="btn" onclick="wizStep++;renderWizard()">הבא ←</button>`
+          :`<button class="btn ok" onclick="closeWizard()">סיום — קדימה לעבודה</button>`}
+      </span>
+    </div>`;
+}
+
+/* ============ בדיקת מערכת עצמית + אימות מול תעודה רשמית ============ */
+// 14 מקרי בדיקה שמאמתים את מנוע החישוב מול תוצאות שחושבו ידנית
+const SELFTESTS=[
+ {n:'לשון — פנימי 30% + חיצונית 70% (מגן 50/50)', sid:'lashon', u:{}, g:{'lashon.0':85,'lashon.1.m':80,'lashon.1.e':91}, exp:86,
+  d:'רכיב חיצוני (80+91)/2=85.5→86 · 85×0.3+86×0.7=85.7→86'},
+ {n:'עיגול 0.5 למעלה', sid:'lashon', u:{}, g:{'lashon.0':85.5,'lashon.1.m':85.5,'lashon.1.e':85.5}, exp:86, d:'85.5 מתעגל ל-86'},
+ {n:'עיגול מטה', sid:'lashon', u:{}, g:{'lashon.0':85.4,'lashon.1.m':85.4,'lashon.1.e':85.4}, exp:85, d:'85.4 מתעגל ל-85'},
+ {n:'היפוך אחוזים כשהבחינה גבוהה מהמגן', sid:'math', u:{math:5}, g:{'math.1.m':100,'math.1.e':100,'math.2.m':70,'math.2.e':90}, exp:93,
+  d:'שאלון שני (60/40) מתהפך ל-40/60: 70×0.4+90×0.6=82 · 100×0.6+82×0.4=92.8→93 (בלי היפוך היה 91)'},
+ {n:'ללא היפוך — המגן גבוה מהבחינה', sid:'math', u:{math:5}, g:{'math.1.m':100,'math.1.e':100,'math.2.m':90,'math.2.e':70}, exp:93,
+  d:'נשמרת חלוקת 60/40: 90×0.6+70×0.4=82 · 100×0.6+82×0.4=92.8→93'},
+ {n:'אין היפוך כשהמגן גבוה', sid:'lashon', u:{}, g:{'lashon.0':100,'lashon.1.m':90,'lashon.1.e':70}, exp:86, d:'50/50 סימטרי: (90+70)/2=80 · 100×0.3+80×0.7=86'},
+ {n:'היסטוריה — 3 רכיבים, בחינות 100%', sid:'history', u:{}, g:{'history.0':90,'history.1.e':80,'history.2.e':70}, exp:80,
+  d:'90×0.3+80×0.35+70×0.35=80'},
+ {n:'אזרחות — 2 רכיבים 30/70', sid:'ezrachut', u:{}, g:{'ezrachut.0':90,'ezrachut.1.e':80}, exp:83, d:'90×0.3+80×0.7=83'},
+ {n:'מתמטיקה 3 יח"ל', sid:'math', u:{math:3}, g:{'math.0':100,'math.1.m':100,'math.1.e':100,'math.2.m':100,'math.2.e':100}, exp:100, d:'הכול 100'},
+ {n:'ציון מעכב (54 נכשל)', sid:'lashon', u:{}, g:{'lashon.0':54,'lashon.1.m':54,'lashon.1.e':54}, exp:54, d:'54 < 54.5 = מעכב'},
+ {n:'ציון עובר (55)', sid:'lashon', u:{}, g:{'lashon.0':55,'lashon.1.m':55,'lashon.1.e':55}, exp:55, d:'55 עובר'},
+ {n:'נרמול — עבודה נוספת 20%', sid:'lashon', u:{}, g:{'lashon.0':90,'lashon.1.m':80,'lashon.1.e':70,'lashon.2':100}, ov:{'lashon.2':{w:20}}, exp:83,
+  d:'(90×30+75×70+100×20)/120 = 82.9→83'},
+ {n:'התאמה אישית — מגן 70%', sid:'lashon', u:{}, g:{'lashon.0':100,'lashon.1.m':100,'lashon.1.e':60}, ov:{'lashon.1':{s:70}}, exp:92,
+  d:'100×0.7+60×0.3=88 · 100×0.3+88×0.7=91.6→92'},
+ {n:'תנ"ך 5 יח"ל — כל 5 הרכיבים', sid:'tanakh', u:{tanakh:5}, g:{'tanakh.0':90,'tanakh.1.e':80,'tanakh.2.e':80,'tanakh.3':90,'tanakh.4.e':90}, exp:86,
+  d:'90×.20+80×.20+80×.20+90×.16+90×.24 = 86'},
+ {n:'תושב"ע 3 יח"ל — הגבר מנוטרל', sid:'toshba', u:{toshba:3}, g:{'toshba.0':90,'toshba.1.m':80,'toshba.1.e':80,'toshba.2.m':70,'toshba.2.e':70}, exp:80,
+  d:'90×.30+80×.35+70×.35 = 79.5 → מעוגל ל-80 · שאלוני ההגבר מנוטרלים ב-3 יח"ל'},
+];
+function runSelfTest(){
+  const keep={custom:state.custom,flipFav:state.flipFav,countBlue:state.countBlue,predLevel:state.predLevel,thresholds:state.thresholds};
+  state.custom={}; state.flipFav=true; state.countBlue=true;
+  state.thresholds={pass:54.5,excel:90,potential:85,gap:20};
+  const res=SELFTESTS.map(t=>{
+    const st={id:'_t',name:'_t',units:t.u||{},grades:t.g,ov:t.ov||{},gstat:{},tests:{},notes:{}};
+    const r=calcSubject(st,SUBJ_MAP[t.sid]);
+    return {...t,got:r.final,ok:r.final===t.exp};
+  });
+  Object.assign(state,keep);
+  return res;
+}
+function envChecks(){
+  const out=[];
+  const chk=(n,ok,note)=>out.push({n,ok,note:note||''});
+  chk('שמירה בדפדפן',STORAGE_OK,STORAGE_OK?'הנתונים נשמרים בין פתיחות':(STORAGE_WHY+' — הנתונים לא יישמרו!'));
+  chk('אופן הפתיחה',location.protocol!=='file:',location.protocol==='file:'
+    ?'הקובץ נפתח ישירות מהמכשיר — בנייד זה חוסם שמירה. פתחו את כתובת האינטרנט (https).'
+    :'נפתח מכתובת אינטרנט — תקין');
+  chk('שמירה אוטומטית לקובץ',FS_OK,FS_OK?(fileState==='on'?'מחובר: '+fileName:'נתמך — מומלץ לחבר קובץ נתונים מהתפריט'):'לא נתמך בדפדפן זה (נדרש Chrome/Edge במחשב) — יש להסתמך על 💾 גיבוי');
+  chk('ספריית אקסל (ייבוא/ייצוא)',typeof XLSX!=='undefined','');
+  chk('ספריית גרפים',typeof Chart!=='undefined','');
+  chk('הצפנה (לקוד השחזור)',!!(window.crypto&&window.crypto.subtle),'נדרש לנעילה בסיסמה');
+  chk('IndexedDB (זכירת קובץ הנתונים)',!!window.indexedDB,'');
+  const b=lastBackupInfo();
+  chk('גיבוי חיצוני',!!b,b?('אחרון: '+new Date(b.at).toLocaleString('he-IL')):'טרם בוצע גיבוי — מומלץ מאוד!');
+  chk('מסך מגע',IS_TOUCH,IS_TOUCH?'מזוהה — מידע הסבר נפתח בלחיצה, וסימון צבע דרך הנקודה שליד הציון':'עכבר — מידע הסבר במעבר, וסימון צבע בלחיצה ימנית');
+  const ua=navigator.userAgent||'';
+  const isIOS=/iPad|iPhone|iPod/.test(ua)||(/Macintosh/.test(ua)&&(navigator.maxTouchPoints||0)>1);
+  const standalone=!!(window.navigator.standalone||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches));
+  if(isIOS){
+    chk('אייפון/אייפד — שמירה לאורך זמן',standalone,
+      standalone?'התוכנה מותקנת במסך הבית — השמירה יציבה'
+      :'⚠️ ספארי מוחק נתונים של אתרים שלא נכנסו אליהם 7 ימים. חובה: שיתוף ← "הוספה למסך הבית", ולגבות לקובץ.');
+  }
+  if(IS_TOUCH&&!FS_OK) chk('שמירה לקובץ בנייד',false,'לא נתמכת בנייד — העבודה בנייד מומלצת לצפייה; להזנה כבדה השתמשי במחשב וגבי בקובץ.');
+  return out;
+}
+function renderDiag(){
+  const t=runSelfTest(), e=envChecks();
+  const bad=t.filter(x=>!x.ok).length, badE=e.filter(x=>!x.ok).length;
+  return `<div class="card" style="margin-bottom:14px; border:2px solid ${bad?'var(--bad)':'var(--ok)'};">
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <h2 class="sec" style="margin:0; font-size:15px;">${ic('shield',18)}בדיקת מערכת</h2>
+      <span class="badge ${bad?'b-bad':'b-ok'}">${bad?`${bad} כשלים בחישוב`:`כל ${t.length} בדיקות החישוב עברו ✓`}</span>
+      ${badE?`<span class="badge b-warn">${badE} התראות סביבה</span>`:''}
+      <button class="btn sec sm" style="margin-inline-start:auto;" onclick="toggleBox('diag')">${openBoxes.diag?'▴ סגירה':'▾ פירוט'}</button>
+    </div>
+    ${openBoxes.diag?`
+    <h3 class="sec" style="font-size:13.5px; margin-top:12px;">מנוע החישוב — ${t.length} מקרי בדיקה</h3>
+    <div class="scroll" style="max-height:40vh;"><table class="tbl"><thead><tr><th>מקרה</th><th>צפוי</th><th>קיבלנו</th><th></th></tr></thead><tbody>
+    ${t.map(x=>`<tr><td style="text-align:right; font-size:12px;">${esc(x.n)}<br><span class="note">${esc(x.d)}</span></td>
+      <td style="font-weight:800;">${x.exp}</td><td style="font-weight:800;" class="${x.ok?'':'grade-bad'}">${x.got===null?'—':x.got}</td>
+      <td>${x.ok?'<span class="badge b-ok">עבר</span>':'<span class="badge b-bad">נכשל</span>'}</td></tr>`).join('')}
+    </tbody></table></div>
+    <h3 class="sec" style="font-size:13.5px; margin-top:12px;">סביבת העבודה</h3>
+    ${e.map(x=>`<div class="alert-item ${x.ok?'al-info':'al-warn'}"><b>${x.ok?'✓':'⚠️'}</b> ${esc(x.n)}${x.note?` — <span class="note">${esc(x.note)}</span>`:''}</div>`).join('')}`:''}
+  </div>`;
+}
+
+/* ===== אימות מול תעודה רשמית ===== */
+let vf={id:'',vals:{}};
+function openVerify(){
+  if(!state.students.length){ toast('אין תלמידות'); return; }
+  vf={id:state.students[0].id,vals:{}};
+  document.getElementById('vfModal').classList.add('show');
+  renderVerify();
+}
+function closeVerify(){ document.getElementById('vfModal').classList.remove('show'); }
+function renderVerify(){
+  const st=state.students.find(s=>s.id===vf.id)||state.students[0];
+  if(!st) return;
+  const rows=SUBJECTS.filter(s=>!s.internalOnly).map(subj=>{
+    const r=calcSubject(st,subj);
+    if(!r.active) return null;
+    const off=vf.vals[subj.id];
+    const diff=(off!==undefined&&off!==''&&r.final!==null)?(r.final-(+off)):null;
+    return {subj,r,off,diff};
+  }).filter(Boolean);
+  const filled=rows.filter(x=>x.diff!==null);
+  const bad=filled.filter(x=>x.diff!==0);
+  document.getElementById('vfBox').innerHTML=`
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+    <h2 class="sec" style="margin:0;">${ic('shield',19)}אימות מול תעודה רשמית</h2>
+    <button class="btn sec sm" onclick="closeVerify()">סגירה ✕</button>
+  </div>
+  <div class="note" style="margin-bottom:10px;">בחרי תלמידה שיש לה <b>ציונים סופיים רשמיים</b> (מתעודה או ממערכת המשרד), הזיני אותם בעמודה הימנית — והשוואה תראה אם המנוע מחשב בדיוק אותו דבר. <b>זו הבדיקה החשובה ביותר לפני שסומכים על הכלי.</b></div>
+  <div class="toolbar">
+    <label>תלמידה:</label>
+    <select onchange="vf.id=this.value;vf.vals={};renderVerify()">
+      ${state.students.map(s=>`<option value="${s.id}" ${s.id===vf.id?'selected':''}>${esc(s.name)} · ${esc(s.cls)}</option>`).join('')}
+    </select>
+    ${filled.length?`<span class="badge ${bad.length?'b-bad':'b-ok'}">${bad.length?`${bad.length} פערים מתוך ${filled.length}`:`התאמה מלאה ב-${filled.length} מקצועות ✓`}</span>`:''}
+  </div>
+  <div class="scroll" style="max-height:52vh; margin-top:10px;"><table class="tbl grades">
+  <thead><tr><th>מקצוע</th><th>הציון הרשמי</th><th>המערכת מחשבת</th><th>פער</th></tr></thead><tbody>
+  ${rows.map(x=>`<tr>
+    <td>${esc(x.subj.name)}${x.r.final===null?' <span class="partTag">חלקי</span>':''}</td>
+    <td><input type="number" min="0" max="100" value="${x.off??''}" style="width:70px;" onchange="vf.vals['${x.subj.id}']=this.value;renderVerify()"></td>
+    <td style="font-weight:800;">${x.r.final===null?(x.r.partial===null?'—':x.r.partial+' (חלקי)'):x.r.final}</td>
+    <td>${x.diff===null?'—':(x.diff===0?'<span class="badge b-ok">מדויק</span>':`<span class="badge b-bad">${x.diff>0?'+':''}${x.diff}</span>`)}</td>
+  </tr>`).join('')}
+  </tbody></table></div>
+  ${bad.length?`<div class="alert-item al-bad" style="margin-top:10px;"><b>נמצאו פערים.</b> בדקי במקצועות המסומנים: משקלי הרכיבים, חלוקת מגן/בחינה, יח"ל, וכלל היפוך האחוזים (בהגדרות). לרוב פער נובע מהגדרת משקל שאינה תואמת את מה שנעשה בפועל.</div>`
+   :(filled.length?`<div class="alert-item al-info" style="margin-top:10px;"><b>מצוין —</b> המנוע מחשב בדיוק כמו התעודה הרשמית ב-${filled.length} מקצועות. מומלץ לחזור על הבדיקה עוד 2-3 תלמידות.</div>`:'')}`;
+}
+
+/* ============ מידע נגיש גם במסך מגע ============ */
+const IS_TOUCH=(typeof window!=='undefined')&&('ontouchstart'in window||(navigator.maxTouchPoints||0)>0);
+function infoDlg(title,text){
+  const m=document.getElementById('ndModal'), b=document.getElementById('ndBox');
+  if(!m||!b) return;
+  b.innerHTML=`<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
+      <h2 class="sec" style="margin:0; font-size:16px;">ℹ️ ${esc(title)}</h2>
+      <button class="btn sec sm" onclick="document.getElementById('ndModal').classList.remove('show')">✕</button></div>
+    <div style="font-size:14px; line-height:1.8; white-space:pre-wrap;">${esc(text)}</div>`;
+  m.classList.add('show');
+}
+// טקסט מוסבר: גם tooltip וגם לחיצה (חובה במסך מגע)
+function tip(text,inner,cls){
+  const t=String(text||'').replace(/"/g,'&quot;');
+  return `<span class="tipx ${cls||''}" title="${t}" onclick="event.stopPropagation();infoDlg('הסבר',${JSON.stringify(String(text||''))})">${inner}</span>`;
+}
+
 /* ============ אזורים מתקפלים ============ */
 let openBoxes={};
 function toggleBox(k){ openBoxes[k]=!openBoxes[k]; renderKeepScroll(); }
 
 /* ============ הערות (לכל קובייה ולכל מקצוע) ============ */
+function keyLabel(st,key){
+  const parts=String(key).split('.');
+  const subj=SUBJ_MAP[parts[0]];
+  if(!subj) return key;
+  let s=subj.name;
+  if(parts[1]!==undefined){
+    const cs=subj.comps(getUnits(st,subj)||subj.opts[subj.opts.length-1]);
+    if(cs[+parts[1]]) s+=' · '+cs[+parts[1]].n;
+    if(parts[2]==='m') s+=' (מגן)'; else if(parts[2]==='e') s+=' (בחינה)';
+  }
+  return s;
+}
 function noteOf(st,key){ return ((st.notes||{})[key]||'').trim(); }
 function noteBtn(st,key,label){
   const t=noteOf(st,key);
@@ -935,6 +1402,7 @@ function saveNote(){
   const v=(document.getElementById('ndText')||{}).value||'';
   st.notes=st.notes||{};
   if(v.trim()) st.notes[nd.key]=v.trim(); else delete st.notes[nd.key];
+  logChange('note',st,nd.label,'',v.trim()?v.trim().slice(0,40):'(נמחקה)');
   save(); closeNote(); toast(v.trim()?'ההערה נשמרה':'ההערה נמחקה');
 }
 function delNote(){
@@ -999,16 +1467,103 @@ function renameDup(id){
 
 /* ============ ביטול פעולה (Undo) ============ */
 let undoStack=[];
+function undoKey(){ return 'bagrutUndo:'+currentProfileId; }
+function loadUndo(){ try{ undoStack=JSON.parse(LS.getItem(undoKey()))||[]; }catch(e){ undoStack=[]; } }
+function persistUndo(){ try{ LS.setItem(undoKey(),JSON.stringify(undoStack.slice(-8))); }catch(e){} }
 function pushUndo(label){
-  try{ undoStack.push({label,at:Date.now(),snap:JSON.stringify(state)}); if(undoStack.length>12) undoStack.shift(); }catch(e){}
+  try{ undoStack.push({label,at:Date.now(),snap:JSON.stringify(state)}); if(undoStack.length>8) undoStack.shift(); persistUndo(); }catch(e){}
   renderUndo();
+}
+
+/* ===== גיבויים מגורסים אוטומטיים (נקודות שחזור) ===== */
+function snapKey(){ return 'bagrutSnaps:'+currentProfileId; }
+function loadSnaps(){ try{ return JSON.parse(LS.getItem(snapKey()))||[]; }catch(e){ return []; } }
+function autoSnapshot(){
+  try{
+    const snaps=loadSnaps();
+    const today=new Date().toDateString();
+    const n=state.students.length;
+    // נקודת שחזור אחת ליום, ועוד אחת אם מספר התלמידות השתנה משמעותית
+    const last=snaps[snaps.length-1];
+    if(last&&new Date(last.at).toDateString()===today&&Math.abs((last.n||0)-n)<3) return;
+    snaps.push({at:new Date().toISOString(),n,snap:JSON.stringify(state)});
+    while(snaps.length>6) snaps.shift();
+    LS.setItem(snapKey(),JSON.stringify(snaps));
+  }catch(e){}
+}
+function restoreSnap(i){
+  const snaps=loadSnaps(); const s=snaps[i]; if(!s) return;
+  if(!confirm(`לשחזר את נקודת השמירה מ-${new Date(s.at).toLocaleString('he-IL')}?\n(${s.n} תלמידות)\n\nהמצב הנוכחי יישמר קודם כנקודת ביטול.`)) return;
+  pushUndo('שחזור נקודת שמירה');
+  try{ state=Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)),JSON.parse(s.snap)); }catch(e){ toast('שגיאה'); return; }
+  save(); render(); toast('שוחזר בהצלחה');
+}
+/* ===== בדיקת תקינות לקובץ גיבוי ===== */
+function validateBackup(d){
+  const errs=[],warns=[];
+  if(!d||typeof d!=='object') return {ok:false,errs:['הקובץ אינו קובץ נתונים תקין']};
+  const isFull=d._type==='bagrut-backup';
+  const datas=isFull?Object.values(d.data||{}):[d];
+  if(!datas.length) errs.push('הקובץ אינו מכיל נתונים');
+  let tot=0;
+  datas.forEach(s=>{
+    if(!s||typeof s!=='object'){ errs.push('מבנה נתונים שגוי'); return; }
+    if(!Array.isArray(s.students)) errs.push('רשימת התלמידות חסרה או פגומה');
+    else{
+      tot+=s.students.length;
+      s.students.forEach(st=>{
+        if(!st||typeof st!=='object'){ errs.push('רשומת תלמידה פגומה'); return; }
+        if(!st.name) warns.push('תלמידה בלי שם');
+        if(st.grades&&typeof st.grades==='object'){
+          Object.entries(st.grades).forEach(([k,v])=>{ if(typeof v!=='number'||v<0||v>100) warns.push(`ציון לא תקין אצל ${st.name||'?'} (${k})`); });
+        }
+      });
+    }
+    if(s.classes&&!Array.isArray(s.classes)) errs.push('רשימת הכיתות פגומה');
+  });
+  const cur=countAllStudents();
+  if(cur>0&&tot===0) warns.push('הקובץ ריק מתלמידות — השחזור ימחק את הנתונים הקיימים');
+  if(cur>5&&tot<cur*0.5) warns.push(`הקובץ מכיל ${tot} תלמידות לעומת ${cur} כרגע — ייתכן שזה גיבוי ישן`);
+  return {ok:errs.length===0,errs:[...new Set(errs)].slice(0,6),warns:[...new Set(warns)].slice(0,6),total:tot,isFull};
+}
+
+/* ===== יומן שינויים ===== */
+function logChange(type,st,detail,from,to){
+  try{
+    state.log=state.log||[];
+    state.log.push({t:Date.now(),ty:type,s:st?st.name:'',d:detail||'',f:(from===undefined?'':from),o:(to===undefined?'':to)});
+    if(state.log.length>600) state.log=state.log.slice(-600);
+  }catch(e){}
+}
+function logView(){
+  const lg=(state.log||[]).slice().reverse();
+  if(!lg.length) return '<div class="note" style="padding:12px;">היומן ריק — כל שינוי ציון או פעולה גורפת יירשם כאן.</div>';
+  const TY={grade:'ציון',status:'סימון צבע',units:'יח"ל',note:'הערה',bulk:'פעולה גורפת',import:'ייבוא',test:'מבחן כיתה',del:'מחיקה',other:'שינוי'};
+  return `<div class="scroll" style="max-height:55vh;"><table class="tbl"><thead><tr><th>מתי</th><th>סוג</th><th>תלמידה</th><th>פרטים</th><th>מ־</th><th>ל־</th></tr></thead><tbody>
+  ${lg.slice(0,300).map(x=>`<tr>
+    <td style="white-space:nowrap; font-size:11.5px;">${new Date(x.t).toLocaleString('he-IL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</td>
+    <td><span class="pill">${esc(TY[x.ty]||x.ty)}</span></td>
+    <td style="font-weight:700;">${esc(x.s)}</td>
+    <td style="font-size:12px;">${esc(x.d)}</td>
+    <td style="color:var(--muted);">${esc(String(x.f))}</td>
+    <td style="font-weight:800;">${esc(String(x.o))}</td></tr>`).join('')}
+  </tbody></table></div>
+  <div class="note" style="margin-top:6px;">מוצגים ${Math.min(300,lg.length)} מתוך ${lg.length} רשומות (נשמרות 600 האחרונות, ועוברות עם קובץ הגיבוי).</div>`;
+}
+function exportLog(){
+  const lg=state.log||[];
+  if(!lg.length){ toast('היומן ריק'); return; }
+  const rows=lg.map(x=>({'תאריך':new Date(x.t).toLocaleString('he-IL'),'סוג':x.ty,'תלמידה':x.s,'פרטים':x.d,'מ':x.f,'ל':x.o}));
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'יומן שינויים');
+  XLSX.writeFile(wb,`יומן-שינויים-${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 function doUndo(){
   const u=undoStack.pop();
   if(!u){ toast('אין פעולה לביטול'); return; }
-  if(!confirm(`לבטל את הפעולה "${u.label}"?\nהמצב יחזור לרגע שלפניה.`)){ undoStack.push(u); return; }
+  if(!confirm(`לבטל את הפעולה "${u.label}"?\n(${new Date(u.at).toLocaleTimeString('he-IL')})\nהמצב יחזור לרגע שלפניה.`)){ undoStack.push(u); return; }
   try{ state=Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)),JSON.parse(u.snap)); }catch(e){ toast('שגיאה בביטול'); return; }
-  save(); render(); toast('✅ בוטל: '+u.label);
+  persistUndo(); save(); render(); toast('✅ בוטל: '+u.label);
 }
 function renderUndo(){
   const el=document.getElementById('undoBar'); if(!el) return;
@@ -1129,12 +1684,18 @@ function getUnits(st,subj){
   const u=(st.units||{})[subj.id];
   return (u===0||u)?u:subj.opts[subj.opts.length-1];
 }
+let _compCache={};
+function clearCompCache(){ _compCache={}; }
 function getComps(subj,u){
+  const ck=subj.id+'|'+u;
+  if(_compCache[ck]) return _compCache[ck];
   const base=subj.comps(u);
-  return base.map((c,i)=>{
+  const out=base.map((c,i)=>{
     const ov=state.custom[subj.id+'.'+u+'.'+i];
     return ov?Object.assign({},c,ov):c;
   });
+  _compCache[ck]=out;
+  return out;
 }
 // רכיבים אפקטיביים לתלמידה ספציפית: ברירת מחדל ← הגדרות גלובליות ← התאמה אישית לתלמידה
 function getCompsFor(st,subj,u){
@@ -1274,7 +1835,7 @@ function gradeClass(v){
 function scoreCell(r){
   if(!r||!r.active) return '<span style="color:#cbd5e1;">—</span>';
   if(r.final!==null) return `<span class="${gradeClass(r.final)}">${r.final}</span>`;
-  if(r.partial!==null) return `<span class="grade-part" title="ציון חלקי — מבוסס על ${r.covered}% מהמשקל בלבד. הציון הסופי יחושב כשכל הרכיבים יוזנו.">${r.partial}</span> <span class="partTag">חלקי ${r.covered}%</span>`;
+  if(r.partial!==null) return tip(`ציון חלקי — מבוסס על ${r.covered}% מהמשקל בלבד.\nהציון הסופי יחושב כשכל הרכיבים יוזנו.\nציון זה אינו נכלל בממוצע, בזכאות ובספירת המצטיינות.`,`<span class="grade-part">${r.partial}</span> <span class="partTag">חלקי ${r.covered}%</span>`);
   return '<span class="grade-miss">—</span>';
 }
 // תצוגת ציון בדוח — חלקי מוצג שקוף ונטוי עם כוכבית (עובד גם בהדפסה בשחור-לבן)
@@ -1302,7 +1863,7 @@ function fmt(v){ return (v===null||v===undefined)?'—':(Math.round(v*10)/10); }
 
 /* ============ נעילה בסיסמה (אופציונלי) ============ */
 let lockHash='', recCode='';
-try{ lockHash=localStorage.getItem('bagrutLock')||''; recCode=localStorage.getItem('bagrutRec')||''; }catch(e){}
+try{ lockHash=LS.getItem('bagrutLock')||''; recCode=LS.getItem('bagrutRec')||''; }catch(e){}
 function makeRecCode(){
   const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // בלי תווים מבלבלים
   let s=''; for(let g=0;g<4;g++){ for(let i=0;i<4;i++) s+=A[Math.floor(Math.random()*A.length)]; if(g<3) s+='-'; }
@@ -1339,7 +1900,7 @@ async function tryUnlock(){
   if(!v){ err.textContent='נא להזין סיסמה'; return; }
   if(await sha256(v)===lockHash){
     document.getElementById('lockScreen').style.display='none';
-    sessionStorage.setItem('bagrutUnlocked','1');
+    SS.setItem('bagrutUnlocked','1');
     render();
   }else{
     err.textContent='סיסמה שגויה';
@@ -1356,8 +1917,8 @@ async function setLock(){
   if(!confirm('⚠️ חשוב לדעת:\n\n• אין דרך לשחזר סיסמה שנשכחה.\n• הנעילה מונעת כניסה מזדמנת למחשב — היא אינה הצפנה צבאית של הקובץ.\n• מומלץ לשמור גיבוי במקום בטוח.\n\nלהפעיל את הנעילה?')) return;
   lockHash=await sha256(p1);
   recCode=makeRecCode();
-  try{ localStorage.setItem('bagrutLock',lockHash); localStorage.setItem('bagrutRec',recCode); }catch(e){}
-  sessionStorage.setItem('bagrutUnlocked','1');
+  try{ LS.setItem('bagrutLock',lockHash); LS.setItem('bagrutRec',recCode); }catch(e){}
+  SS.setItem('bagrutUnlocked','1');
   scheduleFileSave(); render();
   downloadRecovery(recCode);
   alert('🔒 הנעילה הופעלה!\n\n🔑 קוד השחזור שלך:\n\n        '+recCode+'\n\nקובץ עם הקוד ירד למחשב — שמרי אותו במקום בטוח (למשל בדרייב).\n\nאם תשכחי את הסיסמה — לחצי "שכחתי סיסמה" במסך הנעילה והזיני את הקוד הזה. הנתונים לעולם לא יאבדו.\n\nהקוד שמור גם בתוך כל קובץ גיבוי.');
@@ -1369,8 +1930,8 @@ async function forgotPass(){
   if(!recCode){ alert('לא נמצא קוד שחזור במכשיר זה.\n\nאם יש לך קובץ גיבוי — שחזרי ממנו (♻️ שחזור); הקוד שמור בתוכו.'); return; }
   if(norm(c)!==norm(recCode)){ alert('קוד שחזור שגוי.'); return; }
   lockHash='';
-  try{ localStorage.removeItem('bagrutLock'); }catch(e){}
-  sessionStorage.setItem('bagrutUnlocked','1');
+  try{ LS.removeItem('bagrutLock'); }catch(e){}
+  SS.setItem('bagrutUnlocked','1');
   document.getElementById('lockScreen').style.display='none';
   scheduleFileSave(); render();
   alert('✅ הנעילה הוסרה בהצלחה וכל הנתונים נשמרו.\n\nאפשר להגדיר סיסמה חדשה בהגדרות.');
@@ -1392,7 +1953,7 @@ async function removeLock(){
   if(cur===null) return;
   if(await sha256(cur)!==lockHash){ alert('סיסמה שגויה.'); return; }
   lockHash=''; recCode='';
-  try{ localStorage.removeItem('bagrutLock'); localStorage.removeItem('bagrutRec'); }catch(e){}
+  try{ LS.removeItem('bagrutLock'); LS.removeItem('bagrutRec'); }catch(e){}
   scheduleFileSave(); render(); toast('🔓 הנעילה הוסרה');
 }
 
@@ -1448,23 +2009,23 @@ function setFont(id){
   r.setProperty('--font-head',"'"+f.head+"'");
   r.setProperty('--font-body',"'"+f.body+"'");
   r.setProperty('--font-num',"'"+f.num+"'");
-  try{ localStorage.setItem('bagrutFont',f.id); }catch(e){}
+  try{ LS.setItem('bagrutFont',f.id); }catch(e){}
   if(currentTab==='settings') render();
 }
-function initFont(){ let id='rubik'; try{ id=localStorage.getItem('bagrutFont')||'rubik'; }catch(e){} setFont(id); }
-function currentFontId(){ try{ return localStorage.getItem('bagrutFont')||'rubik'; }catch(e){ return 'rubik'; } }
+function initFont(){ let id='rubik'; try{ id=LS.getItem('bagrutFont')||'rubik'; }catch(e){} setFont(id); }
+function currentFontId(){ try{ return LS.getItem('bagrutFont')||'rubik'; }catch(e){ return 'rubik'; } }
 
 /* ============ ערכת צבע ============ */
 const ACCENTS=[['indigo','סגול','#4f46e5'],['ocean','ים','#0284c7'],['emerald','ירוק','#059669'],['rose','ורוד','#e11d48'],['sunset','שקיעה','#ea580c']];
 function setAccent(a){
   document.documentElement.setAttribute('data-accent',a);
-  try{ localStorage.setItem('bagrutAccent',a); }catch(e){}
+  try{ LS.setItem('bagrutAccent',a); }catch(e){}
   const hd=document.querySelector('header.app');
   if(hd){ const c=getComputedStyle(document.documentElement);
     hd.style.background=`linear-gradient(120deg,${c.getPropertyValue('--h1')} 0%,${c.getPropertyValue('--h2')} 45%,${c.getPropertyValue('--h3')} 100%)`; }
   if(currentTab==='settings') render();
 }
-function initAccent(){ let a='indigo'; try{ a=localStorage.getItem('bagrutAccent')||'indigo'; }catch(e){} setAccent(a); }
+function initAccent(){ let a='indigo'; try{ a=LS.getItem('bagrutAccent')||'indigo'; }catch(e){} setAccent(a); }
 
 /* ============ מונים מונפשים ============ */
 function animateCounters(){
@@ -1566,7 +2127,7 @@ function renderHeaderCenter(){
 }
 function renderHdrBtns(){
   const s=document.getElementById('btnSearch');
-  if(s) s.innerHTML=ic('search',16)+'<span class="hide-sm">חיפוש</span><kbd class="hide-sm" style="background:rgba(255,255,255,.2); border-color:rgba(255,255,255,.3); color:#fff;">Ctrl K</kbd>';
+  if(s) s.innerHTML=ic('search',16)+'<span class="hide-sm">חיפוש</span><kbd class="kbdHint hide-sm">Ctrl K</kbd>';
   const m=document.getElementById('btnMenu');
   if(m) m.innerHTML=`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span class="hide-sm">תפריט</span>`;
   const el=document.getElementById('hdrMenu'); if(!el) return;
@@ -1642,7 +2203,7 @@ function render(){
   else if(currentTab==='alerts') renderAlerts(m);
   else if(currentTab==='settings') renderSettings(m);
   else if(currentTab==='help') renderHelp(m);
-  renderSaveInd(); renderNag(); renderHeaderCenter(); renderUndo(); animateCounters();
+  renderSaveInd(); renderNag(); renderHeaderCenter(); renderUndo(); renderLic(); animateCounters();
 }
 function classFilterHtml(id,val){
   return `<select id="${id}" onchange="render()"><option value="">כל השכבה</option>${state.classes.map(c=>`<option ${val===c?'selected':''}>${c}</option>`).join('')}</select>`;
@@ -1723,8 +2284,8 @@ function avgOf(arr){ return arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.l
 function topTable(results){
   const rows=results.filter(x=>x.r.avg!==null).sort((a,b)=>b.r.avg-a.r.avg).slice(0,15);
   if(!rows.length) return '<div class="note">אין עדיין ציונים</div>';
-  return `<table class="tbl grades"><thead><tr><th>#</th><th>שם</th><th>כיתה</th><th>ממוצע משוקלל</th><th>יח"ל</th><th>סטטוס</th></tr></thead><tbody>
-  ${rows.map((x,i)=>`<tr><td>${i+1}</td><td><span class="name-link" onclick="openStudent('${x.st.id}')">${esc(x.st.name)}</span></td><td>${esc(x.st.cls)}</td>
+  return `<table class="tbl grades"><thead><tr><th>#</th><th>שם</th><th class="cCls">כיתה</th><th>ממוצע משוקלל</th><th>יח"ל</th><th>סטטוס</th></tr></thead><tbody>
+  ${rows.map((x,i)=>`<tr><td>${i+1}</td><td><span class="name-link" onclick="openStudent('${x.st.id}')">${esc(x.st.name)}</span></td><td class="cCls">${esc(x.st.cls)}</td>
    <td class="${gradeClass(x.r.avg)}">${x.r.avg}</td><td>${x.r.totalUnits}</td><td class="status-cell"><span class="badge ${x.r.cls}">${x.r.status}</span></td></tr>`).join('')}
   </tbody></table>`;
 }
@@ -1776,10 +2337,22 @@ function renderStudents(m){
       <div class="toolbar"><input type="text" id="newClsName" placeholder="למשל: יב-3" style="width:140px;"><button class="btn ok sm" onclick="addClass()">➕ כיתה</button></div>
       <div>${state.classes.map(c=>`<span class="pill" style="margin:3px; display:inline-block;">${esc(c)} · ${state.students.filter(s=>s.cls===c).length} תלמידות
         <a style="color:var(--bad); cursor:pointer; font-weight:800;" onclick="delClass('${esc(c)}')">✕</a></span>`).join('')||'<span class="note">אין כיתות — צרי כיתה למעלה, או ייבאי קובץ אקסל והכיתה תיווצר אוטומטית</span>'}</div>
-      <div style="margin-top:10px;"><button class="btn sec sm" onclick="loadDemo()" title="יוצר 24 תלמידות בדיוניות בכיתות יב-1/יב-2 — להתנסות בלבד">🎲 נתוני הדגמה (שמות בדיוניים)</button>
-      <button class="btn bad sm" onclick="if(confirm('למחוק את כל התלמידות (הכיתות יישארו)?')){pushUndo('מחיקת כל התלמידות');state.students=[];save();render();}">🗑️ מחיקת כל התלמידות</button>
-      <button class="btn bad sm" onclick="if(confirm('למחוק את כל הכיתות ואת כל התלמידות בסימולטור הזה?')){pushUndo('מחיקת כיתות ותלמידות');state.students=[];state.classes=[];save();render();}">🧹 מחיקת כיתות + תלמידות</button>
-      <button class="btn bad sm" onclick="factoryReset()" title="מוחק את כל הסימולטורים והנתונים במכשיר הזה ומחזיר תוכנה נקייה">${ic('trash',15)}איפוס מלא (הכול)</button></div>
+      <div class="dangerZone">
+        <span class="dzLink" onclick="toggleBox('danger')">${openBoxes.danger?'▴':'▾'} פעולות מחיקה ואיפוס</span>
+        ${state.students.length?'':`<span class="dzLink" style="margin-inline-start:14px;" onclick="loadDemo()" title="יוצר 24 תלמידות בדיוניות — להתנסות בלבד">🎲 נתוני הדגמה</span>`}
+        ${openBoxes.danger?`
+        <div class="dzBody">
+          <div class="note" style="margin-bottom:8px;">פעולות שאינן ניתנות לביטול (למעט "ביטול פעולה" מיד לאחר מכן). מומלץ לגבות לפני.</div>
+          <div class="dzRow"><span>מחיקת כל התלמידות <i>· הכיתות יישארו</i></span>
+            <button class="btn bad sm" onclick="if(confirm('למחוק את כל התלמידות (הכיתות יישארו)?')){pushUndo('מחיקת כל התלמידות');state.students=[];save();render();}">מחיקה</button></div>
+          <div class="dzRow"><span>מחיקת כיתות + תלמידות <i>· בסימולטור הזה בלבד</i></span>
+            <button class="btn bad sm" onclick="if(confirm('למחוק את כל הכיתות ואת כל התלמידות בסימולטור הזה?')){pushUndo('מחיקת כיתות ותלמידות');state.students=[];state.classes=[];save();render();}">מחיקה</button></div>
+          <div class="dzRow"><span>איפוס מלא <i>· כל הסימולטורים במכשיר</i></span>
+            <button class="btn bad sm" onclick="factoryReset()">איפוס</button></div>
+          ${state.students.length?`<div class="dzRow"><span>נתוני הדגמה <i>· 24 תלמידות בדיוניות</i></span>
+            <button class="btn sec sm" onclick="loadDemo()">טעינה</button></div>`:''}
+        </div>`:''}
+      </div>
     </div>
   </div>
   ${dupBanner()}
@@ -1791,10 +2364,10 @@ function renderStudents(m){
 function allStudentsTable(){
   if(!state.students.length) return '<div class="note">עדיין אין תלמידות</div>';
   const rows=state.students.map(st=>({st,r:calcStudent(st)})).sort((a,b)=>a.st.cls.localeCompare(b.st.cls)||a.st.name.localeCompare(b.st.name));
-  return `<table class="tbl grades"><thead><tr><th>שם</th><th>כיתה</th><th>ממוצע</th><th>יח"ל</th><th>מעכבים</th><th>חסרים</th><th>סטטוס</th><th></th></tr></thead><tbody>
+  return `<table class="tbl grades"><thead><tr><th>שם</th><th class="cCls">כיתה</th><th>ממוצע</th><th>יח"ל</th><th>מעכבים</th><th>חסרים</th><th>סטטוס</th><th></th></tr></thead><tbody>
   ${rows.map(x=>`<tr>
     <td><span class="name-link" onclick="openStudent('${x.st.id}')">${esc(x.st.name)}</span></td>
-    <td><select onchange="setStudentClass('${x.st.id}',this.value)">${state.classes.map(c=>`<option ${x.st.cls===c?'selected':''}>${esc(c)}</option>`).join('')}</select></td>
+    <td class="cCls"><select onchange="setStudentClass('${x.st.id}',this.value)">${state.classes.map(c=>`<option ${x.st.cls===c?'selected':''}>${esc(c)}</option>`).join('')}</select></td>
     <td class="${gradeClass(x.r.avg)}">${fmt(x.r.avg)}</td>
     <td>${x.r.totalUnits}</td>
     <td>${x.r.blockers.length?`<span class="badge b-bad">${x.r.blockers.map(s=>s.name).join(', ')}</span>`:'—'}</td>
@@ -2015,8 +2588,10 @@ function setCode(id,key,val){
 function setGrade(id,key,val){
   const st=state.students.find(s=>s.id===id); if(!st) return;
   st.grades=st.grades||{};
+  const prev=st.grades[key];
   if(val===''||val===null) delete st.grades[key];
   else st.grades[key]=Math.max(0,Math.min(100,+val));
+  if(prev!==st.grades[key]) logChange('grade',st,keyLabel(st,key),prev===undefined?'—':prev,st.grades[key]===undefined?'—':st.grades[key]);
   save();
   const modal=document.getElementById('studentModal');
   if(modal&&modal.classList.contains('show')) refreshOpenViews(id);
@@ -2024,7 +2599,9 @@ function setGrade(id,key,val){
 }
 function setUnits(id,sid,val){
   const st=state.students.find(s=>s.id===id); if(!st) return;
-  st.units=st.units||{}; st.units[sid]=+val;
+  st.units=st.units||{}; const pv=st.units[sid];
+  st.units[sid]=+val;
+  logChange('units',st,(SUBJ_MAP[sid]||{}).name||sid,pv===undefined?'—':pv,+val);
   save();
   const modal=document.getElementById('studentModal');
   if(modal&&modal.classList.contains('show')) refreshOpenViews(id,true);
@@ -2103,7 +2680,7 @@ function renderEntry(m){
         <button class="btn ${entryFull?'warn':'sec'} sm" onclick="toggleEntryFull()">${entryFull?'✕ יציאה ממסך מלא':'⛶ מסך מלא'}</button>
       </div>
     </div>
-    <div class="scroll" style="max-height:${entryFull?'calc(100vh - 150px)':'70vh'};">${entryGrid(subj,studs)}</div>
+    <div class="scroll" style="max-height:${entryFull?'calc(100dvh - 150px)':'70vh'};">${entryGrid(subj,studs)}</div>
   </div>`;
 }
 function entryGrid(subj,studs){
@@ -2129,14 +2706,15 @@ function entryGrid(subj,studs){
       const key=subj.id+'.'+i, g=st.grades||{};
       const nt=noteOf(st,key);
       const kc=k=>((g[k]==null?'cell-miss':'')+gstatCls(st,k));
-      const ct=k=>`oncontextmenu="event.preventDefault();cycleGstat('${st.id}','${k}')" title="לחיצה ימנית: שחור→אדום→כחול"`;
+      const ct=k=>`oncontextmenu="event.preventDefault();cycleGstat('${st.id}','${k}')" title="לחיצה ימנית (או הנקודה הצבעונית): שחור→אדום→כחול"`;
+      const dot=k=>`<button class="gstatDot ${gstatOf(st,k)}" onclick="cycleGstat('${st.id}','${k}')" title="החלפת סימון: שחור → אדום → כחול"></button>`;
       if(c.t==='i'){
-        tds+=`<td class="${nt?'hasNote':''}" title="${nt?esc(nt):''}"><div class="gcell"><input type="number" min="0" max="100" data-k="g|${st.id}|${key}" class="${kc(key)}" ${ct(key)} value="${g[key]??''}" onchange="setGrade('${st.id}','${key}',this.value)"></div></td>`;
+        tds+=`<td class="${nt?'hasNote':''}" ${nt?`onclick="if(event.target===this)infoDlg('הערה',${JSON.stringify(nt)})"`:''}><div class="gcell"><input type="number" min="0" max="100" data-k="g|${st.id}|${key}" class="${kc(key)}" ${ct(key)} value="${g[key]??''}" onchange="setGrade('${st.id}','${key}',this.value)">${dot(key)}</div></td>`;
       }else{
         const eff=c.s;
-        const rM=eff>0?`<div class="gcell"><small>מגן</small><input type="number" min="0" max="100" data-k="g|${st.id}|${key}.m" class="${kc(key+'.m')}" ${ct(key+'.m')} value="${g[key+'.m']??''}" onchange="setGrade('${st.id}','${key}.m',this.value)"></div>`:'';
-        const rE=eff<100?`<div class="gcell"><small>בחינה</small><input type="number" min="0" max="100" data-k="g|${st.id}|${key}.e" class="${kc(key+'.e')}" ${ct(key+'.e')} value="${g[key+'.e']??''}" onchange="setGrade('${st.id}','${key}.e',this.value)"></div>`:'';
-        tds+=`<td class="${nt?'hasNote':''}" title="${nt?esc(nt):''}">${rM}${rE}</td>`;
+        const rM=eff>0?`<div class="gcell"><small>מגן</small><input type="number" min="0" max="100" data-k="g|${st.id}|${key}.m" class="${kc(key+'.m')}" ${ct(key+'.m')} value="${g[key+'.m']??''}" onchange="setGrade('${st.id}','${key}.m',this.value)">${dot(key+'.m')}</div>`:'';
+        const rE=eff<100?`<div class="gcell"><small>בחינה</small><input type="number" min="0" max="100" data-k="g|${st.id}|${key}.e" class="${kc(key+'.e')}" ${ct(key+'.e')} value="${g[key+'.e']??''}" onchange="setGrade('${st.id}','${key}.e',this.value)">${dot(key+'.e')}</div>`:'';
+        tds+=`<td class="${nt?'hasNote':''}" ${nt?`onclick="if(event.target===this)infoDlg('הערה',${JSON.stringify(nt)})"`:''}>${rM}${rE}</td>`;
       }
     });
     const flIc=(r.flips&&r.flips.length)?' <span title="היפוך אחוזים לטובת הבחינה ב: '+esc(r.flips.map(f=>f.comp).join(', '))+'">🔀</span>':'';
@@ -2363,6 +2941,7 @@ function giApply(){
     if(mn?poolP.find(s=>s.id===mn):matchStudent(r.name,poolP)) willN++; });
   if(!confirm(`אישור אחרון — עדכון ציונים\n\n📘 מקצוע: ${subjP.name}\n📝 רכיב: ${curP.n}\n🎯 סוג הציון: ${tgtP}\n🏫 כיתה: ${entryClass||'כל השכבה'}\n👩‍🎓 תלמידות שיתעדכנו: ${willN}\n\nציונים קיימים ברכיב זה יידרסו. להמשיך?`)) return;
   pushUndo(`ייבוא ${subjP.name} · ${tgtP}`);
+  logChange('import',null,`${subjP.name} · ${tgtP} · ${willN} תלמידות`,'',gi.color==='r'?'אדום':gi.color==='b'?'כחול':'שחור');
   const subj=SUBJ_MAP[gi.subj]||SUBJECTS[0];
   const isTest=gi.comp==='T';
   const comps=giCompOptions();
@@ -2411,6 +2990,7 @@ function applyEntryColor(){
   const sTxt=scope==='all'?'כל הציונים במקצוע':'הרכיב שנבחר';
   if(!confirm(`לצבוע ${sTxt} ב${subj.name} אצל ${studs.length} תלמידות בצבע ${cTxt}?\n(רק ציונים שהוזנו — תאים ריקים לא ישתנו)`)) return;
   pushUndo('צביעה גורפת — '+subj.name);
+  logChange('bulk',null,'צביעה · '+subj.name+' · '+sTxt,'',cTxt);
   let n=0;
   studs.forEach(st=>{
     const u=getUnits(st,subj); if(u===0) return;
@@ -2435,7 +3015,7 @@ function applyEntryColor(){
 }
 
 /* ============ סימולציה — סביבה עצמאית שלא נוגעת בציונים האמיתיים ============ */
-let simSplit='', simPredict=false, simBonus=0, simClass='', simSubj='lashon', simFull=false, simDense=false;
+let simSplit='', simPredict=false, simBonus=0, simClass='', simSubj='lashon', simFull=false, simDense=false, calcOn=false;
 function toggleEntryFull(){
   entryFull=!entryFull;
   document.body.style.overflow=entryFull?'hidden':'';
@@ -2495,7 +3075,7 @@ function renderSim(m){
       <span class="pill">${studs.length} תלמידות</span>
       ${simFull?'<span class="pill" style="background:#fff7ed; border-color:#f59e0b;">מסך מלא — Esc ליציאה</span>':''}
     </div>
-    <div class="scroll" style="max-height:${simFull?'calc(100vh - 190px)':(simDense?'62vh':'52vh')};">${simGrid(simSubjObj,studs.slice().sort((a,b)=>a.name.localeCompare(b.name)))}</div>
+    <div class="scroll" style="max-height:${simFull?'calc(100dvh - 190px)':(simDense?'62vh':'52vh')};">${simGrid(simSubjObj,studs.slice().sort((a,b)=>a.name.localeCompare(b.name)))}</div>
   </div>
   <div class="card" style="margin-bottom:14px;">
     <h3 class="sec">⚙️ תרחישים כלליים (אופציונלי)</h3>
@@ -2506,7 +3086,7 @@ function renderSim(m){
         <option value="0" ${state.predLevel===0?'selected':''}>אופטימי — בחינה = מגן</option>
         <option value="-5" ${state.predLevel===-5?'selected':''}>מציאותי — מגן פחות 5</option>
         <option value="-10" ${state.predLevel===-10?'selected':''}>זהיר — מגן פחות 10</option>
-        <option value="auto" ${state.predLevel==='auto'?'selected':''}>🎯 כיול אוטומטי לפי הנתונים</option>
+        <option value="auto" ${state.predLevel==='auto'?'selected':''}>🎯 כיול אוטומטי לפי הנתונים (מומלץ)</option>
       </select>
       <label>חלוקת מגן/בחינה בכל הבחינות:</label>
       <select onchange="simSplit=this.value;render()">
@@ -2520,7 +3100,12 @@ function renderSim(m){
       <label>תוספת נק׳ לכל בחינה: <input type="number" min="0" max="15" value="${simBonus}" onchange="simBonus=this.value;render()"></label>
     </div>
   </div>
-  ${calcPanel(studs)}
+  ${calcOn?calcPanel(studs):`<div class="card" style="margin-bottom:14px;">
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <h3 class="sec" style="margin:0;">🎯 מחשבון: כמה צריך כדי להצטיין</h3>
+      <button class="btn ok sm" onclick="calcOn=true;render()">חשב עכשיו</button>
+      <span class="note">חישוב כבד — רץ רק בלחיצה כדי לא להאט את ההקלדה. (התג הירוק "צריך X" לצורך מעבר מוצג תמיד בטבלה.)</span>
+    </div></div>`}
   ${simPredict?predictionPanel(studs):''}
   <div class="kpis">
     <div class="kpi k2"><div class="n">${sE}${delta(bE,sE)}</div><div class="t">זכאיות בתרחיש (אמיתי: ${bE})</div></div>
@@ -2603,18 +3188,22 @@ function internalComp(st,subj){
   return null;
 }
 // הציון המינימלי בהערכה הפנימית שיביא את ציון המקצוע ליעד (חיפוש מדויק, מכבד עיגול והיפוך)
+// חיפוש בינארי: הציון הסופי עולה מונוטונית עם ההערכה הפנימית,
+// ולכן די ב-7 בדיקות במקום 101 — פי 14 מהר יותר.
+function minSat(test,lo,hi){
+  if(test(lo)) return lo;
+  if(!test(hi)) return null;
+  while(hi-lo>1){ const mid=(lo+hi)>>1; if(test(mid)) hi=mid; else lo=mid; }
+  return hi;
+}
 function neededInternalForSubject(st,subj,target){
   const ic=internalComp(st,subj); if(!ic) return {ok:false,reason:'אין הערכה פנימית'};
   const key=subj.id+'.'+ic.i;
   st.grades=st.grades||{};
   const orig=st.grades[key];
   const start=orig===undefined?0:Math.max(0,Math.min(100,Math.ceil(orig)));
-  let found=null;
-  for(let x=start;x<=100;x++){   // רק העלאה — לא נציע להוריד ציון קיים
-    st.grades[key]=x;
-    const r=calcSubject(st,subj);
-    if(r.final!==null&&r.final>=target){ found=x; break; }
-  }
+  const test=x=>{ st.grades[key]=x; const r=calcSubject(st,subj); return r.final!==null&&r.final>=target; };
+  const found=minSat(test,start,100);
   if(orig===undefined) delete st.grades[key]; else st.grades[key]=orig;
   return found===null?{ok:false,reason:'לא ניתן להגיע ליעד'}:{ok:true,x:found,comp:ic.c.n,key,cur:orig===undefined?null:orig,w:ic.c.w};
 }
@@ -2628,12 +3217,7 @@ function neededInternalForAvg(st,target){
     st.grades=st.grades||{};
     const orig=st.grades[key];
     const start=orig===undefined?0:Math.max(0,Math.min(100,Math.ceil(orig)));
-    let found=null;
-    for(let x=start;x<=100;x++){   // רק העלאה
-      st.grades[key]=x;
-      const rr=calcStudent(st);
-      if(rr.avg!==null&&rr.avg>target){ found=x; break; }
-    }
+    const found=minSat(x=>{ st.grades[key]=x; const rr=calcStudent(st); return rr.avg!==null&&rr.avg>target; },start,100);
     if(orig===undefined) delete st.grades[key]; else st.grades[key]=orig;
     if(found!==null) best.push({subj,x:found,cur:orig===undefined?null:orig,comp:ic.c.n,delta:found-(orig===undefined?0:orig)});
   });
@@ -2651,14 +3235,13 @@ function neededInternalAll(st,target){
   if(!keys.length) return null;
   st.grades=st.grades||{};
   const orig={}; keys.forEach(k=>{ orig[k.key]=st.grades[k.key]; });
-  let found=null,changed=0;
-  for(let x=0;x<=100;x++){
-    let ch=0;
+  const apply=x=>{ let ch=0;
     keys.forEach(k=>{ const cur=orig[k.key];
       if(cur===undefined||cur<x){ st.grades[k.key]=x; ch++; } else st.grades[k.key]=cur; });
-    const rr=calcStudent(st);
-    if(rr.avg!==null&&rr.avg>target){ found=x; changed=ch; break; }
-  }
+    return ch; };
+  const found=minSat(x=>{ apply(x); const rr=calcStudent(st); return rr.avg!==null&&rr.avg>target; },0,100);
+  let changed=0;
+  if(found!==null) changed=apply(found);
   keys.forEach(k=>{ if(orig[k.key]===undefined) delete st.grades[k.key]; else st.grades[k.key]=orig[k.key]; });
   return found===null?null:{x:found,changed,total:keys.length};
 }
@@ -2678,7 +3261,8 @@ function calcPanel(studs){
   excRows.sort((a,b)=>b.avg-a.avg);
   if(!excRows.length) return '';
   return `<div class="card" style="margin-bottom:14px; border:2px solid var(--ok);">
-    <h3 class="sec">⭐ כמה צריך כדי להצטיין (מעל ${T.excel})</h3>
+    <div style="display:flex; align-items:center; gap:10px;"><h3 class="sec" style="margin:0;">⭐ כמה צריך כדי להצטיין (מעל ${T.excel})</h3>
+      <button class="btn sec sm" style="margin-inline-start:auto;" onclick="calcOn=false;render()">✕ סגירה</button></div>
     <div class="note" style="margin-bottom:10px;">המספר הירוק = בדיוק מה שצריך להזין בהערכה הפנימית. <span class="pill">כדי לעבור — התג הירוק "צריך X" מופיע צמוד לשדה בטבלת הניסוי</span></div>
 
     ${excRows.length?`
@@ -2824,7 +3408,7 @@ function buildReportHtml(cls){
     <div style="text-align:center;">
       <h2 style="font-size:20px;">${esc(reportTitle())} — ${cls?esc(cls):'כל השכבה'}</h2>
       ${state.coord?`<div style="font-size:13.5px; font-weight:700; color:var(--brand); margin-top:2px;">רכזת פדגוגית: ${esc(state.coord)}</div>`:''}
-      <div class="note">הופק בתאריך ${today} · ${esc(appTitle())}</div>
+      <div class="note">הופק בתאריך ${today} · ${esc(appTitle())}${isLicensed()?' · רישיון: '+esc(licName):' · גרסת התנסות'}</div>
     </div>
   </div>
   <div class="kpis">
@@ -2837,11 +3421,11 @@ function buildReportHtml(cls){
   </div>
   <h3 class="sec">טבלת תלמידות מפורטת</h3>
   <div class="scroll" style="max-height:none;">
-  <table class="tbl grades"><thead><tr><th>שם</th><th>כיתה</th>${SUBJECTS.map(s=>`<th>${esc(s.name)}</th>`).join('')}<th>ממוצע</th><th>סטטוס</th></tr></thead><tbody>
-  ${results.map(x=>`<tr><td style="font-weight:700;">${esc(x.st.name)}</td><td>${esc(x.st.cls)}</td>
+  <table class="tbl grades"><thead><tr><th>שם</th><th class="cCls">כיתה</th>${SUBJECTS.map(s=>`<th>${esc(s.name)}</th>`).join('')}<th>ממוצע</th><th>סטטוס</th></tr></thead><tbody>
+  ${results.map(x=>`<tr><td style="font-weight:700;">${esc(x.st.name)}</td><td class="cCls">${esc(x.st.cls)}</td>
     ${SUBJECTS.map(s=>{const r=x.r.per[s.id]; if(!r||!r.active)return '<td style="color:#cbd5e1;">—</td>';
       const nt=subjNote(x.st,s.id);
-      return `<td ${nt?`class="hasNote" title="${esc(nt)}"`:''}>${scoreCellReport(r)}${nt?' <span style="color:#f59e0b; font-size:11px;" title="'+esc(nt)+'">📝</span>':''}</td>`;}).join('')}
+      return `<td ${nt?'class="hasNote"':''}>${scoreCellReport(r)}${nt?' '+tip(nt,'<span style="color:#f59e0b; font-size:12px;">📝</span>'):''}</td>`;}).join('')}
     <td class="${gradeClass(x.r.avg)}" style="font-weight:800;">${fmt(x.r.avg)}${(!x.r.complete&&x.r.avg!==null)?'<sup style="opacity:.55;">*</sup>':''}</td>
     <td><span class="badge ${x.r.cls}">${x.r.status}</span></td></tr>`).join('')}
   </tbody></table></div>
@@ -2905,9 +3489,36 @@ function copyReport(){
 function renderSettings(m){
   const T=state.thresholds;
   m.innerHTML=`
+  <div class="card" style="margin-bottom:14px; background:linear-gradient(135deg,#eef2ff,#fff); border:2px solid var(--brand);">
+    <div class="toolbar" style="margin-bottom:0;">
+      <label style="font-size:14px;"><input type="checkbox" ${state.pro?'checked':''} onchange="togglePro()">
+        <b>מצב מקצועי</b></label>
+      <span class="note">${state.pro?'כל היכולות פתוחות: שינוי גורף, קטלוג שאלונים, משקולות, ערכות צבע וגופנים.'
+        :'מוצגות רק היכולות הבסיסיות. הדליקי כדי לפתוח שינוי גורף, קטלוג שאלונים, משקולות ועיצוב.'}</span>
+      <button class="btn sec sm" style="margin-inline-start:auto;" onclick="openWizard()">${ic('help',14)}הדרכה מהירה</button>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="toolbar" style="margin-bottom:0;">
+      <h2 class="sec" style="margin:0; font-size:15px;">${ic('shield',18)}רישיון</h2>
+      ${isLicensed()?`<span class="badge b-ok">מורשה: ${esc(licName)}</span>
+        <button class="btn sec sm" onclick="removeLic()">הסרה</button>`
+        :`<span class="badge b-warn">גרסת התנסות</span>
+        <button class="btn ok sm" onclick="activateLic()">הפעלת רישיון</button>`}
+      <span class="note">${isLicensed()?'הרישיון מונפק למוסד זה בלבד.':'הרישיון משויך לשם המוסד ומאפשר תמיכה ועדכונים.'}</span>
+    </div>
+  </div>
+  ${renderDiag()}
+  <div class="card" style="margin-bottom:14px;">
+    <div class="toolbar" style="margin-bottom:0;">
+      <h2 class="sec" style="margin:0; font-size:15px;">${ic('shield',18)}אימות מול תעודה רשמית</h2>
+      <button class="btn ok sm" onclick="openVerify()">פתיחת כלי האימות</button>
+      <span class="note">משווה את חישובי המערכת מול ציונים סופיים רשמיים של תלמידה — הבדיקה החשובה ביותר.</span>
+    </div>
+  </div>
   <div class="card" style="margin-bottom:14px; border:2px solid var(--ok);">
     <h2 class="sec">${ic('save',19)}מצב השמירה — האם הנתונים שלי בטוחים?</h2>
-    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>3.5</b> · 01.09.2026</span>
+    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>4.5</b> · 01.09.2026</span>
     <span class="note">אחרי העלאת גרסה חדשה — רעננו את הדף (Ctrl+F5) וּודאו שהמספר כאן התעדכן.</span></div>
     <div id="storageBox">${storageStatusHtml()}</div>
     ${(()=>{const b=lastBackupInfo(); const cur=countAllStudents();
@@ -2938,6 +3549,31 @@ function renderSettings(m){
     </div>
     <div class="note">כל סימולטור הוא סביבה נפרדת לחלוטין — תלמידות, כיתות, ציונים והגדרות משלו. מעבר בין סימולטורים דרך התפריט בכותרת העליונה. כך אפשר לנהל במקביל את יב, יא, ושנתונים קודמים.</div>
   </div>
+  <div class="card" style="margin-bottom:14px; padding:${openBoxes.snap?'17px':'11px 17px'};">
+    <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="toggleBox('snap')">
+      <h2 class="sec" style="margin:0; font-size:15px;">${ic('clock',18)}נקודות שמירה אוטומטיות</h2>
+      <span class="pill">${loadSnaps().length} נקודות</span>
+      <span style="margin-inline-start:auto; font-size:16px; color:var(--muted);">${openBoxes.snap?'▴':'▾'}</span>
+    </div>
+    ${openBoxes.snap?`
+    <div class="note" style="margin:10px 0;">התוכנה שומרת אוטומטית נקודת שחזור בכל יום עבודה (עד 6 נקודות אחרונות). אם משהו התקלקל — אפשר לחזור לנקודה קודמת. זה <b>בנוסף</b> לגיבוי הידני, לא במקומו.</div>
+    ${(()=>{const s=loadSnaps(); return s.length?`<table class="tbl"><thead><tr><th>תאריך</th><th>תלמידות</th><th></th></tr></thead><tbody>
+      ${s.map((x,i)=>`<tr><td>${new Date(x.at).toLocaleString('he-IL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</td>
+        <td>${x.n}</td><td><button class="btn sec sm" onclick="restoreSnap(${i})">שחזור לנקודה זו</button></td></tr>`).reverse().join('')}
+      </tbody></table>`:'<div class="note">עדיין אין נקודות שמירה.</div>';})()}`:''}
+  </div>
+  <div class="card" style="margin-bottom:14px; padding:${openBoxes.log?'17px':'11px 17px'};">
+    <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="toggleBox('log')">
+      <h2 class="sec" style="margin:0; font-size:15px;">${ic('file',18)}יומן שינויים</h2>
+      <span class="pill">${(state.log||[]).length} רשומות</span>
+      <span style="margin-inline-start:auto; font-size:16px; color:var(--muted);">${openBoxes.log?'▴':'▾'}</span>
+    </div>
+    ${openBoxes.log?`
+    <div class="note" style="margin:10px 0;">כל שינוי ציון, סימון צבע, יח"ל, הערה, פעולה גורפת וייבוא נרשמים כאן — מה שונה, ממה למה ומתי. שימושי כשמתגלה ציון שגוי ורוצים לדעת מה קרה.</div>
+    <div class="toolbar"><button class="btn sec sm" onclick="exportLog()">${ic('down',14)}ייצוא היומן לאקסל</button>
+      <button class="btn bad sm" onclick="if(confirm('לנקות את יומן השינויים?')){state.log=[];save();render();}">ניקוי היומן</button></div>
+    ${logView()}`:''}
+  </div>
   <div class="card" style="margin-bottom:14px; padding:${openBoxes.lock?'17px':'11px 17px'};">
     <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="toggleBox('lock')">
       <h2 class="sec" style="margin:0; font-size:15px;">${ic('lock',18)}נעילת הקובץ</h2>
@@ -2958,7 +3594,7 @@ function renderSettings(m){
     <b>סיסמה שנשכחה לעולם לא תגרום לאובדן נתונים:</b> בעת ההפעלה נוצר <b>קוד שחזור</b> שיורד כקובץ ונשמר גם בכל גיבוי. במסך הנעילה יש "שכחתי סיסמה" שמסיר את הנעילה בעזרתו.</div>`:''}
   </div>
   <div class="card" style="margin-bottom:14px;">
-    <h2 class="sec">${ic('type',19)}גופן</h2>
+    ${isPro()?`<h2 class="sec">${ic('type',19)}גופן</h2>
     <div class="note" style="margin-bottom:8px;">בחרי גופן — התצוגה מתעדכנת מיד. כל דוגמה מוצגת בגופן עצמו.</div>
     <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; margin-bottom:16px;">
       ${FONTS.map(f=>{const sel=currentFontId()===f.id;
@@ -2976,7 +3612,7 @@ function renderSettings(m){
         background:${col}; cursor:pointer; box-shadow:0 4px 12px ${col}55; transition:transform .15s ease;"
         onmouseover="this.style.transform='scale(1.12)'" onmouseout="this.style.transform=''"></button>`).join('')}
       <span class="note">הצבע משפיע על הכותרת, הכפתורים והלשוניות.</span>
-    </div>
+    </div>`:''}
     <h2 class="sec">${ic('school',19)}זהות בית הספר</h2>
     <div class="toolbar">
       <label><b>שם בית הספר:</b></label>
@@ -3041,7 +3677,7 @@ function renderSettings(m){
     </div>
     <div class="note">בקובץ המקורי מקצועות אלה מוזנים אך אינם נכללים בממוצע המשוקלל — לכן ברירת המחדל כבויה.</div>`:''}
   </div>
-  <div class="card" style="margin-bottom:14px; padding:${openBoxes.cat?'17px':'11px 17px'};">
+  ${isPro()?`<div class="card" style="margin-bottom:14px; padding:${openBoxes.cat?'17px':'11px 17px'};">
     <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="toggleBox('cat')">
       <h2 class="sec" style="margin:0; font-size:15px;">${ic('file',18)}קטלוג שאלונים — בגרות גמישה</h2>
       <span class="pill">לעיון בלבד</span>
@@ -3056,8 +3692,8 @@ function renderSettings(m){
       </select>
     </div>
     <div class="scroll" style="max-height:55vh;">${catalogTable()}</div>`:''}
-  </div>
-  <div class="card" style="margin-bottom:14px; border:2px solid var(--brand2); padding:${openBoxes.bulk?'17px':'11px 17px'};">
+  </div>`:''}
+  ${isPro()?`<div class="card" style="margin-bottom:14px; border:2px solid var(--brand2); padding:${openBoxes.bulk?'17px':'11px 17px'};">
     <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="toggleBox('bulk')">
       <h2 class="sec" style="margin:0; font-size:15px;">${ic('gear',18)}שינוי גורף — מקצוע שלם, כל התלמידות</h2>
       <span style="margin-inline-start:auto; font-size:16px; color:var(--muted);">${openBoxes.bulk?'▴':'▾'}</span>
@@ -3075,8 +3711,8 @@ function renderSettings(m){
       <button class="btn ok" onclick="bulkCodesAll()">🏷️ החלת כל סמלי השאלונים שנבחרו — לכל התלמידות בבת אחת</button>
     </div>
     <div class="note" style="margin-top:8px;">💡 להחזרת מקצוע לברירת המחדל אצל כולן: <button class="btn sec sm" onclick="bulkClear()">↩️ ניקוי כל ההתאמות האישיות במקצוע זה</button></div>`:''}
-  </div>
-  <div class="card" style="padding:${openBoxes.wts?'17px':'11px 17px'};">
+  </div>`:''}
+  ${isPro()?`<div class="card" style="padding:${openBoxes.wts?'17px':'11px 17px'};">
     <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="toggleBox('wts')">
       <h2 class="sec" style="margin:0; font-size:15px;">📚 משקולות מקצועות — ברירת מחדל</h2>
       <span class="pill">חלה על תלמידות בלי התאמה אישית</span>
@@ -3086,7 +3722,7 @@ function renderSettings(m){
     <div class="note" style="margin:10px 0;">כאן משנים את חלוקת האחוזים בין המגן לבחינה (30/70, 50/50, 40/60 וכו׳) ואת משקל כל רכיב בציון הסופי. השינוי חל על כל התלמידות. סה"כ משקלי הרכיבים בכל מקצוע צריך להיות 100.</div>
     ${SUBJECTS.map(subj=>settingsSubj(subj)).join('')}
     <button class="btn warn" onclick="if(confirm('לאפס את כל המשקולות לברירת המחדל?')){state.custom={};save();render();}">↩️ איפוס לברירות מחדל</button>`:''}
-  </div>`;
+  </div>`:''}`;
 }
 function T_set(k,v){ state.thresholds[k]=+v; save(); toast('נשמר'); }
 let bulkSubj='lashon';
@@ -3129,6 +3765,7 @@ function bulkApply(i){
   const what=[cVal?`סמל ${cVal}`:'',sVal!==''?`מגן ${sVal}%/בחינה ${100-sVal}%`:'',wVal!==''?`משקל ${wVal}%`:''].filter(Boolean).join(' · ');
   if(!confirm(`להחיל על ${targets.length} תלמידות ב${esc(subj.name)} — ${esc(String(what))}?`)) return;
   pushUndo('שינוי גורף — '+subj.name);
+  logChange('bulk',null,subj.name+' · '+String(what),'',targets.length+' תלמידות');
   targets.forEach(st=>{
     if(cVal){ st.codes=st.codes||{}; st.codes[key]=cVal; }
     if(sVal!==''||wVal!==''){
@@ -3339,6 +3976,7 @@ function importSimulator(wb){
   const pf=profiles.find(x=>x.id===currentProfileId);
   if(pf&&(pf.unnamed||!pf.name)){ pf.name=cls; delete pf.unnamed; saveProfiles(); renderProfileBar(); }
   pushUndo('ייבוא מקובץ סימולטור');
+  logChange('import',null,'קובץ סימולטור · כיתה '+cls,'',parsed.length+' תלמידות');
   let added=0, updated=0;
   const seen={};
   parsed.forEach(p=>{
@@ -3397,7 +4035,7 @@ function exportJSON(){
   const all={_type:'bagrut-backup',_ver:2,_at:new Date().toISOString(),school:schoolName,profiles:profiles,current:currentProfileId,data:{}};
   profiles.forEach(pr=>{
     const key=pr.id==='main'?'bagrutSimPro':'bagrutSimPro:'+pr.id;
-    try{ const raw=localStorage.getItem(key); if(raw) all.data[pr.id]=JSON.parse(raw); }catch(e){}
+    try{ const raw=LS.getItem(key); if(raw) all.data[pr.id]=JSON.parse(raw); }catch(e){}
   });
   all.data[currentProfileId]=state;   // המצב הפעיל, מעודכן לרגע זה
   const blob=new Blob([JSON.stringify(all)],{type:'application/json'});
@@ -3407,7 +4045,7 @@ function exportJSON(){
   const pad=n=>String(n).padStart(2,'0');
   a.download=`גיבוי-${(schoolName||'סימולטור-בגרות').replace(/[\\/:*?"<>|]/g,'')}-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.json`;
   a.click();
-  try{ localStorage.setItem('bagrutLastBackup',JSON.stringify({at:d.toISOString(),n:countAllStudents()})); }catch(e){}
+  try{ LS.setItem('bagrutLastBackup',JSON.stringify({at:d.toISOString(),n:countAllStudents()})); }catch(e){}
   const n=Object.keys(all.data).length;
   toast(`גיבוי מלא ירד למחשב — ${n} סימולטורים, ${countAllStudents()} תלמידות. שמרי אותו בדרייב!`);
   render();
@@ -3417,12 +4055,12 @@ function countAllStudents(){
   profiles.forEach(pr=>{
     const key=pr.id==='main'?'bagrutSimPro':'bagrutSimPro:'+pr.id;
     try{ if(pr.id===currentProfileId){ n+=state.students.length; return; }
-      const raw=localStorage.getItem(key); if(raw) n+=(JSON.parse(raw).students||[]).length; }catch(e){}
+      const raw=LS.getItem(key); if(raw) n+=(JSON.parse(raw).students||[]).length; }catch(e){}
   });
   return n;
 }
 function lastBackupInfo(){
-  try{ const r=localStorage.getItem('bagrutLastBackup'); if(!r) return null; return JSON.parse(r); }catch(e){ return null; }
+  try{ const r=LS.getItem('bagrutLastBackup'); if(!r) return null; return JSON.parse(r); }catch(e){ return null; }
 }
 function importJSON(input){
   const file=input.files[0]; if(!file) return;
@@ -3430,15 +4068,21 @@ function importJSON(input){
   reader.onload=e=>{
     try{
       const d=JSON.parse(e.target.result);
+      const vr=validateBackup(d);
+      if(!vr.ok){ alert('❌ הקובץ אינו תקין ולא ישוחזר:\n\n• '+vr.errs.join('\n• ')); input.value=''; return; }
+      if(vr.warns&&vr.warns.length){
+        if(!confirm('⚠️ נמצאו אזהרות בקובץ:\n\n• '+vr.warns.join('\n• ')+'\n\nלהמשיך בשחזור?')){ input.value=''; return; }
+      }
       if(d&&d._type==='bagrut-backup'&&d.data){
         // גיבוי מלא — כל הסימולטורים
         let tot=0; Object.values(d.data).forEach(s=>tot+=((s&&s.students)||[]).length);
         const when=d._at?new Date(d._at).toLocaleString('he-IL',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'לא ידוע';
         const names=(d.profiles||[]).map(p=>p.name||'(ללא שם)').join(', ');
         if(!confirm(`שחזור גיבוי מלא\n\nתאריך הגיבוי: ${when}\nסימולטורים: ${names}\nסך תלמידות: ${tot}\n\n⚠️ הנתונים הקיימים במכשיר זה יוחלפו. להמשיך?`)){ input.value=''; return; }
+        pushUndo('שחזור מגיבוי');
         (d.profiles||[]).forEach(pr=>{
           const key=pr.id==='main'?'bagrutSimPro':'bagrutSimPro:'+pr.id;
-          if(d.data[pr.id]) localStorage.setItem(key,JSON.stringify(d.data[pr.id]));
+          if(d.data[pr.id]) LS.setItem(key,JSON.stringify(d.data[pr.id]));
         });
         profiles=(d.profiles&&d.profiles.length)?d.profiles:[{id:'main',name:'',unnamed:1}];
         currentProfileId=(d.current&&profiles.some(p=>p.id===d.current))?d.current:profiles[0].id;
@@ -3450,6 +4094,7 @@ function importJSON(input){
         // גיבוי בפורמט הישן — סימולטור בודד
         const n=((d&&d.students)||[]).length;
         if(!confirm(`שחזור גיבוי לסימולטור הנוכחי\n\nתלמידות בקובץ: ${n}\n\n⚠️ הנתונים בסימולטור הנוכחי יוחלפו. להמשיך?`)){ input.value=''; return; }
+        pushUndo('שחזור מגיבוי');
         state=Object.assign(JSON.parse(JSON.stringify(DEFAULT_STATE)),d);
         save(); render(); toast(`שוחזרו ${n} תלמידות`);
       }
@@ -3512,9 +4157,9 @@ function storageStatusHtml(){
     const key=pr.id==='main'?'bagrutSimPro':'bagrutSimPro:'+pr.id;
     let n=0,kb=0,t='—';
     try{
-      const raw=localStorage.getItem(key);
+      const raw=LS.getItem(key);
       if(raw){ kb=Math.round(raw.length*2/1024); const d=JSON.parse(raw); n=(d.students||[]).length; }
-      const ts=localStorage.getItem('bagrutLastSave:'+pr.id);
+      const ts=LS.getItem('bagrutLastSave:'+pr.id);
       if(ts) t=new Date(ts).toLocaleString('he-IL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
     }catch(e){}
     return `<tr ${pr.id===currentProfileId?'style="background:#f0fdf4; font-weight:700;"':''}>
@@ -3541,12 +4186,12 @@ function factoryReset(){
   if(!confirm('אישור אחרון: הנתונים יימחקו ואי אפשר לשחזר אותם — אלא מקובץ גיבוי.\n\nלמחוק?')) return;
   try{
     const keys=[];
-    for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf('bagrut')===0) keys.push(k); }
-    keys.forEach(k=>localStorage.removeItem(k));
+    for(let i=0;i<LS.length;i++){ const k=LS.key(i); if(k&&k.indexOf('bagrut')===0) keys.push(k); }
+    keys.forEach(k=>LS.removeItem(k));
   }catch(e){}
   profiles=[{id:'main',name:'',unnamed:1}];
   currentProfileId='main';
-  lockHash=''; recCode=''; try{ sessionStorage.removeItem('bagrutUnlocked'); }catch(e){}
+  lockHash=''; recCode=''; try{ SS.removeItem('bagrutUnlocked'); }catch(e){}
   saveProfiles();
   state=JSON.parse(JSON.stringify(DEFAULT_STATE));
   lastSaveAt=null; saveOk=null;
@@ -3559,7 +4204,7 @@ function testSave(){
   save();
   let ok=false, msg='';
   try{
-    const raw=localStorage.getItem(profileKey());
+    const raw=LS.getItem(profileKey());
     const d=JSON.parse(raw);
     ok=(d.students||[]).length===before;
     msg=ok?`✅ השמירה עובדת מצוין!\n\nנבדק עכשיו: ${before} תלמידות נשמרו ונקראו בחזרה בהצלחה.\nשעת השמירה: ${new Date().toLocaleTimeString('he-IL')}\n\nגם אם תסגרי את הדפדפן — הנתונים יחזרו בפתיחה הבאה במכשיר הזה.\nלגיבוי חיצוני (מומלץ שבועי): כפתור "💾 גיבוי".`
@@ -3577,6 +4222,30 @@ function renderHelp(m){
     <h2 class="sec" style="font-size:18px;">❓ מדריך למשתמש — ${esc(appTitle())}</h2>
     <div style="font-size:14px; line-height:1.8;">הכלי מחשב זכאות לבגרות וממוצע משוקלל לפי מבנה הבגרות הגמישה, מאתר מצטיינות ותלמידות בסיכון, ומאפשר סימולציות בלי לגעת בציונים האמיתיים. <b>הכול נשמר אוטומטית בדפדפן של המחשב הזה.</b></div>
   </div>
+  ${step('📱','שימוש בטלפון ובטאבלט',`
+    <b>התקנה (חשוב במיוחד באייפון):</b><br>
+    <b>לפני הכול —</b> ודאו שארבעת קובצי ה-PNG של האייקון (icon-180 / icon-192 / icon-512 / favicon-32) הועלו לאותה תיקייה עם index.html. בלעדיהם ההתקנה תעבוד, אבל האייקון יהיה כללי.<br>
+    <b>אייפון/אייפד:</b> פותחים את הקישור ב<b>ספארי</b> ← כפתור השיתוף (⬆️) ← <b>"הוספה למסך הבית"</b>. זה גם נותן אייקון וגם <b>מונע מספארי למחוק את הנתונים</b> (ספארי מוחק נתונים של אתרים שלא נכנסו אליהם 7 ימים!).<br>
+    <b>אנדרואיד:</b> פותחים ב<b>כרום</b> ← תפריט ⋮ ← <b>"הוספה למסך הבית"</b>. חשוב: לא לפתוח מתוך וואטסאפ או פייסבוק — הדפדפן המשולב שלהם שומר בנפרד ומתנקה.<br><br>
+    <b>מה שונה בנייד:</b><br>
+    • סימון צבע לציון — לחיצה על <b>הנקודה הצבעונית</b> שליד הציון (במחשב זו לחיצה ימנית).<br>
+    • הסברים והערות — נפתחים ב<b>לחיצה</b> במקום מעבר עכבר.<br>
+    • טבלאות רחבות נגללות לצד, ו<b>עמודת השם נשארת קבועה</b> כדי שתדעו על מי אתן מסתכלות. מומלץ גם <b>📋 תצוגה צפופה</b> ו<b>⛶ מסך מלא</b>, ולסובב את המכשיר לרוחב.<br>
+    • חלונות נפתחים כ"גלילון" מלמטה, בסגנון אפליקציה.<br>
+    • <b>שמירה אוטומטית לקובץ אינה נתמכת בנייד</b> — לכן בנייד חשוב במיוחד לגבות (💾 גיבוי → שמירה בדרייב).<br><br>
+    <b>ההמלצה שלי:</b> הזנה כבדה במחשב · צפייה, דוחות והתראות בנייד. העברה בין מכשירים דרך קובץ הגיבוי בדרייב.`)}
+  ${step('✅','לפני שסומכים על הכלי — שתי בדיקות',`
+    <b>1. בדיקת מערכת</b> (הגדרות, בראש העמוד): 15 מקרי בדיקה שמאמתים את מנוע החישוב — עיגול, היפוך אחוזים, נרמול, מקצועות רבי-מלל, ספי מעכב. בנוסף בדיקת סביבה: האם הדפדפן שומר, האם חובר קובץ נתונים, האם בוצע גיבוי. הכול צריך להיות ירוק.<br>
+    <b>2. אימות מול תעודה רשמית</b> (הגדרות ← "אימות מול תעודה רשמית"): בוחרים תלמידה שיש לה ציונים סופיים רשמיים, מזינים אותם, והכלי מראה אם הוא מחשב <b>בדיוק</b> אותו דבר. <b>זו הבדיקה החשובה ביותר.</b> מומלץ על 3 תלמידות משנה קודמת לפני תחילת עבודה אמיתית.`)}
+  ${step('🛡️','אם משהו התקלקל',`
+    <b>↩️ ביטול</b> — כפתור בסרגל העליון או Ctrl+Z. שומר 8 פעולות אחרונות ו<b>שורד רענון דף</b>.<br>
+    <b>נקודות שמירה</b> (הגדרות) — התוכנה שומרת אוטומטית נקודת שחזור בכל יום עבודה, עד 6 נקודות. אפשר לחזור לכל אחת.<br>
+    <b>יומן שינויים</b> (הגדרות) — כל שינוי ציון, סימון, יח"ל, הערה, ייבוא ופעולה גורפת נרשם: מה שונה, ממה למה ומתי. ניתן לייצוא לאקסל. שימושי כשמתגלה ציון שגוי ורוצים לדעת מה קרה.<br>
+    <b>בדיקת תקינות בשחזור</b> — קובץ גיבוי פגום או חשוד (למשל ריק, או קטן משמעותית מהנתונים הקיימים) ייחסם או יעורר אזהרה לפני שידרוס משהו.`)}
+  ${step('🎚️','מצב פשוט ומצב מקצועי',`
+    התוכנה נפתחת ב<b>מצב פשוט</b>: מוצגות רק היכולות שרכזת צריכה ביום-יום. השינוי הגורף, קטלוג השאלונים, טבלת המשקולות, ערכות הצבע והגופנים — מוסתרים.<br>
+    בהגדרות, בראש העמוד, יש מתג <b>"מצב מקצועי"</b> שפותח את הכול. אפשר לעבור הלוך ושוב בכל רגע — שום נתון לא נפגע.<br>
+    יש גם <b>הדרכה מהירה</b> (אשף ב-5 שלבים) שנפתחת אוטומטית בפעם הראשונה, וזמינה תמיד מההגדרות.`)}
   ${step('🏫','התאמה לבית הספר שלכם',`
     <b>הגדרות ← 🏫 זהות בית הספר:</b> מזינים את שם בית הספר ולוחצים שמירה — והוא מופיע מיד בכותרת, בכל הדוחות המודפסים, בנושא המייל ובשם קובץ הגיבוי.<br>
     באותו מקום מעלים גם את <b>הלוגו</b> של בית הספר (כל קובץ תמונה). כברירת מחדל מוצג לוגו כללי.<br>
@@ -3698,9 +4367,9 @@ function renderHelp(m){
 try{
   if(location.search.indexOf('reset=1')>-1){
     if(confirm('🗑️ פתיחה במצב איפוס\n\nלמחוק את כל הנתונים במכשיר הזה ולהתחיל תוכנה נקייה לגמרי?')){
-      const kk=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf('bagrut')===0) kk.push(k); }
-      schoolName=''; lockHash=''; recCode=''; sessionStorage.removeItem('bagrutUnlocked');
-      kk.forEach(k=>localStorage.removeItem(k));
+      const kk=[]; for(let i=0;i<LS.length;i++){ const k=LS.key(i); if(k&&k.indexOf('bagrut')===0) kk.push(k); }
+      schoolName=''; lockHash=''; recCode=''; SS.removeItem('bagrutUnlocked');
+      kk.forEach(k=>LS.removeItem(k));
       try{ indexedDB.deleteDatabase('bagrutFS'); }catch(e){}
       profiles=[{id:'main',name:'',unnamed:1}]; currentProfileId='main'; saveProfiles();
       state=JSON.parse(JSON.stringify(DEFAULT_STATE));
@@ -3709,20 +4378,27 @@ try{
   }
 }catch(e){}
 (function(){ const f=document.getElementById('appFoot'); if(f) f.textContent=appTitle(); document.title=appTitle(); })();
+try{
 initAccent();
 initFont();
 renderTabs();
 renderHdrBtns();
 renderHeaderCenter();
-if(isLocked()&&sessionStorage.getItem('bagrutUnlocked')!=='1') showLock();
+if(isLocked()&&SS.getItem('bagrutUnlocked')!=='1') showLock();
 renderProfileBar();
 renderLogo();
 renderSaveInd();
 render();
 renderNag();
+loadUndo(); renderUndo();
+autoSnapshot();
+if(!state.wizDone&&!isLocked()&&STORAGE_OK) setTimeout(openWizard,600);
 fileInit();
+}catch(err){
+  window.dispatchEvent(new ErrorEvent('error',{message:(err&&err.message)||String(err),filename:'init',lineno:0}));
+}
 // אזהרה אם הדפדפן לא מאפשר שמירה בכלל (גלישה בסתר / חסימה)
-try{ localStorage.setItem('bagrutTest','1'); localStorage.removeItem('bagrutTest'); }
+try{ LS.setItem('bagrutTest','1'); LS.removeItem('bagrutTest'); }
 catch(e){ setTimeout(()=>alert('⚠️ הדפדפן חוסם שמירת נתונים (ייתכן מצב גלישה בסתר).\nהנתונים לא יישמרו בין פתיחות! פתחי בחלון דפדפן רגיל.'),400); }
 
 </script>
