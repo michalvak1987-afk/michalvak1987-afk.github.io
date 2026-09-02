@@ -513,9 +513,32 @@ select.colCode{font-size:10.5px; font-weight:800; padding:1px 4px; height:20px; 
   border-radius:6px; border:1px solid #c7d2fe; background:#eef2ff; color:#3730a3; vertical-align:middle;
   font-family:inherit; cursor:pointer;}
 select.colCode:hover{background:#e0e7ff; border-color:#818cf8;}
-.rowCode{font-size:9.5px; font-weight:800; color:#3730a3; background:#eef2ff; border:1px solid #c7d2fe;
-  border-radius:5px; padding:0 4px; margin-bottom:3px; display:inline-block; line-height:14px;}
+button.rowCode{font-size:9.5px; font-weight:800; color:#3730a3; background:#eef2ff; border:1px solid #c7d2fe;
+  border-radius:5px; padding:0 5px; margin-bottom:3px; display:inline-block; line-height:15px; height:16px;
+  font-family:inherit; cursor:pointer; transition:all .12s ease; white-space:nowrap;}
+button.rowCode:hover{background:#c7d2fe; border-color:#6366f1;}
+button.rowCode.empty{color:#a5b0c2; background:transparent; border-color:#dbe3f2; font-weight:700;}
+button.rowCode.empty:hover{color:#4338ca; background:#eef2ff; border-color:#a5b4fc;}
+.symGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(112px,1fr)); gap:7px;}
+.symBtn{font-family:inherit; font-size:13px; font-weight:800; padding:10px 8px; border-radius:11px; cursor:pointer;
+  border:1.5px solid var(--line); background:#fff; color:var(--ink); transition:all .13s ease;}
+.symBtn:hover{border-color:var(--brand); background:#eef2ff; transform:translateY(-1px);}
+.symBtn.on{border-color:var(--brand); background:linear-gradient(135deg,#4f46e5,#7c8cf8); color:#fff;}
 @media(max-width:820px){select.colCode{max-width:92px; font-size:10px;}}
+/* ============ סרגל מיון וסינון ============ */
+.fltBar{display:flex; align-items:center; gap:7px; flex-wrap:wrap; padding:8px 12px; margin-bottom:10px;
+  background:rgba(255,255,255,.7); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  border:1px solid var(--line); border-radius:12px; font-size:12.5px;}
+.fltBar .fLbl{display:inline-flex; align-items:center; gap:4px; font-weight:800; color:var(--muted); font-size:11.5px;}
+.fltBar .fLbl svg{stroke:var(--muted);}
+select.fSel{font-size:12px; font-weight:700; padding:4px 8px; height:28px; border-radius:8px;
+  border:1px solid var(--line); background:#fff; color:var(--ink); font-family:inherit; max-width:190px;}
+select.fSel.on{border-color:var(--brand); background:#eef2ff; color:#3730a3; box-shadow:0 0 0 2px rgba(79,70,229,.12);}
+.fltBar .fCnt{margin-inline-start:auto; font-weight:800; color:#3730a3; background:#eef2ff;
+  border:1px solid #c7d2fe; border-radius:99px; padding:3px 11px; white-space:nowrap;}
+.fltBar .fCnt.off{color:var(--muted); background:var(--soft); border-color:var(--line);}
+@media(max-width:820px){.fltBar{gap:5px; padding:7px 9px;} select.fSel{max-width:140px; font-size:11.5px;}
+  .fltBar .fCnt{margin-inline-start:0;}}
 </style>
 </head>
 <body>
@@ -2738,7 +2761,8 @@ function closeStudent(){
 /* ============ הזנת ציונים לפי מקצוע ============ */
 function renderEntry(m){
   const subj=SUBJ_MAP[entrySubj]||SUBJECTS[0];
-  const studs=filteredStudents(entryClass).sort((a,b)=>a.name.localeCompare(b.name));
+  const allStuds=filteredStudents(entryClass);
+  const studs=fltApply(allStuds,subj);
   m.innerHTML=`
   <div class="toolbar">
     <label>מקצוע:</label><select onchange="entrySubj=this.value;render()">${SUBJECTS.map(s=>`<option value="${s.id}" ${s.id===entrySubj?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
@@ -2769,10 +2793,11 @@ function renderEntry(m){
         <option value="r">🔴 אדום — אמיתי, טרם דווח</option>
         <option value="b">🔵 כחול — פיקטיבי / הערכה</option>
       </select>
-      <button class="btn ok sm" onclick="applyEntryColor()">🎨 החל על ${filteredStudents(entryClass).length} תלמידות</button>
+      <button class="btn ok sm" onclick="applyEntryColor()">🎨 החל על ${studs.length} תלמידות${fltOn()?' (המסוננות)':''}</button>
     </div>
   </div>
   <div class="card ${entryFull?'tblfull':''} ${entryDense?'dense':''}" id="entryCard">
+    ${fltBar(subj,allStuds.length,studs.length)}
     <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px;">
       <span class="pill">${studs.length} תלמידות</span>
       <div style="display:flex; gap:6px;">
@@ -2783,7 +2808,50 @@ function renderEntry(m){
     <div class="scroll" style="max-height:${entryFull?'calc(100dvh - 150px)':'70vh'};">${entryGrid(subj,studs)}</div>
   </div>`;
 }
-// בורר סמל השאלון בכותרת העמודה — כדי שבזמן ההזנה יהיה ברור איזה שאלון מוזן.
+// בחירת סמל שאלון לתלמידה — דיאלוג קצר, כדי לא להעמיס את הטבלה במאות תפריטים
+function pickCode(stId,key){
+  const st=state.students.find(s=>s.id===stId); if(!st) return;
+  const m=document.getElementById('ndModal'), b=document.getElementById('ndBox');
+  if(!m||!b) return;
+  const cur=((st.codes||{})[key]||'');
+  const opts=codeOptions(key);
+  const [sid,ci]=key.split('.');
+  const subj=SUBJ_MAP[sid];
+  const cn=subj?((subj.comps(subj.opts[subj.opts.length-1])[+ci]||{}).n||''):'';
+  b.innerHTML=`<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:4px;">
+      <h2 class="sec" style="margin:0; font-size:16px;">סמל שאלון</h2>
+      <button class="btn sec sm" onclick="document.getElementById('ndModal').classList.remove('show')">✕</button></div>
+    <div class="note" style="margin-bottom:10px;">${esc(st.name)} · ${esc(subj?subj.name:'')} · ${esc(cn)}</div>
+    <div class="symGrid">
+      ${opts.map(o=>`<button class="symBtn${cur===o?' on':''}" onclick="setCodePick('${stId}','${key}','${esc(o)}')">${esc(o)}</button>`).join('')}
+      ${(cur&&!opts.includes(cur))?`<button class="symBtn on" onclick="setCodePick('${stId}','${key}','${esc(cur)}')">${esc(cur)}</button>`:''}
+    </div>
+    <div class="toolbar" style="margin:12px 0 0;">
+      <button class="btn sec sm" onclick="setCodeCustom('${stId}','${key}');document.getElementById('ndModal').classList.remove('show')">הקלדת סמל אחר</button>
+      ${cur?`<button class="btn dz sm" onclick="setCodePick('${stId}','${key}','')">ניקוי הסמל</button>`:''}
+      <button class="btn sm" style="margin-inline-start:auto;" onclick="applyCodeToClass('${stId}','${key}')">החלה על כל הכיתה המוצגת</button>
+    </div>`;
+  m.classList.add('show');
+}
+function setCodePick(stId,key,v){
+  setCode(stId,key,v);
+  document.getElementById('ndModal').classList.remove('show');
+  renderKeepScroll();
+}
+function applyCodeToClass(stId,key){
+  const st=state.students.find(s=>s.id===stId); if(!st) return;
+  const v=((st.codes||{})[key]||'');
+  if(!v){ toast('קודם בחרי סמל'); return; }
+  const studs=entryStuds();
+  const where=(entryClass?('כיתה '+entryClass):'כל הכיתות')+(fltOn()?' — המסוננות בלבד':'');
+  if(!confirm(`להחיל את הסמל ${v} על ${studs.length} תלמידות ב${where}?`)) return;
+  pushUndo('סמל שאלון לכל הכיתה');
+  studs.forEach(s=>{ s.codes=s.codes||{}; s.codes[key]=v; });
+  save();
+  document.getElementById('ndModal').classList.remove('show');
+  renderKeepScroll(); toast('הסמל הוחל על '+studs.length+' תלמידות');
+}
+// (לא בשימוש בכותרת יותר — נשמר לתאימות) בורר סמל השאלון בכותרת העמודה — כדי שבזמן ההזנה יהיה ברור איזה שאלון מוזן.
 // חל על כל התלמידות המוצגות; אם לתלמידות סמלים שונים — מוצג "מעורב".
 function colCode(subj,i,studs){
   const key=subj.id+'.'+i;
@@ -2806,7 +2874,7 @@ function setColCode(sid,i,v){
   const subj=SUBJ_MAP[sid]; if(!subj) return;
   const key=sid+'.'+i;
   if(v==='__c'){ const t=prompt('הקלידי סמל שאלון לכל התלמידות המוצגות:',''); if(t===null) return; v=t.trim(); }
-  const studs=filteredStudents(entryClass);
+  const studs=entryStuds();
   if(!studs.length){ toast('אין תלמידות מוצגות'); return; }
   const comps=subj.comps(subj.opts[subj.opts.length-1]);
   const cn=(comps[i]||{}).n||'';
@@ -2816,6 +2884,83 @@ function setColCode(sid,i,v){
   studs.forEach(st=>{ st.codes=st.codes||{}; if(v) st.codes[key]=v; else delete st.codes[key]; });
   save(); renderKeepScroll(); toast('הסמל הוחל על '+studs.length+' תלמידות');
 }
+/* ============ מיון וסינון משותף ============
+   אובייקט מצב אחד לשלושת המסכים, כדי שהסינון לא "יתחלף" כשעוברים בין לשוניות.
+   כשסינון פעיל מוצג תג בולט עם המניין — כדי שלא ייווצר רושם שנתונים נעלמו. */
+let flt={u:'',fill:'',stat:'',sort:'name'};
+function fltOn(){ return !!(flt.u||flt.fill||flt.stat); }
+function fltClear(){ flt.u=''; flt.fill=''; flt.stat=''; renderKeepScroll(); }
+function fltSet(k,v){ flt[k]=v; renderKeepScroll(); }
+
+// subj = המקצוע הנוכחי (הזנת ציונים / סימולציה), או null בדוחות
+function fltApply(studs,subj){
+  let out=studs.slice();
+  if(flt.u!==''){
+    const want=+flt.u;
+    out=out.filter(st=>subj?getUnits(st,subj)===want:calcStudent(st).totalUnits===want);
+  }
+  if(flt.fill){
+    out=out.filter(st=>{
+      if(subj){
+        const r=calcSubject(st,subj);
+        if(!r.active) return flt.fill==='miss';         // מקצוע כבוי נחשב "חסר"
+        return flt.fill==='miss'?r.missing>0:r.missing===0;
+      }
+      const r=calcStudent(st);
+      return flt.fill==='miss'?r.missing.length>0:r.missing.length===0;
+    });
+  }
+  if(flt.stat){
+    out=out.filter(st=>{
+      const r=calcStudent(st);
+      switch(flt.stat){
+        case 'exc':  return r.excellent;
+        case 'pot':  return r.potential;
+        case 'elig': return r.eligible;
+        case 'bad':  return r.blockers.length>0;
+        case 'brd':  return !!r.borderline;
+        case 'inc':  return r.missing.length>0;
+        default:     return true;
+      }
+    });
+  }
+  const byName=(a,b)=>a.name.localeCompare(b.name,'he');
+  const un=st=>subj?getUnits(st,subj):calcStudent(st).totalUnits;
+  const cmp={
+    name: byName,
+    cls:  (a,b)=>String(a.cls).localeCompare(String(b.cls),'he')||byName(a,b),
+    uDesc:(a,b)=>un(b)-un(a)||byName(a,b),
+    uAsc: (a,b)=>un(a)-un(b)||byName(a,b)
+  }[flt.sort]||byName;
+  return out.sort(cmp);
+}
+
+// הרשימה שמוצגת בפועל על המסך — כל פעולה גורפת וכל ייצוא חייבים לעבוד עליה,
+// אחרת סינון על המסך ופעולה על 41 תלמידות זה מתכון לטעות.
+function entryStuds(){ return fltApply(filteredStudents(entryClass),SUBJ_MAP[entrySubj]||SUBJECTS[0]); }
+function repStuds(cls){ return fltApply(filteredStudents(cls),null); }
+function fltBar(subj,total,shown){
+  const uOpts=subj
+    ? subj.opts.filter(o=>o!==0).map(o=>[o,o+' יח"ל'])
+    : [...new Set(state.students.map(st=>calcStudent(st).totalUnits))].filter(Boolean).sort((a,b)=>b-a).map(o=>[o,o+' יח"ל']);
+  const sel=(k,ph,opts)=>`<select class="fSel${flt[k]?' on':''}" onchange="fltSet('${k}',this.value)">
+    <option value="">${ph}</option>
+    ${opts.map(([v,l])=>`<option value="${v}" ${String(flt[k])===String(v)?'selected':''}>${l}</option>`).join('')}</select>`;
+  return `<div class="fltBar">
+    <span class="fLbl">${ic('search',14)} סינון</span>
+    ${sel('u',subj?'כל היח"ל':'כל סה"כ היח"ל',uOpts)}
+    ${sel('fill','מלאות וחסרות',[['miss',subj?'חסר ציון במקצוע':'חסר ציון באחד המקצועות'],['done',subj?'הושלם במקצוע':'כל המקצועות הושלמו']])}
+    ${sel('stat','כל הסטטוסים',[['exc','⭐ מצטיינות'],['pot','✨ פוטנציאל'],['elig','✓ זכאיות'],['bad','🚩 עם מעכבים'],['brd','⚠️ גבוליות'],['inc','… חסר נתונים']])}
+    <span class="fLbl" style="margin-inline-start:8px;">מיון</span>
+    <select class="fSel" onchange="fltSet('sort',this.value)">
+      ${[['name','שם'],['cls','כיתה ואז שם'],['uDesc','יח"ל — מהגבוה'],['uAsc','יח"ל — מהנמוך']]
+        .map(([v,l])=>`<option value="${v}" ${flt.sort===v?'selected':''}>${l}</option>`).join('')}
+    </select>
+    ${fltOn()?`<span class="fCnt">מוצגות ${shown} מתוך ${total}</span>
+      <button class="btn sec sm" onclick="fltClear()">✕ ניקוי הסינון</button>`
+      :`<span class="fCnt off">${total} תלמידות</span>`}
+  </div>`;
+}
 function entryGrid(subj,studs){
   if(!studs.length) return '<div class="note">אין תלמידות — הוסיפי בלשונית "תלמידות"</div>';
   // כותרות לפי יח"ל מקסימלי כדי לכלול את כל הרכיבים
@@ -2823,9 +2968,8 @@ function entryGrid(subj,studs){
   const headComps=subj.comps(maxU);
   let head=`<tr><th>שם</th>${subj.opts.length>1?'<th>יח"ל</th>':''}${subj.named?'<th>מקצוע</th>':''}`;
   headComps.forEach((c,i)=>{
-    const cc=colCode(subj,i,studs);
     const sub=(c.t==='i'||(c.s>0&&c.s<100))?'':`<br><small>${c.s===0?'100% בחינה':'מגן בלבד'}</small>`;
-    head+=`<th>${esc(c.n)}${cc?' '+cc:''}${sub}</th>`;
+    head+=`<th>${esc(c.n)}${sub}</th>`;
   });
   head+='<th>ציון סופי</th><th>סטטוס</th></tr>';
   const rows=studs.map(st=>{
@@ -2843,10 +2987,11 @@ function entryGrid(subj,studs){
       const kc=k=>((g[k]==null?'cell-miss':'')+gstatCls(st,k));
       const ct=k=>`oncontextmenu="event.preventDefault();cycleGstat('${st.id}','${k}')" title="לחיצה ימנית (או הנקודה הצבעונית): שחור→אדום→כחול"`;
       const dot=k=>`<button class="gstatDot ${gstatOf(st,k)}" onclick="cycleGstat('${st.id}','${k}')" title="החלפת סימון: שחור → אדום → כחול"></button>`;
-      // תג סמל אישי — מוצג רק כשהוא שונה מהסמל של שאר התלמידות המוצגות
+      // תג סמל השאלון — מוצג ליד הציון; לחיצה עליו פותחת בחירה
       const myCode=((st.codes||{})[key]||'');
-      const colVals=[...new Set(studs.map(s=>((s.codes||{})[key]||'')))];
-      const codeTag=(myCode&&colVals.length>1)?`<div class="rowCode" title="סמל השאלון של ${esc(st.name)}">${esc(myCode)}</div>`:'';
+      const codeTag=codeOptions(key).length
+        ? `<button class="rowCode${myCode?'':' empty'}" onclick="pickCode('${st.id}','${key}')" title="סמל השאלון — לחצי לשינוי">${myCode?esc(myCode):'סמל +'}</button>`
+        : '';
       if(c.t==='i'){
         tds+=`<td class="${nt?'hasNote':''}" ${nt?`onclick="if(event.target===this)infoDlg('הערה',${JSON.stringify(nt)})"`:''}><div class="eWrap">${codeTag}<div class="gcell"><input type="number" min="0" max="100" data-k="g|${st.id}|${key}" class="${kc(key)}" ${ct(key)} value="${g[key]??''}" onchange="setGrade('${st.id}','${key}',this.value)">${dot(key)}</div></div></td>`;
       }else{
@@ -3127,7 +3272,7 @@ function applyEntryColor(){
   const subj=SUBJ_MAP[entrySubj]||SUBJECTS[0];
   const scope=(document.getElementById('ecScope')||{}).value||'all';
   const color=(document.getElementById('ecColor')||{}).value||'';
-  const studs=filteredStudents(entryClass);
+  const studs=entryStuds();
   if(!studs.length){ toast('אין תלמידות בבחירה'); return; }
   const cTxt=color==='r'?'🔴 אדום (טרם דווח)':color==='b'?'🔵 כחול (פיקטיבי)':'⚫ שחור (דווח למשרד)';
   const sTxt=scope==='all'?'כל הציונים במקצוע':'הרכיב שנבחר';
@@ -3173,7 +3318,9 @@ function toggleSimFull(){
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&(simFull||entryFull)){ simFull=false; entryFull=false; document.body.style.overflow=''; render(); } });
 function renderSim(m){
   const opts={split:simSplit===''?null:+simSplit, predict:simPredict, bonus:+simBonus, sim:true};
-  const studs=filteredStudents(simClass);
+  const simSubj=null;                                            // הסימולציה חוצה מקצועות
+  const allStuds=filteredStudents(simClass);
+  const studs=fltApply(allStuds,simSubj);
   const base=studs.map(st=>({st,r:calcStudent(st)}));           // המצב האמיתי
   const sim=studs.map(st=>({st,r:calcStudent(st,opts)}));       // התרחיש
   const bE=base.filter(x=>x.r.eligible).length, sE=sim.filter(x=>x.r.eligible).length;
@@ -3250,6 +3397,7 @@ function renderSim(m){
       <span class="note">חישוב כבד — רץ רק בלחיצה כדי לא להאט את ההקלדה. (התג הירוק "צריך X" לצורך מעבר מוצג תמיד בטבלה.)</span>
     </div></div>`}
   ${simPredict?predictionPanel(studs):''}
+  ${fltBar(simSubj,allStuds.length,studs.length)}
   <div class="kpis">
     <div class="kpi k2"><div class="n">${sE}${delta(bE,sE)}</div><div class="t">זכאיות בתרחיש (אמיתי: ${bE})</div></div>
     <div class="kpi k4"><div class="n">${sX}${delta(bX,sX)}</div><div class="t">מצטיינות בתרחיש (אמיתי: ${bX})</div></div>
@@ -3532,10 +3680,11 @@ function renderReports(m){
     <button class="btn sec" onclick="copyReport()">📋 העתקת סיכום</button>
     <button class="btn sec" onclick="exportExcel(reportClass)">📥 אקסל של הדוח</button>
   </div>
+  ${fltBar(null,filteredStudents(reportClass).length,repStuds(reportClass).length)}
   <div class="card" id="reportBody">${buildReportHtml(reportClass)}</div>`;
 }
 function buildReportHtml(cls){
-  const studs=filteredStudents(cls).sort((a,b)=>a.cls.localeCompare(b.cls)||a.name.localeCompare(b.name));
+  const studs=repStuds(cls);
   const results=studs.map(st=>({st,r:calcStudent(st)}));
   const n=studs.length;
   if(!n) return '<div class="note">אין תלמידות</div>';
@@ -3605,7 +3754,7 @@ function printReport(){
 }
 function reportText(cls){ return gx(_reportText(cls)); }
 function _reportText(cls){
-  const studs=filteredStudents(cls);
+  const studs=repStuds(cls);
   const results=studs.map(st=>({st,r:calcStudent(st)}));
   const n=studs.length; if(!n) return 'אין נתונים';
   const elig=results.filter(x=>x.r.eligible).length;
@@ -3981,7 +4130,7 @@ function setCustom(sid,u,i,field,val){
 /* ============ אקסל ============ */
 function exportExcel(cls){
   cls=typeof cls==='string'?cls:'';
-  const studs=filteredStudents(cls);
+  const studs=repStuds(cls);
   if(!studs.length){toast('אין נתונים לייצוא');return;}
   const wb=XLSX.utils.book_new();
   // גיליון סיכום
@@ -4514,7 +4663,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='5.4';
+const APP_VERSION='5.6';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
@@ -4831,7 +4980,8 @@ function renderHelp(m){
     <b>"הנתונים נעלמו!"</b> — כנראה נפתח בדפדפן אחר או במכשיר אחר (הנתונים לא עוברים לבד), או שנוקתה היסטוריית הדפדפן. פתרון: ♻️ שחזור מקובץ הגיבוי האחרון.<br>
     <b>"הציון לא מתעדכן"</b> — כנראה חסר רכיב: משבצת מקווקוות = ציון חסר, והציון הסופי יחושב רק כשהכול מלא (או בסימולציה עם 🔮).<br>
     <b>"תלמידה עם 92 לא מסומנת מצטיינת"</b> — בדקי את תנאי היח"ל: נדרש מתמטיקה 4-5 ואנגלית 5. אפשר לשנות בהגדרות.<br>
-    <b>"רישיון והתנסות"</b> — התוכנה פתוחה לגמרי 14 יום. מיום 7 מופיע פס תזכורת, ובתום ההתנסות נדרש קוד רישיון של המוסד. <b>הנתונים אינם נמחקים בשום שלב</b>, וגיבוי לקובץ פתוח גם במסך הנעילה. הקוד נגזר משם המוסד ולכן אינו יכול "לאבד" — הספק מנפיק אותו מחדש בכל רגע. הרישיון לתמיד, בלי תאריך תפוגה.<br>
+    <b>"מיון וסינון"</b> — בראש הזנת הציונים, הסימולציה והדוחות יש סרגל: <b>יח"ל</b> (במקצוע שנבחר), <b>מלאות/חסרות</b>, <b>סטטוס</b> (מצטיינות, פוטנציאל, זכאיות, מעכבים, גבוליות), ומיון לפי שם / כיתה / יח"ל. כשסינון פעיל מוצג "מוצגות 12 מתוך 41" וכפתור ניקוי — כדי שלא ייווצר רושם שנתונים נעלמו. <b>שימו לב:</b> פעולות גורפות (צביעה, סמל שאלון) והייצוא לאקסל, ההדפסה והמייל — כולם עובדים על <b>מה שמוצג בפועל</b>. זה בכוונה: מסנן ומחיל = בדיוק מה שרואים.<br>
+        <b>"רישיון והתנסות"</b> — התוכנה פתוחה לגמרי 14 יום. מיום 7 מופיע פס תזכורת, ובתום ההתנסות נדרש קוד רישיון של המוסד. <b>הנתונים אינם נמחקים בשום שלב</b>, וגיבוי לקובץ פתוח גם במסך הנעילה. הקוד נגזר משם המוסד ולכן אינו יכול "לאבד" — הספק מנפיק אותו מחדש בכל רגע. הרישיון לתמיד, בלי תאריך תפוגה.<br>
     <b>"צריך מקצוע שאינו ברשימה"</b> — יש 3 משבצות פתוחות למקצועות מוגברים והתמחויות: בכרטיס התלמיד/ה כותבים את שם המקצוע (פיזיקה, ביולוגיה, תקשורת…) ובוחרים יח"ל ומשקלים. למקצוע עם מבנה חריג — פנו לספק.<br>
         <b>"התוכנה מדברת בלשון נקבה — יש לנו בנים"</b> — <b>הגדרות ← לשון פנייה</b>. שלוש בחירות נפרדות: לשון התלמידות (נקבה / זכר / מעורב), לשון הפנייה אליך (נקבה / זכר / "לחצו"), ושם התפקיד (רכזת / רכז). בבית ספר מעורב מוצגת לשון זכר רבים — צורת הרבים התקנית לקבוצה מעורבת — וכשמדובר בתלמיד אחד: "תלמיד/ה". ההגדרה חלה על כל המסכים, הדוחות והייצוא לאקסל.<br>
         <b>"איך אני מקבלת גרסה חדשה?"</b> — אוטומטית. התוכנה בודקת פעם ביום אם עלתה גרסה חדשה, ואם כן מופיע פס ירוק בראש המסך: <b>עדכון עכשיו</b>. לחיצה אחת — והתוכנה נטענת מחדש מעודכנת. <b>הכיתות והציונים נשמרים</b>; הם מאוחסנים לפי כתובת האתר, לא בתוך הקובץ. אפשר גם לבדוק ידנית: <b>הגדרות ← מצב השמירה ← בדיקת עדכון</b>.<br>
