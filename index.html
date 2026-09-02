@@ -439,6 +439,19 @@ table.tbl.grades td.cCls select option{text-align:right;}
   white-space:nowrap; transition:opacity .16s ease, max-width .22s ease, padding .22s ease, margin .22s ease;}
 #btnSearch:hover .kbdHint,#btnSearch:focus-visible .kbdHint{opacity:.9; max-width:60px; padding-inline:5px; margin-inline-start:6px; border-width:1px;}
 @media (hover:none){#btnSearch .kbdHint{display:none;}}
+/* ============ תיבת "איך לא לאבד נתונים" ============ */
+.lossBox{margin-top:12px; background:linear-gradient(180deg,#fffdf5,#fffbeb); border:1px solid #fde68a;
+  border-inline-start:4px solid var(--warn); border-radius:12px; padding:13px 15px; font-size:13.5px; line-height:1.65;}
+.lossHead{display:flex; align-items:center; gap:8px; font-weight:800; color:#92400e; font-size:14px; margin-bottom:8px;}
+.lossHead svg{flex:0 0 auto; stroke:#b45309;}
+.lossList{margin:0; padding-inline-start:22px;}
+.lossList li{margin-bottom:5px; color:#3f3222;}
+.lossList li::marker{font-weight:800; color:#b45309;}
+.lossFix{margin-top:9px; padding-top:9px; border-top:1px dashed #fcd34d; color:#3f3222;}
+/* ============ כפתורי פעולה הרסנית — מאופקים ============ */
+button.btn.dz{background:#fff; color:#b3223f; border:1px solid #f3bfcb; box-shadow:none; font-weight:700;}
+button.btn.dz:hover{background:#fff1f4; border-color:#e8879e; color:#9f1239; box-shadow:0 2px 8px rgba(190,24,60,.13); filter:none;}
+button.btn.dz:active{background:#ffe4ea;}
 </style>
 </head>
 <body>
@@ -492,7 +505,7 @@ table.tbl.grades td.cCls select option{text-align:right;}
   <div class="hint"><span><kbd>↑</kbd><kbd>↓</kbd> ניווט</span><span><kbd>Enter</kbd> פתיחה</span><span><kbd>Esc</kbd> סגירה</span><span style="margin-inline-start:auto;">Ctrl+K</span></div>
 </div></div>
 <div class="toast" id="toast"></div>
-<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 4.5</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
+<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 4.6</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
 <script>
 "use strict";
 /* ===== שכבת אחסון עמידה =====
@@ -1391,7 +1404,7 @@ function openNote(id,key,label){
       placeholder="למשל: נעדרה מהמבחן — מועד ב' · אישור ועדת חריגים · הציון טרם סופי">${esc(noteOf(st,key))}</textarea>
     <div class="toolbar" style="margin-top:10px; margin-bottom:0;">
       <button class="btn ok" onclick="saveNote()">שמירה</button>
-      ${noteOf(st,key)?`<button class="btn bad sm" onclick="delNote()">מחיקת ההערה</button>`:''}
+      ${noteOf(st,key)?`<button class="btn dz sm" onclick="delNote()">מחיקת ההערה</button>`:''}
       <span class="note" style="margin-inline-start:auto;">ההערות נכללות בייצוא לאקסל ובדוחות</span>
     </div>`;
   setTimeout(()=>{ const t=document.getElementById('ndText'); if(t) t.focus(); },100);
@@ -2344,11 +2357,11 @@ function renderStudents(m){
         <div class="dzBody">
           <div class="note" style="margin-bottom:8px;">פעולות שאינן ניתנות לביטול (למעט "ביטול פעולה" מיד לאחר מכן). מומלץ לגבות לפני.</div>
           <div class="dzRow"><span>מחיקת כל התלמידות <i>· הכיתות יישארו</i></span>
-            <button class="btn bad sm" onclick="if(confirm('למחוק את כל התלמידות (הכיתות יישארו)?')){pushUndo('מחיקת כל התלמידות');state.students=[];save();render();}">מחיקה</button></div>
+            <button class="btn dz sm" onclick="if(confirm('למחוק את כל התלמידות (הכיתות יישארו)?')){pushUndo('מחיקת כל התלמידות');state.students=[];save();render();}">מחיקה</button></div>
           <div class="dzRow"><span>מחיקת כיתות + תלמידות <i>· בסימולטור הזה בלבד</i></span>
-            <button class="btn bad sm" onclick="if(confirm('למחוק את כל הכיתות ואת כל התלמידות בסימולטור הזה?')){pushUndo('מחיקת כיתות ותלמידות');state.students=[];state.classes=[];save();render();}">מחיקה</button></div>
+            <button class="btn dz sm" onclick="if(confirm('למחוק את כל הכיתות ואת כל התלמידות בסימולטור הזה?')){pushUndo('מחיקת כיתות ותלמידות');state.students=[];state.classes=[];save();render();}">מחיקה</button></div>
           <div class="dzRow"><span>איפוס מלא <i>· כל הסימולטורים במכשיר</i></span>
-            <button class="btn bad sm" onclick="factoryReset()">איפוס</button></div>
+            <button class="btn dz sm" onclick="factoryReset()">איפוס</button></div>
           ${state.students.length?`<div class="dzRow"><span>נתוני הדגמה <i>· 24 תלמידות בדיוניות</i></span>
             <button class="btn sec sm" onclick="loadDemo()">טעינה</button></div>`:''}
         </div>`:''}
@@ -3518,7 +3531,7 @@ function renderSettings(m){
   </div>
   <div class="card" style="margin-bottom:14px; border:2px solid var(--ok);">
     <h2 class="sec">${ic('save',19)}מצב השמירה — האם הנתונים שלי בטוחים?</h2>
-    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>4.5</b> · 01.09.2026</span>
+    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>4.6</b> · 01.09.2026</span>
     <span class="note">אחרי העלאת גרסה חדשה — רעננו את הדף (Ctrl+F5) וּודאו שהמספר כאן התעדכן.</span></div>
     <div id="storageBox">${storageStatusHtml()}</div>
     ${(()=>{const b=lastBackupInfo(); const cur=countAllStudents();
@@ -3535,7 +3548,7 @@ function renderSettings(m){
       <button class="btn ok sm" onclick="testSave()">🧪 בדיקת שמירה עכשיו</button>
       <button class="btn sm" onclick="exportJSON()">💾 גיבוי לקובץ</button>
       <button class="btn sec sm" onclick="document.getElementById('jsonFile').click()">♻️ שחזור מגיבוי</button>
-      <button class="btn bad sm" onclick="factoryReset()" title="מוחק את כל הסימולטורים, הכיתות והתלמידות במכשיר הזה ומחזיר את התוכנה למצב חדש">🗑️ איפוס מלא — התחלה מאפס</button>
+      <button class="btn dz sm" onclick="factoryReset()" title="מוחק את כל הסימולטורים, הכיתות והתלמידות במכשיר הזה ומחזיר את התוכנה למצב חדש">איפוס מלא — התחלה מאפס</button>
     </div>
     <div class="note">"איפוס מלא" מוחק את כל הנתונים ששמורים בדפדפן במכשיר הזה ומחזיר תוכנה נקייה לגמרי. מומלץ ללחוץ "💾 גיבוי" קודם.</div>
   </div>
@@ -3545,7 +3558,7 @@ function renderSettings(m){
       <span class="pill">סימולטור נוכחי: <b>${esc((profiles.find(p=>p.id===currentProfileId)||{}).name||'(ללא שם)')}</b></span>
       <button class="btn ok sm" onclick="newProfile()">➕ סימולטור חדש לשנתון/כיתה</button>
       <button class="btn sec sm" onclick="renameProfile()">✏️ שינוי שם</button>
-      <button class="btn bad sm" onclick="deleteProfile()">🗑️ מחיקת הסימולטור הנוכחי</button>
+      <button class="btn dz sm" onclick="deleteProfile()">🗑️ מחיקת הסימולטור הנוכחי</button>
     </div>
     <div class="note">כל סימולטור הוא סביבה נפרדת לחלוטין — תלמידות, כיתות, ציונים והגדרות משלו. מעבר בין סימולטורים דרך התפריט בכותרת העליונה. כך אפשר לנהל במקביל את יב, יא, ושנתונים קודמים.</div>
   </div>
@@ -3571,7 +3584,7 @@ function renderSettings(m){
     ${openBoxes.log?`
     <div class="note" style="margin:10px 0;">כל שינוי ציון, סימון צבע, יח"ל, הערה, פעולה גורפת וייבוא נרשמים כאן — מה שונה, ממה למה ומתי. שימושי כשמתגלה ציון שגוי ורוצים לדעת מה קרה.</div>
     <div class="toolbar"><button class="btn sec sm" onclick="exportLog()">${ic('down',14)}ייצוא היומן לאקסל</button>
-      <button class="btn bad sm" onclick="if(confirm('לנקות את יומן השינויים?')){state.log=[];save();render();}">ניקוי היומן</button></div>
+      <button class="btn dz sm" onclick="if(confirm('לנקות את יומן השינויים?')){state.log=[];save();render();}">ניקוי היומן</button></div>
     ${logView()}`:''}
   </div>
   <div class="card" style="margin-bottom:14px; padding:${openBoxes.lock?'17px':'11px 17px'};">
@@ -3586,7 +3599,7 @@ function renderSettings(m){
       ${lockHash?`<span class="badge b-ok">🔒 נעילה פעילה</span>
         <button class="btn sec sm" onclick="changeLock()">שינוי סיסמה</button>
         <button class="btn sec sm" onclick="showRecCode()">🔑 הצגת קוד השחזור</button>
-        <button class="btn bad sm" onclick="removeLock()">הסרת הנעילה</button>`
+        <button class="btn dz sm" onclick="removeLock()">הסרת הנעילה</button>`
         :`<span class="badge b-miss">🔓 ללא נעילה</span>
         <button class="btn ok sm" onclick="setLock()">🔒 הפעלת נעילה בסיסמה</button>`}
     </div>
@@ -3630,7 +3643,7 @@ function renderSettings(m){
     <div class="toolbar">
       ${logoHtml(48)}
       <button class="btn sec sm" onclick="document.getElementById('logoFile').click()">📷 העלאת לוגו</button>
-      ${state.logo?'<button class="btn bad sm" onclick="state.logo=null;save();renderLogo();render();">חזרה ללוגו המובנה</button>':'<span class="note">מוצג לוגו ברירת מחדל — להעלאת הלוגו של בית הספר לחצי על "העלאת לוגו"</span>'}
+      ${state.logo?'<button class="btn dz sm" onclick="state.logo=null;save();renderLogo();render();">חזרה ללוגו המובנה</button>':'<span class="note">מוצג לוגו ברירת מחדל — להעלאת הלוגו של בית הספר לחצי על "העלאת לוגו"</span>'}
       <input type="file" id="logoFile" accept="image/*" style="display:none" onchange="uploadLogo(this)">
     </div>
   </div>
@@ -4174,10 +4187,14 @@ function storageStatusHtml(){
   <table class="tbl"><thead><tr><th>סימולטור</th><th>תלמידות</th><th>גודל</th><th>שמירה אחרונה</th></tr></thead>
   <tbody>${rows}</tbody>
   <tfoot><tr><th>סה"כ בדפדפן</th><th colspan="3">${total} KB</th></tr></tfoot></table>
-  <div class="alert-item al-warn" style="margin-top:10px;">
-    <b>⚠️ שתי דרכים לאבד נתונים — ואיך למנוע:</b><br>
-    1. <b>ניקוי היסטוריית גלישה / "נתוני אתרים"</b> בדפדפן ימחק את הנתונים. 2. <b>מכשיר או דפדפן אחר</b> לא יראה אותם (הם מקומיים).<br>
-    הפתרון לשניהם: <b>אחת לשבוע לחצי "💾 גיבוי"</b> ושמרי את הקובץ בדרייב/מייל. שחזור בכל מכשיר עם "♻️ שחזור".
+  <div class="lossBox">
+    <div class="lossHead">${ic('shield',17)}<span>שתי דרכים לאבד נתונים — ואיך למנוע</span></div>
+    <ol class="lossList">
+      <li><b>ניקוי היסטוריית הגלישה</b> — מחיקת "נתוני אתרים" בדפדפן מוחקת גם את הנתונים כאן.</li>
+      <li><b>מכשיר או דפדפן אחר</b> — לא יראה את הנתונים. הם שמורים מקומית בלבד.</li>
+    </ol>
+    <div class="lossFix"><b>הפתרון לשניהם, פעם בשבוע:</b> לחצי <b>💾 גיבוי לקובץ</b> ושמרי את הקובץ בדרייב או במייל.
+      בכל מכשיר אחר — <b>♻️ שחזור מגיבוי</b> ומקבלים את הכול בחזרה.</div>
   </div>`;
 }
 function factoryReset(){
