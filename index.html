@@ -490,16 +490,32 @@ button.btn.dz:active{background:#ffe4ea;}
 .licBar .licTxt{flex:1 1 auto; min-width:0; color:#4a3410;}
 .licBar.urgent .licTxt{color:#6b1229;}
 @media(max-width:820px){.licBar{padding:8px 12px; font-size:12.5px; gap:8px;} .licBar .licTxt{flex-basis:100%;}}
-/* ============ רכיב חיצוני: מגן ובחינה זה לצד זה, המשוקלל מתחת ============ */
-.eBox{display:flex; align-items:flex-start; justify-content:center; gap:8px;}
-.eBox .gcell{width:auto; min-width:0; flex:0 1 auto;}
-.eBox .gcell input{width:64px;}
-.eBox .gcell small{white-space:nowrap; font-size:9.5px; letter-spacing:-.2px;}
-.eAvg{margin-top:5px; padding-top:4px; border-top:1px dashed #cbd5e1; font-size:11px; font-weight:700;
+/* ============ רכיב חיצוני: מגן ובחינה זה לצד זה, המשוקלל מתחת ============
+   רשת ולא flex — כדי שהתוויות והשדות יעמדו בדיוק על אותו קו בכל השורות. */
+.eWrap{display:inline-block; text-align:center;}
+.eBox{display:grid; grid-template-columns:repeat(2,auto); column-gap:8px; align-items:start;}
+.eBox .gcell{display:grid; grid-template-rows:13px auto; justify-items:center; align-content:start;
+  width:auto; min-width:0; gap:0;}
+/* ביטול ההפרדה האנכית בין שני שדות עוקבים — כאן הם זה ליד זה ולא זה מתחת לזה */
+.eBox .gcell+.gcell{margin-top:0; padding-top:0; border-top:0;}
+.dense .eBox .gcell{gap:0;}
+.eBox .gcell small{grid-row:1; display:block; height:13px; line-height:13px; margin:0;
+  white-space:nowrap; font-size:9.5px; letter-spacing:-.2px; color:var(--muted);}
+.eBox .gcell input{grid-row:2; width:66px; margin:0;}
+.eBox .gcell .gstatDot{grid-row:2; justify-self:end;}
+.eAvg{margin-top:4px; padding-top:4px; border-top:1px dashed #cbd5e1; font-size:11px; font-weight:700;
   color:#334155; text-align:center; white-space:nowrap;}
 .eAvg b{font-size:13.5px; font-weight:800; color:#0b1220;}
-.eAvg.pend{color:#94a3b8; font-weight:600; font-style:italic;}
-@media(max-width:820px){.eBox{gap:5px;} .eBox .gcell input{width:52px;} .eAvg{font-size:10px;}}
+.eAvg.pend{color:#94a3b8; font-weight:600; font-style:italic; font-size:10px;}
+@media(max-width:820px){.eBox{column-gap:5px;} .eBox .gcell input{width:52px;} .eAvg{font-size:10px;}}
+/* ============ סמל שאלון בכותרת העמודה ============ */
+select.colCode{font-size:10.5px; font-weight:800; padding:1px 4px; height:20px; max-width:118px;
+  border-radius:6px; border:1px solid #c7d2fe; background:#eef2ff; color:#3730a3; vertical-align:middle;
+  font-family:inherit; cursor:pointer;}
+select.colCode:hover{background:#e0e7ff; border-color:#818cf8;}
+.rowCode{font-size:9.5px; font-weight:800; color:#3730a3; background:#eef2ff; border:1px solid #c7d2fe;
+  border-radius:5px; padding:0 4px; margin-bottom:3px; display:inline-block; line-height:14px;}
+@media(max-width:820px){select.colCode{max-width:92px; font-size:10px;}}
 </style>
 </head>
 <body>
@@ -2767,6 +2783,39 @@ function renderEntry(m){
     <div class="scroll" style="max-height:${entryFull?'calc(100dvh - 150px)':'70vh'};">${entryGrid(subj,studs)}</div>
   </div>`;
 }
+// בורר סמל השאלון בכותרת העמודה — כדי שבזמן ההזנה יהיה ברור איזה שאלון מוזן.
+// חל על כל התלמידות המוצגות; אם לתלמידות סמלים שונים — מוצג "מעורב".
+function colCode(subj,i,studs){
+  const key=subj.id+'.'+i;
+  const opts=codeOptions(key);
+  if(!opts.length||!studs.length) return '';
+  const vals=[...new Set(studs.map(s=>((s.codes||{})[key]||'')))];
+  const cur=vals.length===1?vals[0]:'__mix';
+  const inList=opts.includes(cur);
+  return `<select class="colCode" onclick="event.stopPropagation()" onchange="setColCode('${subj.id}',${i},this.value)"
+      title="סמל השאלון — חל על כל התלמידות המוצגות">
+    <option value="">סמל…</option>
+    ${opts.map(o=>`<option value="${esc(o)}" ${cur===o?'selected':''}>${esc(o)}</option>`).join('')}
+    ${(cur&&cur!=='__mix'&&!inList)?`<option value="${esc(cur)}" selected>${esc(cur)}</option>`:''}
+    ${cur==='__mix'?'<option value="__mix" selected>מעורב</option>':''}
+    <option value="__c">אחר — הקלדה…</option>
+  </select>`;
+}
+function setColCode(sid,i,v){
+  if(v==='__mix') return;
+  const subj=SUBJ_MAP[sid]; if(!subj) return;
+  const key=sid+'.'+i;
+  if(v==='__c'){ const t=prompt('הקלידי סמל שאלון לכל התלמידות המוצגות:',''); if(t===null) return; v=t.trim(); }
+  const studs=filteredStudents(entryClass);
+  if(!studs.length){ toast('אין תלמידות מוצגות'); return; }
+  const comps=subj.comps(subj.opts[subj.opts.length-1]);
+  const cn=(comps[i]||{}).n||'';
+  const where=entryClass?('כיתה '+entryClass):'כל הכיתות';
+  if(!confirm(`להחיל את הסמל ${v||'(ריק)'} על ${studs.length} תלמידות ב${where}?\n\n${subj.name} · ${cn}`)) return;
+  pushUndo('סמל שאלון גורף — '+subj.name);
+  studs.forEach(st=>{ st.codes=st.codes||{}; if(v) st.codes[key]=v; else delete st.codes[key]; });
+  save(); renderKeepScroll(); toast('הסמל הוחל על '+studs.length+' תלמידות');
+}
 function entryGrid(subj,studs){
   if(!studs.length) return '<div class="note">אין תלמידות — הוסיפי בלשונית "תלמידות"</div>';
   // כותרות לפי יח"ל מקסימלי כדי לכלול את כל הרכיבים
@@ -2774,7 +2823,9 @@ function entryGrid(subj,studs){
   const headComps=subj.comps(maxU);
   let head=`<tr><th>שם</th>${subj.opts.length>1?'<th>יח"ל</th>':''}${subj.named?'<th>מקצוע</th>':''}`;
   headComps.forEach((c,i)=>{
-    head+=c.t==='i'?`<th>${esc(c.n)}</th>`:`<th>${esc(c.n)}<br><small>${c.s===0?'100% בחינה':(c.s===100?'מגן בלבד':'מגן '+c.s+'% / בחינה '+(100-c.s)+'%')}</small></th>`;
+    const cc=colCode(subj,i,studs);
+    const sub=(c.t==='i'||(c.s>0&&c.s<100))?'':`<br><small>${c.s===0?'100% בחינה':'מגן בלבד'}</small>`;
+    head+=`<th>${esc(c.n)}${cc?' '+cc:''}${sub}</th>`;
   });
   head+='<th>ציון סופי</th><th>סטטוס</th></tr>';
   const rows=studs.map(st=>{
@@ -2792,8 +2843,12 @@ function entryGrid(subj,studs){
       const kc=k=>((g[k]==null?'cell-miss':'')+gstatCls(st,k));
       const ct=k=>`oncontextmenu="event.preventDefault();cycleGstat('${st.id}','${k}')" title="לחיצה ימנית (או הנקודה הצבעונית): שחור→אדום→כחול"`;
       const dot=k=>`<button class="gstatDot ${gstatOf(st,k)}" onclick="cycleGstat('${st.id}','${k}')" title="החלפת סימון: שחור → אדום → כחול"></button>`;
+      // תג סמל אישי — מוצג רק כשהוא שונה מהסמל של שאר התלמידות המוצגות
+      const myCode=((st.codes||{})[key]||'');
+      const colVals=[...new Set(studs.map(s=>((s.codes||{})[key]||'')))];
+      const codeTag=(myCode&&colVals.length>1)?`<div class="rowCode" title="סמל השאלון של ${esc(st.name)}">${esc(myCode)}</div>`:'';
       if(c.t==='i'){
-        tds+=`<td class="${nt?'hasNote':''}" ${nt?`onclick="if(event.target===this)infoDlg('הערה',${JSON.stringify(nt)})"`:''}><div class="gcell"><input type="number" min="0" max="100" data-k="g|${st.id}|${key}" class="${kc(key)}" ${ct(key)} value="${g[key]??''}" onchange="setGrade('${st.id}','${key}',this.value)">${dot(key)}</div></td>`;
+        tds+=`<td class="${nt?'hasNote':''}" ${nt?`onclick="if(event.target===this)infoDlg('הערה',${JSON.stringify(nt)})"`:''}><div class="eWrap">${codeTag}<div class="gcell"><input type="number" min="0" max="100" data-k="g|${st.id}|${key}" class="${kc(key)}" ${ct(key)} value="${g[key]??''}" onchange="setGrade('${st.id}','${key}',this.value)">${dot(key)}</div></div></td>`;
       }else{
         const eff=c.s;
         const eSplit=(r.flips||[]).some(f=>f.comp===c.n)?(100-eff):eff;   // אם היה היפוך — מציגים את החלוקה שבפועל
@@ -2802,7 +2857,7 @@ function entryGrid(subj,studs){
         const dv=(r.details||[])[i], cv=(dv&&dv.val!==null&&dv.val!==undefined)?Math.round(dv.val):null;
         const flip=(r.flips||[]).some(f=>f.comp===c.n);
         const avgRow=(rM&&rE)?`<div class="eAvg${cv===null?' pend':''}" title="${flip?'היפוך אחוזים לטובת הבחינה':'משוקלל לפי החלוקה שהוגדרה'}">${cv===null?'ממתין לשני הציונים':`${flip?'🔀 ':''}משוקלל <b>${cv}</b>`}</div>`:'';
-        tds+=`<td class="${nt?'hasNote':''}" ${nt?`onclick="if(event.target===this)infoDlg('הערה',${JSON.stringify(nt)})"`:''}><div class="eBox">${rM}${rE}</div>${avgRow}</td>`;
+        tds+=`<td class="${nt?'hasNote':''}" ${nt?`onclick="if(event.target===this)infoDlg('הערה',${JSON.stringify(nt)})"`:''}><div class="eWrap">${codeTag}<div class="eBox">${rM}${rE}</div>${avgRow}</div></td>`;
       }
     });
     const flIc=(r.flips&&r.flips.length)?' <span title="היפוך אחוזים לטובת הבחינה ב: '+esc(r.flips.map(f=>f.comp).join(', '))+'">🔀</span>':'';
@@ -3250,7 +3305,7 @@ function simGrid(subj,studs){
         const rE=eff<100?`<div class="gcell"><small>בחינה ${100-eSplit}%</small><input type="number" min="0" max="100" data-k="s|${st.id}|${key}.e" class="${cls(key+'.e')}" value="${g[key+'.e']??''}" onchange="setGradeSim('${st.id}','${key}.e',this.value)"></div>`:'';
         const dvS=(r.details||[])[i], cvS=(dvS&&dvS.val!==null&&dvS.val!==undefined)?Math.round(dvS.val):null;
         const avgS=(rM&&rE)?`<div class="eAvg${cvS===null?' pend':''}">${cvS===null?'ממתין לשני הציונים':`משוקלל <b>${cvS}</b>`}</div>`:'';
-        tds+=`<td><div class="eBox">${rM}${rE}</div>${avgS}</td>`;
+        tds+=`<td><div class="eWrap"><div class="eBox">${rM}${rE}</div>${avgS}</div></td>`;
       }
     });
     // מבחני כיתה — לא נכנסים לציון הרשמי, רק משפרים את החיזוי
@@ -4459,7 +4514,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='5.2';
+const APP_VERSION='5.4';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
