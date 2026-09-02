@@ -111,7 +111,8 @@ header.app>*{position:relative; z-index:1;}
 header.app h1{font-size:22px; font-weight:800; letter-spacing:-.4px; text-shadow:0 2px 10px rgba(0,0,0,.18);}
 header.app .sub{opacity:.85; font-size:12.5px;}
 #hdrCenter{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); display:flex; align-items:center; gap:14px; text-align:center; pointer-events:none; z-index:2;}
-#hdrCenter .ttl{text-align:center;}
+#hdrCenter .ttl{text-align:center; min-width:0;}
+header.app h1,header.app .sub,.coordLine{direction:rtl; unicode-bidi:plaintext;}
 #hdrActions{margin-inline-start:auto; display:flex; gap:8px; align-items:center; z-index:3;}
 .glassIcon{width:56px; height:56px; border-radius:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
   background:linear-gradient(145deg,rgba(255,255,255,.34),rgba(255,255,255,.12));
@@ -253,6 +254,15 @@ table.tbl.grades tr:hover td:first-child{background:#f2f6ff;}
   .coordLine{font-size:11px; padding:2px 9px;}
   .glassIcon{width:42px; height:42px; border-radius:13px;}
   .glassIcon svg{width:21px; height:21px;}
+  /* בטלפון: גרפיקה אחת בלבד בשורה הסגולה, והכותרת בשורה אחת שלמה */
+  #logoSlot{max-width:96px;}
+  #logoSlot img,#logoSlot>span{height:34px !important; width:auto !important; max-width:96px !important;}
+  #logoSlot svg{max-height:34px; width:auto;}
+  #hdrCenter{flex:1 1 auto; min-width:0; gap:9px; margin-inline-start:10px;}
+  #hdrCenter>.glassIcon{display:none;}
+  header.app h1{font-size:16.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
+  header.app{flex-wrap:nowrap;}
+  #hdrActions{gap:6px; flex-shrink:0;}
   #subBar{padding:6px 12px; gap:7px; font-size:11.5px;}
   #subBar select{max-width:120px !important;}
   main{padding:12px 10px;}
@@ -308,6 +318,11 @@ table.tbl.grades tr:hover td:first-child{background:#f2f6ff;}
   .ring{width:92px; height:92px;} .ring svg{width:92px; height:92px;} .ring .rn{font-size:18px;}
   nav.tabs button{padding:9px 10px; font-size:12.5px;}
   table.tbl th,table.tbl td{font-size:12px; padding:5px 4px;}
+  #logoSlot{max-width:74px;}
+  #logoSlot img,#logoSlot>span{height:29px !important; max-width:74px !important;}
+  #logoSlot svg{max-height:29px;}
+  header.app h1{font-size:15px;}
+  header.app{padding-inline:10px; gap:7px;}
   .grid2,.grid3{grid-template-columns:1fr;}
 }
 .alert-item{display:flex; gap:10px; align-items:center; padding:9px 13px; border-radius:11px; margin-bottom:7px; font-size:13px; transition:transform .12s ease;}
@@ -505,7 +520,7 @@ button.btn.dz:active{background:#ffe4ea;}
   <div class="hint"><span><kbd>↑</kbd><kbd>↓</kbd> ניווט</span><span><kbd>Enter</kbd> פתיחה</span><span><kbd>Esc</kbd> סגירה</span><span style="margin-inline-start:auto;">Ctrl+K</span></div>
 </div></div>
 <div class="toast" id="toast"></div>
-<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 4.6</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
+<footer><span id="appFoot">סימולטור בגרות</span> · <b>גרסה 4.7</b> (01.09.2026) · הנתונים נשמרים אוטומטית בדפדפן המקומי</footer>
 <script>
 "use strict";
 /* ===== שכבת אחסון עמידה =====
@@ -2133,7 +2148,7 @@ function renderHeaderCenter(){
   el.innerHTML=`
     <div class="glassIcon">${ic('school',28)}</div>
     <div class="ttl">
-      <h1 id="appH1" style="line-height:1.15;">${esc(appTitle())}</h1>
+      <h1 id="appH1" dir="rtl" style="line-height:1.15;">${esc(appTitle())}</h1>
       <div class="sub">חישוב זכאות · איתור מצטיינות · סימולציות ודוחות</div>
       ${state.coord?`<div class="coordLine">${ic('users',13)} רכזת פדגוגית: ${esc(state.coord)}</div>`:''}
     </div>`;
@@ -3531,7 +3546,7 @@ function renderSettings(m){
   </div>
   <div class="card" style="margin-bottom:14px; border:2px solid var(--ok);">
     <h2 class="sec">${ic('save',19)}מצב השמירה — האם הנתונים שלי בטוחים?</h2>
-    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>4.6</b> · 01.09.2026</span>
+    <div class="toolbar" style="margin-bottom:8px;"><span class="pill" style="background:#eef2ff; border-color:var(--brand);">גרסת התוכנה: <b>4.7</b> · 01.09.2026</span>
     <span class="note">אחרי העלאת גרסה חדשה — רעננו את הדף (Ctrl+F5) וּודאו שהמספר כאן התעדכן.</span></div>
     <div id="storageBox">${storageStatusHtml()}</div>
     ${(()=>{const b=lastBackupInfo(); const cur=countAllStudents();
