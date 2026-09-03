@@ -450,13 +450,20 @@ table.tbl.grades td{padding:7px 6px;}
 footer{padding:18px; text-align:center; color:var(--muted); font-size:12px; border-top:1px solid var(--line); margin-top:20px; background:rgba(255,255,255,.5);}
 @media print{
   body>*{display:none !important;}
-  #printArea{display:block !important; padding:0;}
+  /* תקן ישראלי: הדוח המודפס כולו מימין לשמאל */
+  html,body{direction:rtl !important;}
+  #printArea{display:block !important; padding:0; direction:rtl; text-align:right;}
+  #printArea table{direction:rtl;}
+  #printArea table.tbl th,#printArea table.tbl td{text-align:right;}
+  #printArea table.tbl.grades th,#printArea table.tbl.grades td{text-align:center;}
+  #printArea table.tbl.grades th:first-child,#printArea table.tbl.grades td:first-child{text-align:right;}
+  @page{size:A4; margin:12mm;}
   #printArea .no-print{display:none !important;}
   table.tbl th{position:static;}
   .scroll{max-height:none; overflow:visible; border:none;}
 }
 #printArea{display:none;}
-body.print-mode #printArea{display:block; padding:20px; background:#fff;}
+body.print-mode #printArea{display:block; padding:20px; background:#fff; direction:rtl; text-align:right;}
 .status-cell{min-width:110px;}
 .toast{position:fixed; bottom:22px; left:22px; background:rgba(30,41,59,.92); -webkit-backdrop-filter:blur(18px) saturate(180%); backdrop-filter:blur(18px) saturate(180%); color:#fff; padding:13px 22px; border-radius:14px; z-index:500; font-size:13.5px; box-shadow:0 12px 32px rgba(0,0,0,.32); opacity:0; transform:translateY(12px); transition:all .28s cubic-bezier(.2,.8,.3,1); border:1px solid rgba(255,255,255,.12);}
 .toast.show{opacity:1; transform:none;}
@@ -620,17 +627,17 @@ select.fSel.on{border-color:var(--brand); background:#eef2ff; color:#3730a3; box
   background-size:26px 26px; opacity:.04;}
 
 /* --- Hero: שורה אחת קומפקטית. נסגר בטלפון. --- */
-.hero{display:flex; align-items:center; gap:16px; padding:15px 20px; margin-bottom:14px;
+.hero{display:flex; align-items:center; gap:14px; padding:11px 18px; margin-bottom:12px;
   background:linear-gradient(120deg,rgba(79,70,229,.055),rgba(147,51,234,.05) 55%,rgba(255,255,255,0));
-  border:var(--hair); border-radius:var(--r-lg); box-shadow:var(--el1); min-height:76px;}
-.hero .hIco{flex:0 0 auto; width:46px; height:46px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+  border:var(--hair); border-radius:var(--r-lg); box-shadow:var(--el1); min-height:0;}
+.hero .hIco{flex:0 0 auto; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center;
   background:linear-gradient(140deg,var(--brand),var(--brand2)); color:#fff; box-shadow:0 4px 14px rgba(79,70,229,.28);}
-.hero .hIco svg{width:24px; height:24px; stroke:currentColor;}
+.hero .hIco svg{width:21px; height:21px; stroke:currentColor;}
 .hero .hTxt{flex:1 1 auto; min-width:0;}
 .hero h1.hT{font-family:var(--font-head,'Rubik'),sans-serif; font-size:19px; font-weight:800; letter-spacing:-.3px; line-height:1.2; color:var(--ink);}
 .hero .hS{font-size:12.5px; font-weight:600; color:var(--muted); margin-top:2px;}
 .hero .hAct{display:flex; gap:7px; flex-wrap:wrap; flex:0 0 auto;}
-.hero .hArt{flex:0 0 auto; width:96px; height:56px; opacity:.5; color:var(--brand);}
+.hero .hArt{flex:0 0 auto; width:78px; height:42px; opacity:.42; color:var(--brand);}
 .hero .hArt svg{width:100%; height:100%; stroke:currentColor;}
 @media(max-width:900px){.hero .hArt{display:none;}}
 @media(max-width:820px){
@@ -789,6 +796,12 @@ table.tbl.grades td.cEmpty{color:#cbd5e1; vertical-align:middle; text-align:cent
   .stSum .stStat b{font-size:14px;}
   .subj-head .shTools{margin-inline-start:0; flex-basis:100%;}
 }
+/* --- כרטיס סיכום כיתות קומפקטי בסוף העמוד --- */
+.cmpCard{padding:13px 15px;}
+.cmpCard .clsGrid{grid-template-columns:repeat(auto-fill,minmax(206px,1fr)); gap:9px;}
+.cmpCard .clsCard{padding:9px 11px;}
+.cmpCard .clsCard .ccStats{padding:6px 0;}
+.cmpCard .clsCard .ccAct{margin-top:7px;}
 </style>
 </head>
 <body>
@@ -1929,7 +1942,7 @@ function exportLog(){
   if(!lg.length){ toast('היומן ריק'); return; }
   const rows=lg.map(x=>({'תאריך':new Date(x.t).toLocaleString('he-IL'),'סוג':x.ty,'תלמידה':x.s,'פרטים':x.d,'מ':x.f,'ל':x.o}));
   const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'יומן שינויים');
+  addSheet(wb,XLSX.utils.json_to_sheet(rows),'יומן שינויים');
   XLSX.writeFile(wb,`יומן-שינויים-${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 function doUndo(){
@@ -2848,7 +2861,7 @@ function classSummary(){
         <button class="btn sec sm" onclick="reportClass='${esc(c)}';setTab('reports')">${ic('file',13)}דוח</button>
       </div></div>`;
   }).join('');
-  return `<div class="card" style="margin-bottom:14px;">
+  return `<div class="card cmpCard" style="margin-top:14px;">
     ${secHead('layers','סיכום לפי כיתה','מבט מהיר על כל כיתה בשכבה')}
     <div class="clsGrid">${cards}</div></div>`;
 }
@@ -2860,7 +2873,6 @@ function renderStudents(m){
         :'ניהול שמות, כיתות וכרטיסי תלמידה',
     [`<button class="btn sm" onclick="document.getElementById('xlsxFile').click()">${ic('up',14)}ייבוא מאקסל</button>`,
      `<button class="btn sec sm" onclick="setTab('entry')">${ic('pen',14)}הזנת ציונים</button>`],'education')}
-  ${nAll?classSummary():''}
   <div class="grid2">
     <div class="card actCard">
       ${secHead('plus','הוספת תלמידה','שם אחד, או הדבקת רשימה שלמה')}
@@ -2870,9 +2882,10 @@ function renderStudents(m){
         <select id="newCls" ${state.classes.length?'':'disabled'}>${state.classes.length?state.classes.map(c=>`<option>${esc(c)}</option>`).join(''):'<option value="">— אין כיתות —</option>'}</select>
         <button class="btn ok" onclick="addStudent()" ${state.classes.length?'':'disabled style="opacity:.5;"'}>${ic('plus',14)}הוספה</button>
       </div>
-      <div class="note">אפשר גם להדביק רשימה: שם אחד בכל שורה</div>
-      <textarea id="bulkNames" rows="3" style="width:100%; margin-top:6px; border:1px solid #cbd5e1; border-radius:8px; padding:8px; font-family:inherit;" placeholder="שרה כהן&#10;רבקה לוי&#10;..."></textarea>
-      <button class="btn sec sm" style="margin-top:6px;" onclick="bulkAdd()">הוספת כל הרשימה</button>
+      <span class="dzLink" style="margin-top:2px; display:inline-block;" onclick="toggleBox('bulkN')">${openBoxes.bulkN?'▴':'▾'} הדבקת רשימה שלמה</span>
+      ${openBoxes.bulkN?`<textarea id="bulkNames" rows="3" style="width:100%; margin-top:6px; border:1px solid #cbd5e1; border-radius:8px; padding:8px; font-family:inherit;" placeholder="שרה כהן&#10;רבקה לוי&#10;..."></textarea>
+      <button class="btn sec sm" style="margin-top:6px;" onclick="bulkAdd()">${ic('plus',13)}הוספת כל הרשימה</button>
+      <div class="note">שם אחד בכל שורה. כיתת היעד היא זו שנבחרה למעלה.</div>`:''}
     </div>
     <div class="card actCard">
       ${secHead('layers','ניהול כיתות','יצירת כיתות ומחיקתן')}
@@ -2899,9 +2912,10 @@ function renderStudents(m){
   </div>
   ${dupBanner()}
   <div class="card" style="margin-top:14px;">
-    <h3 class="sec">כל התלמידות (${state.students.length})</h3>
+    ${secHead('users2',`כל התלמידות · ${state.students.length}`,'לחיצה על שם פותחת את כרטיס התלמידה')}
     <div class="scroll">${allStudentsTable()}</div>
-  </div>`;
+  </div>
+  ${nAll?classSummary():''}`;
 }
 function allStudentsTable(){
   if(!state.students.length) return emptyState('empty','עדיין אין תלמידות',
@@ -4329,7 +4343,7 @@ function buildReportHtml(cls){
   </div>`;
 }
 function printReport(){
-  document.getElementById('printArea').innerHTML='<div class="card" style="border:none; box-shadow:none;">'+buildReportHtml(reportClass)+'</div>';
+  document.getElementById('printArea').innerHTML='<div class="card" style="border:none; box-shadow:none; direction:rtl; text-align:right;" dir="rtl">'+buildReportHtml(reportClass)+'</div>';
   document.body.classList.add('print-mode');
   setTimeout(()=>{ window.print(); document.body.classList.remove('print-mode'); },100);
 }
@@ -4683,6 +4697,10 @@ function setCustom(sid,u,i,field,val){
 }
 
 /* ============ אקסל ============ */
+// כל גיליון נפתח מימין לשמאל — תקן ישראלי. RTL:true הוא חלק מתקן ה-XLSX,
+// ולכן אקסל, Google Sheets ו-LibreOffice מכבדים אותו.
+function sheetRTL(ws){ ws['!views']=[{RTL:true}]; return ws; }
+function addSheet(wb,ws,name){ XLSX.utils.book_append_sheet(wb,sheetRTL(ws),name); }
 function exportExcel(cls){
   cls=typeof cls==='string'?cls:'';
   const studs=repStuds(cls);
@@ -4702,7 +4720,7 @@ function exportExcel(cls){
   if(state.coord) sumRows.forEach(r=>{ r['רכזת פדגוגית']=state.coord; });
   const ws1=XLSX.utils.json_to_sheet(sumRows);
   ws1['!cols']=Object.keys(sumRows[0]).map(()=>({wch:13}));
-  XLSX.utils.book_append_sheet(wb,ws1,'סיכום');
+  addSheet(wb,ws1,'סיכום');
   // גיליון גולמי (לייבוא חוזר)
   const rawRows=studs.map(st=>{
     const row={'שם':st.name,'כיתה':st.cls};
@@ -4727,7 +4745,7 @@ function exportExcel(cls){
     return row;
   });
   const ws2=XLSX.utils.json_to_sheet(rawRows);
-  XLSX.utils.book_append_sheet(wb,ws2,'נתונים גולמיים');
+  addSheet(wb,ws2,'נתונים גולמיים');
   // ניתוח כיתתי
   const anRows=state.classes.map(c=>{
     const ss=state.students.filter(s=>s.cls===c);
@@ -4739,7 +4757,7 @@ function exportExcel(cls){
       'עם מעכבים':rs.filter(r=>r.blockers.length>0).length,
       'ממוצע':avgOf(rs.map(r=>r.avg).filter(v=>v!==null))??''};
   });
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(anRows),'ניתוח כיתתי');
+  addSheet(wb,XLSX.utils.json_to_sheet(anRows),'ניתוח כיתתי');
   XLSX.writeFile(wb,`דוח-בגרות-${cls||'שכבה'}-${new Date().toISOString().slice(0,10)}.xlsx`);
   toast('הקובץ ירד למחשב');
 }
@@ -5218,7 +5236,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='6.8';
+const APP_VERSION='6.9';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
