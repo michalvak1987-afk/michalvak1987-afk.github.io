@@ -1041,6 +1041,105 @@ table.tbl.grades tbody tr:focus-within td:first-child{background:#eaf0ff;}
 @media(max-width:820px){.hGrid{grid-template-columns:1fr;} .hHead{padding:10px 12px;} .hBody{padding:11px 12px;}}
 .bkWarn{font-size:10.5px; font-weight:700; color:#92400e; background:#fffbeb; border:1px solid #fde68a;
   border-radius:var(--r-pill); padding:2px 8px; margin-top:4px; display:inline-block; white-space:nowrap;}
+/* ============================================================
+   מעבר מובייל על הרכיבים החדשים.
+   העיקרון: נתונים לפני קישוט, יעדי נגיעה 36px+, ואף סרגל
+   לא מתפרק לשלוש שורות — מי שגולש רוחבית, גולש רוחבית.
+   ============================================================ */
+
+/* --- סרגלים ארוכים: פס גלילה אופקי במקום שבירה ל-3 שורות --- */
+@media(max-width:820px){
+  .eBar,.repNav,.setTop{flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden;
+    -webkit-overflow-scrolling:touch; scrollbar-width:none;}
+  .eBar::-webkit-scrollbar,.repNav::-webkit-scrollbar,.setTop::-webkit-scrollbar{display:none;}
+  .eBar>*,.repNav>*,.setTop>*{flex:0 0 auto;}
+  .eBar .eGrp,.setTop .proSw{flex-wrap:nowrap;}
+  .eBar select{max-width:132px;}
+  .setTop .note{display:none;}
+  /* רמז שיש עוד — הצללה בקצה */
+  .eBar,.repNav{mask-image:linear-gradient(90deg,transparent 0,#000 10px,#000 calc(100% - 10px),transparent 100%);
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 10px,#000 calc(100% - 10px),transparent 100%);}
+}
+
+/* --- יעדי נגיעה: 36px מינימום לכל דבר שנוגעים בו --- */
+@media (hover:none){
+  button.btn.sm,.eBar .btn.sm,.repNav .btn.sm{min-height:36px; padding-inline:11px;}
+  button.btn.xq{min-width:36px; min-height:36px;}
+  button.rowCode{min-height:24px; line-height:22px; font-size:10.5px; padding-inline:8px;}
+  .gstatDot{width:16px !important; height:16px !important;}
+  .dzLink,.hQ,.preCard,.alCard,.setHead,.hHead{min-height:44px;}
+  .symBtn{min-height:52px;}
+  select,input[type=number],input[type=text]{min-height:36px;}
+  .cCls select{min-height:34px;}
+}
+
+/* --- Control Center: כרטיס אחד בשורה במסך צר --- */
+@media(max-width:430px){
+  .alGrid{grid-template-columns:1fr; gap:7px;}
+  .alCard{padding:9px 11px; gap:9px;}
+  .alCard .alIco{width:30px; height:30px;}
+  .alCard .alN{font-size:19px;}
+}
+
+/* --- כרטיסי כיתה: 2×2 במקום 4 בשורה --- */
+@media(max-width:430px){
+  .clsCard .ccStats{grid-template-columns:repeat(2,1fr); gap:8px 6px;}
+  .clsCard .ccStat i{font-size:10px;}
+}
+
+/* --- Hero: הפעולות בשתי עמודות ולא אחת ארוכה --- */
+@media(max-width:560px){
+  .hero .hAct,.simHero .hAct{display:grid; grid-template-columns:1fr 1fr; gap:6px;}
+  .hero .hAct .btn,.simHero .hAct .btn{width:100%; justify-content:center; padding-inline:6px;}
+  .simHero .hAct .simCnt{grid-column:1/-1; justify-content:center;}
+}
+
+/* --- כותרת הדוח: מטא בשתי עמודות --- */
+@media(max-width:560px){
+  .repHead{gap:9px; padding:11px 13px;}
+  .repHead .rhTtl{font-size:16.5px;}
+  .repHead .rhMeta{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .repHead .rhMeta>span{white-space:normal;}
+}
+
+/* --- Wizard: תגי המניין בשתי עמודות --- */
+@media(max-width:430px){
+  .wzTally{display:grid; grid-template-columns:1fr 1fr; gap:6px;}
+  .wzT2{justify-content:center;}
+  .wzStepBox{padding:10px 11px;}
+  .symGrid{grid-template-columns:1fr 1fr;}
+}
+
+/* --- שורת מסך מלא: כפתור היציאה תמיד נגיש --- */
+@media(max-width:820px){
+  .fsBar{gap:7px;}
+  .fsBar .fsT{font-size:13.5px; flex:1 1 100%;}
+  .fsBar .fsX{margin-inline-start:auto;}
+  .fsBar kbd{display:none;}
+}
+
+/* --- אזור מסוכן וכרטיסי הגדרות --- */
+@media(max-width:560px){
+  .dzCard{padding:11px 12px;}
+  .dzCard .dzRow{flex-wrap:wrap;}
+  .dzCard .dzRow .btn{width:100%;}
+  .sGrp{font-size:13px; margin:16px 2px 8px;}
+}
+
+/* --- השוואה בסימולציה: לא נשבר באמצע --- */
+@media(max-width:560px){
+  .cmp{gap:4px;}
+  .cmpB{font-size:13.5px;}
+  .dBadge{font-size:10px; padding:1px 6px;}
+  .triState{gap:6px;}
+  .tsBox{padding:8px 11px;}
+}
+
+/* --- טבלאות רחבות: רמז גלילה --- */
+@media(max-width:820px){
+  .scroll{position:relative;}
+  table.tbl.grades{min-width:520px;}
+}
 </style>
 </head>
 <body>
@@ -4273,9 +4372,9 @@ function predPresets(){
 }
 function renderSim(m){
   const opts={split:simSplit===''?null:+simSplit, predict:simPredict, bonus:+simBonus, sim:true};
-  const simSubj=null;                                            // הסימולציה חוצה מקצועות
+  const fltSubj=null;   // הסינון בסימולציה חוצה מקצועות (ממוצע/סטטוס) — לא קשור לבורר המקצוע
   const allStuds=filteredStudents(simClass);
-  const studs=fltApply(allStuds,simSubj);
+  const studs=fltApply(allStuds,fltSubj);
   const base=studs.map(st=>({st,r:calcStudent(st)}));           // המצב האמיתי
   const sim=studs.map(st=>({st,r:calcStudent(st,opts)}));       // התרחיש
   const bE=base.filter(x=>x.r.eligible).length, sE=sim.filter(x=>x.r.eligible).length;
@@ -4366,7 +4465,7 @@ function renderSim(m){
       <span class="note">חישוב כבד — רץ רק בלחיצה כדי לא להאט את ההקלדה. (התג הירוק "צריך X" לצורך מעבר מוצג תמיד בטבלה.)</span>
     </div></div>`}
   ${simPredict?predictionPanel(studs):''}
-  ${fltBar(simSubj,allStuds.length,studs.length)}
+  ${fltBar(fltSubj,allStuds.length,studs.length)}
   <div class="kpis">
     ${simKpi('k2','shield','זכאיות',bE,sE)}
     ${simKpi('k4','star','מצטיינות',bX,sX)}
@@ -4416,8 +4515,8 @@ function simGrid(subj,studs){
         // תג "צריך X" — הציון המינימלי בהערכה הפנימית שיביא את המקצוע לציון עובר
         let need='';
         if(i===intIdx&&rReal.final!==null&&rReal.final<state.thresholds.pass){
-          const nd=neededInternalForSubject(st,subj,Math.ceil(state.thresholds.pass));
-          need=nd.ok?`<span class="needbadge" title="הזיני ציון זה כדי שהמקצוע יעבור">צריך ${nd.x}</span>`
+          const needCalc=neededInternalForSubject(st,subj,Math.ceil(state.thresholds.pass));
+          need=needCalc.ok?`<span class="needbadge" title="הזיני ציון זה כדי שהמקצוע יעבור">צריך ${needCalc.x}</span>`
                     :`<span class="badge b-bad" style="font-size:11px;">לא ניתן</span>`;
         }
         tds+=`<td><div class="eWrap"><div class="eTag"></div><div class="eBox one"><div class="gcell"><small>&nbsp;</small><input type="number" min="0" max="100" data-k="s|${st.id}|${key}" class="${cls(key)}" value="${g[key]??''}" onchange="setGradeSim('${st.id}','${key}',this.value)">${need}</div></div></div></td>`;
@@ -5763,7 +5862,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='8.1';
+const APP_VERSION='8.3';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
