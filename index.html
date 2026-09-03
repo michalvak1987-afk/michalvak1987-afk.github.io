@@ -2864,18 +2864,43 @@ function renderKeepScroll(){
   }
 }
 function destroyCharts(){ Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}}); charts={}; }
+/* גבול שגיאה לכל לשונית.
+   אם רינדור של מסך נכשל — לא נשאר מסך ריק בלי הסבר, אלא הודעה
+   עם המסך שנכשל, השגיאה והגרסה, וכפתור העתקה לשליחה לתמיכה.
+   שאר התוכנה ממשיכה לעבוד, והנתונים לא נוגעים. */
+const TAB_RENDER={dash:'renderDash',students:'renderStudents',entry:'renderEntry',sim:'renderSim',
+                  reports:'renderReports',alerts:'renderAlerts',settings:'renderSettings',help:'renderHelp'};
+let lastRenderErr=null;
+function tabErrHtml(tabId,err){
+  const nm=(TABS.find(t=>t[0]===tabId)||[,tabId])[1];
+  const det=`מסך: ${nm} (${tabId})\nגרסה: ${APP_VERSION}\nשגיאה: ${(err&&err.message)||err}\n${((err&&err.stack)||'').split('\n').slice(0,4).join('\n')}`;
+  return `<div class="card">
+    ${emptyState('warn','המסך הזה נתקל בשגיאה',
+      `אירעה שגיאה בהצגת <b>${esc(nm)}</b>. <b>הנתונים שלך בטוחים ולא נפגעו</b> — שאר המסכים עובדים כרגיל.`,null,
+      [`<button class="btn" onclick="renderKeepScroll()">${ic('refresh',15)}נסי שוב</button>`,
+       `<button class="btn sec" onclick="setTab('dash')">${ic('dash',15)}לדשבורד</button>`,
+       `<button class="btn sec" onclick="navigator.clipboard&&navigator.clipboard.writeText(${JSON.stringify(det)}).then(()=>toast('הפרטים הועתקו — אפשר לשלוח לתמיכה'))">${ic('clipboard',15)}העתקת פרטי השגיאה</button>`,
+       `<button class="btn sec" onclick="exportJSON()">${ic('down',15)}גיבוי הנתונים</button>`])}
+    <details style="margin-top:10px; font-size:12px; color:var(--muted);">
+      <summary style="cursor:pointer; font-weight:700;">פרטים טכניים</summary>
+      <pre style="white-space:pre-wrap; margin-top:6px; font-size:11.5px;">${esc(det)}</pre>
+    </details>
+  </div>`;
+}
 function render(){
   destroyCharts();
   const m=document.getElementById('main');
-  if(currentTab==='dash') renderDash(m);
-  else if(currentTab==='students') renderStudents(m);
-  else if(currentTab==='entry') renderEntry(m);
-  else if(currentTab==='sim') renderSim(m);
-  else if(currentTab==='reports') renderReports(m);
-  else if(currentTab==='alerts') renderAlerts(m);
-  else if(currentTab==='settings') renderSettings(m);
-  else if(currentTab==='help') renderHelp(m);
-  renderSaveInd(); renderNag(); renderHeaderCenter(); renderUndo(); renderLic(); animateCounters();
+  const fn=TAB_RENDER[currentTab];
+  try{
+    lastRenderErr=null;
+    if(fn&&typeof window[fn]==='function') window[fn](m);
+    else if(currentTab==='dash') renderDash(m);
+  }catch(err){
+    lastRenderErr={tab:currentTab,err};
+    try{ m.innerHTML=tabErrHtml(currentTab,err); }catch(e2){ m.innerHTML='<div class="card">שגיאה בהצגת המסך.</div>'; }
+    try{ console.error('render('+currentTab+')',err); }catch(e3){}
+  }
+  try{ renderSaveInd(); renderNag(); renderHeaderCenter(); renderUndo(); renderLic(); animateCounters(); }catch(e){}
 }
 function classFilterHtml(id,val){
   return `<select id="${id}" onchange="renderKeepScroll()"><option value="">כל השכבה</option>${state.classes.map(c=>`<option ${val===c?'selected':''}>${c}</option>`).join('')}</select>`;
@@ -5705,7 +5730,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='7.9';
+const APP_VERSION='8.0';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
