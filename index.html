@@ -230,7 +230,8 @@ input[type=number]:focus, select:focus, input[type=text]:focus, textarea:focus{o
 input.cell-miss{background:#f1f5f9; border-style:dashed;}
 input.g-red, .g-red{color:#dc2626 !important; font-weight:800;}
 input.g-blue, .g-blue{color:#1d4ed8 !important; font-weight:800; font-style:italic;}
-input.sim-cell{background:#fff7ed !important; border-color:#f59e0b !important; color:#b45309; font-weight:800; box-shadow:0 0 0 1px #f59e0b;}
+input.sim-cell{background:#eff4ff !important; border-color:#1d4ed8 !important; color:#1d4ed8 !important;
+  font-weight:800; font-style:italic; box-shadow:0 0 0 1px #1d4ed8;}
 #simBanner{display:none; background:linear-gradient(90deg,#fff7ed,#ffedd5); border-bottom:2px solid #f59e0b; padding:8px 18px; font-size:13px; align-items:center; gap:10px; flex-wrap:wrap; position:sticky; top:49px; z-index:49;}
 body.sim-on #simBanner{display:flex;}
 body.sim-on nav.tabs{border-bottom-color:#f59e0b;}
@@ -1165,6 +1166,29 @@ table.tbl.grades tbody tr:focus-within td:first-child{background:#eaf0ff;}
 .segBtn.sim.on{background:linear-gradient(140deg,#d97706,#f59e0b); color:#fff;}
 .stHead.simMode{background:linear-gradient(180deg,#fffdf5,#fff); border-bottom-color:#fcd34d;}
 .stHead.simMode .stNm::after{content:'· ניסוי'; font-size:11.5px; font-weight:800; color:var(--warn); margin-inline-start:7px;}
+/* ============ חיווי סנכרון ודיאלוג התנגשות ============ */
+.syncInd{display:none; align-items:center; gap:5px; font-size:11.5px; font-weight:800; padding:3px 10px;
+  border-radius:var(--r-pill); cursor:pointer; white-space:nowrap; border:1px solid transparent;
+  transition:background var(--t-base) var(--ease);}
+.syncInd svg{stroke:currentColor;}
+.syncInd.dvOk{background:#ecfdf5; color:#065f46; border-color:#a7f3d0;}
+.syncInd.dvLocal{background:var(--soft); color:var(--muted); border-color:var(--line);}
+.syncInd.dvSaving{background:#eef2ff; color:#3730a3; border-color:#c7d2fe;}
+.syncInd.dvWarn{background:#fffbeb; color:#92400e; border-color:#fde68a;}
+.syncInd.dvBad{background:#fff1f4; color:#9f1239; border-color:#f3bfcb;}
+.syncInd.dvOff{background:var(--soft); color:var(--muted); border-color:var(--line);}
+.syncInd:hover{filter:brightness(.97);}
+#cfModal{position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:240; display:none;
+  align-items:flex-start; justify-content:center; padding:30px 15px; overflow:auto;}
+#cfModal.show{display:flex;}
+#cfModal .box{background:#fff; border-radius:24px; max-width:820px; width:100%; padding:20px;
+  max-height:90vh; overflow:auto; box-shadow:0 24px 60px rgba(15,23,42,.4);
+  animation:sheetUp .24s cubic-bezier(.2,.9,.3,1.1) both;}
+@media(max-width:820px){
+  #cfModal{align-items:flex-end; padding:0;}
+  #cfModal .box{border-radius:22px 22px 0 0; max-width:none; max-height:92dvh; padding:16px;
+    padding-bottom:calc(16px + env(safe-area-inset-bottom));}
+}
 </style>
 </head>
 <body>
@@ -1184,6 +1208,7 @@ table.tbl.grades tbody tr:focus-within td:first-child{background:#eaf0ff;}
 <div id="subBar">
   <div id="profileSlot"></div>
   <div style="margin-inline-start:auto; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+    <span id="syncInd" class="syncInd" style="display:none;"></span>
     <div id="undoBar"></div>
     <div id="fileBar" style="display:flex; gap:6px; align-items:center;"></div>
     <div id="saveInd" onclick="setTab('settings')" title="פרטי שמירה וגיבוי"></div>
@@ -1214,6 +1239,7 @@ table.tbl.grades tbody tr:focus-within td:first-child{background:#eaf0ff;}
     <div class="note" style="margin-top:12px; font-size:11.5px;">קוד השחזור נמצא בקובץ שירד בעת הפעלת הנעילה, וגם בתוך כל קובץ גיבוי. <b>הנתונים לעולם לא נמחקים בגלל סיסמה שנשכחה.</b></div>
   </div>
 </div>
+<div id="cfModal" onclick="if(event.target===this)this.classList.remove('show')"><div class="box" id="cfBox"></div></div>
 <div id="licWall" style="display:none; position:fixed; inset:0; z-index:950; background:linear-gradient(135deg,#1e1b4b,#4c1d95 55%,#7e22ce); align-items:center; justify-content:center; padding:20px; overflow:auto;">
   <div style="background:rgba(255,255,255,.97); -webkit-backdrop-filter:blur(24px); backdrop-filter:blur(24px); border-radius:26px; padding:30px 28px; width:min(470px,94vw); text-align:center; box-shadow:0 30px 80px rgba(0,0,0,.45); animation:sheetUp .3s cubic-bezier(.2,.9,.3,1.1) both;">
     <div style="font-size:48px; line-height:1; margin-bottom:8px;">🎓</div>
@@ -1726,6 +1752,15 @@ if(!profiles.length) profiles=[{id:'main',name:'',unnamed:1}];
 currentProfileId=LS.getItem('bagrutCurrentProfile')||profiles[0].id;
 if(!profiles.some(p=>p.id===currentProfileId)) currentProfileId=profiles[0].id;
 function profileKey(){ return currentProfileId==='main'?'bagrutSimPro':'bagrutSimPro:'+currentProfileId; }
+function profileKeyOf(pid){ return pid==='main'?'bagrutSimPro':'bagrutSimPro:'+pid; }
+function loadProfileState(pid){
+  if(pid===currentProfileId) return state;
+  try{ const raw=LS.getItem(profileKeyOf(pid)); return raw?JSON.parse(raw):null; }catch(e){ return null; }
+}
+function saveProfileState(pid,st){
+  if(pid===currentProfileId){ state=st; save(true); return; }
+  try{ LS.setItem(profileKeyOf(pid),JSON.stringify(st)); }catch(e){}
+}
 function saveProfiles(){ LS.setItem('bagrutProfiles',JSON.stringify(profiles)); LS.setItem('bagrutCurrentProfile',currentProfileId); }
 function renderProfileBar(){
   const s=document.getElementById('profileSlot'); if(!s) return;
@@ -1784,7 +1819,7 @@ function loadState(){
   return JSON.parse(JSON.stringify(DEFAULT_STATE));
 }
 let lastSaveAt=null, saveOk=null;
-function save(){
+function save(noQueue){
   clearCompCache();
   try{
     const json=JSON.stringify(state);
@@ -1795,6 +1830,7 @@ function save(){
     lastSaveAt=new Date();
     LS.setItem('bagrutLastSave:'+currentProfileId,lastSaveAt.toISOString());
     scheduleFileSave();   // כתיבה אוטומטית לקובץ הנתונים
+    if(!noQueue&&typeof queueDriveSave==='function') queueDriveSave(currentProfileId);
   }catch(e){
     saveOk=false;
     alert('⚠️ השמירה נכשלה! ייתכן שהדפדפן במצב גלישה בסתר או שהאחסון מלא.\nשגיאה: '+e.message+'\n\nמומלץ ללחוץ "💾 גיבוי" ולשמור את הקובץ מיד.');
@@ -3046,7 +3082,7 @@ function render(){
     try{ m.innerHTML=tabErrHtml(currentTab,err); }catch(e2){ m.innerHTML='<div class="card">שגיאה בהצגת המסך.</div>'; }
     try{ console.error('render('+currentTab+')',err); }catch(e3){}
   }
-  try{ renderSaveInd(); renderNag(); renderHeaderCenter(); renderUndo(); renderLic(); animateCounters(); }catch(e){}
+  try{ renderSaveInd(); renderNag(); renderHeaderCenter(); renderUndo(); renderLic(); renderSyncInd(); animateCounters(); }catch(e){}
 }
 function classFilterHtml(id,val){
   return `<select id="${id}" onchange="renderKeepScroll()"><option value="">כל השכבה</option>${state.classes.map(c=>`<option ${val===c?'selected':''}>${c}</option>`).join('')}</select>`;
@@ -5041,6 +5077,10 @@ function renderSettings(m){
   </div>
 
   ${sGrp('save','נתונים וגיבוי')}
+  ${sCard('drive','folder','חשבון וסנכרון בין מכשירים',
+    'חיבור לגוגל דרייב הפרטי שלך — אותם נתונים בטלפון ובמחשב. הנתונים נשמרים בחשבון שלך, לא אצל הספק.',
+    `<span class="badge ${dvStatus()==='synced'?'b-ok':dvStatus()==='error'?'b-bad':'b-miss'}">${(DVS[dvStatus()]||{}).t||'לא מוגדר'}</span>`,
+    drivePanelHtml())}
   ${sCard('save','save','שמירה, גיבוי ועדכוני גרסה',
     'הנתונים נשמרים לבד בכל שינוי. כאן מגבים לקובץ, משחזרים, ובודקים אם יש גרסה חדשה.',
     `<span class="badge ${STORAGE_OK?'b-ok':'b-bad'}">${STORAGE_OK?'שמירה פעילה':'השמירה חסומה'}</span>
@@ -5945,7 +5985,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='8.5';
+const APP_VERSION='8.8';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
@@ -6051,6 +6091,384 @@ function updAutoInit(){
   }
   const last=updLastCheck();
   if(!last||Date.now()-last>UPD_EVERY) setTimeout(()=>checkUpdate(false),4000);
+}
+
+/* ============================================================================
+   סנכרון דרך Google Drive הפרטי של המשתמשת — App Folder
+   ----------------------------------------------------------------------------
+   עקרונות (לפי מסמך האפיון 2.0):
+   • ספק התוכנה אינו מחזיק שום נתון. הקובץ יושב בתיקייה נסתרת בדרייב של המשתמשת.
+   • ההרשאה היא drive.appdata — מסומנת אצל Google כלא-רגישה, ומעניקה גישה
+     לתיקיית האפליקציה בלבד. אין גישה לשום קובץ אחר בדרייב.
+   • התוכנה עובדת במלואה גם בלי חיבור. החיבור הוא תוספת, לא תנאי.
+   • localStorage נשאר ה-cache; הדרייב הוא מקור האמת לסנכרון בין מכשירים.
+   ============================================================================ */
+const DRIVE_CLIENT_ID='908700355843-mmivpmd09gobn5ub3nfgmann12h1qg72.apps.googleusercontent.com';   // מזהה הלקוח מ-Google Cloud (פרויקט Bagrut Simulator).
+const SCHEMA_VER=1;                 // גרסת מבנה הנתונים. לקוח ישן לא יכתוב על חדש.
+const DRIVE_SCOPE='https://www.googleapis.com/auth/drive.appdata';
+const DRIVE_API='https://www.googleapis.com/drive/v3';
+const DRIVE_UP='https://www.googleapis.com/upload/drive/v3';
+
+let dv={ on:false, token:'', exp:0, email:'', state:'nodrive', busy:false,
+         lastSync:0, lastErr:'', files:{}, queue:{}, sig:{}, tc:null, gisLoaded:false };
+
+function driveEnabled(){ return !!DRIVE_CLIENT_ID; }
+function driveName(){
+  let n=LS.getItem('bagrutDeviceName');
+  if(!n){
+    const ua=navigator.userAgent||'';
+    n=/iPhone/.test(ua)?'אייפון':/iPad/.test(ua)?'אייפד':/Android/.test(ua)?'אנדרואיד':
+      /Macintosh/.test(ua)?'מק':/Windows/.test(ua)?'מחשב Windows':'מכשיר';
+    LS.setItem('bagrutDeviceName',n);
+  }
+  return n;
+}
+function setDriveName(v){ LS.setItem('bagrutDeviceName',(v||'').trim()||driveName()); renderKeepScroll(); }
+
+/* ---- מטען הסנכרון: מה נשלח ומה נשאר מקומי ---- */
+// יוצא במפורש: logo (עד 400KB data-URI), simg (שכבת ניסוי), snapshots, הגדרות מכשיר.
+const SYNC_SKIP_STATE=['logo'];
+const SYNC_SKIP_STUD=['simg'];
+function syncPayload(pid,st,ver){
+  const s=JSON.parse(JSON.stringify(st||state));
+  SYNC_SKIP_STATE.forEach(k=>{ delete s[k]; });
+  (s.students||[]).forEach(x=>SYNC_SKIP_STUD.forEach(k=>{ delete x[k]; }));
+  const pr=profiles.find(p=>p.id===pid)||{};
+  return { schemaVer:SCHEMA_VER, appVer:APP_VERSION, version:ver, id:pid,
+           name:pr.name||'', device:driveName(), savedAt:new Date().toISOString(), state:s };
+}
+// מיזוג נתון שהתקבל מהדרייב חזרה למקומי — בלי לדרוס את מה שלא מסתנכרן
+function applyPayload(local,pl){
+  const inc=JSON.parse(JSON.stringify(pl.state||{}));
+  SYNC_SKIP_STATE.forEach(k=>{ if(local&&local[k]!==undefined) inc[k]=local[k]; });
+  const oldSim={}; ((local&&local.students)||[]).forEach(x=>{ if(x.simg) oldSim[x.id]=x.simg; });
+  (inc.students||[]).forEach(x=>{ if(oldSim[x.id]) x.simg=oldSim[x.id]; });
+  return inc;
+}
+function payloadSig(pl){
+  const s=JSON.stringify(pl.state);
+  let a=0x811c9dc5;
+  for(let i=0;i<s.length;i++){ a^=s.charCodeAt(i); a=Math.imul(a,0x01000193)>>>0; }
+  return s.length+':'+a.toString(36);
+}
+
+/* ---- הזדהות ---- */
+function gisLoad(){
+  return new Promise((res,rej)=>{
+    if(dv.gisLoaded||window.google&&google.accounts) return res();
+    const s=document.createElement('script');
+    s.src='https://accounts.google.com/gsi/client';
+    s.async=true; s.onload=()=>{ dv.gisLoaded=true; res(); }; s.onerror=()=>rej(new Error('טעינת ספריית ההזדהות נכשלה'));
+    document.head.appendChild(s);
+  });
+}
+async function driveConnect(){
+  if(!driveEnabled()){ driveInfoDlg(); return; }
+  try{ await gisLoad(); }catch(e){ dv.lastErr=e.message; dv.state='error'; renderKeepScroll(); return; }
+  dv.tc=google.accounts.oauth2.initTokenClient({
+    client_id:DRIVE_CLIENT_ID, scope:DRIVE_SCOPE,
+    callback:async(r)=>{
+      if(r&&r.access_token){
+        dv.token=r.access_token; dv.exp=Date.now()+((r.expires_in||3600)*1000)-60000; dv.on=true;
+        SS.setItem('bagrutDvTok',dv.token); SS.setItem('bagrutDvExp',String(dv.exp));
+        LS.setItem('bagrutDvWanted','1');
+        dv.state='saving'; renderKeepScroll();
+        await driveSyncAll(true);
+      }else{ dv.state='error'; dv.lastErr='ההרשאה לא אושרה'; renderKeepScroll(); }
+    }
+  });
+  dv.tc.requestAccessToken({prompt:'consent'});
+}
+async function driveSilent(){
+  if(!driveEnabled()||LS.getItem('bagrutDvWanted')!=='1') return false;
+  const t=SS.getItem('bagrutDvTok'), e=+(SS.getItem('bagrutDvExp')||0);
+  if(t&&e>Date.now()){ dv.token=t; dv.exp=e; dv.on=true; dv.state='synced'; return true; }
+  try{ await gisLoad(); }catch(e2){ return false; }
+  return new Promise(res=>{
+    dv.tc=google.accounts.oauth2.initTokenClient({
+      client_id:DRIVE_CLIENT_ID, scope:DRIVE_SCOPE,
+      callback:r=>{
+        if(r&&r.access_token){
+          dv.token=r.access_token; dv.exp=Date.now()+((r.expires_in||3600)*1000)-60000; dv.on=true;
+          SS.setItem('bagrutDvTok',dv.token); SS.setItem('bagrutDvExp',String(dv.exp));
+          dv.state='synced'; res(true);
+        } else res(false);
+      }
+    });
+    try{ dv.tc.requestAccessToken({prompt:''}); }catch(e3){ res(false); }
+  });
+}
+function driveDisconnect(){
+  if(!confirm('לנתק את החשבון מהמכשיר הזה?\n\nהנתונים בדרייב ובמכשיר לא יימחקו.\nהתוכנה תמשיך לעבוד מקומית, בלי סנכרון.')) return;
+  try{ if(window.google&&google.accounts&&dv.token) google.accounts.oauth2.revoke(dv.token,()=>{}); }catch(e){}
+  dv={...dv,on:false,token:'',exp:0,email:'',state:'nodrive',files:{},queue:{},sig:{}};
+  SS.removeItem('bagrutDvTok'); SS.removeItem('bagrutDvExp'); LS.removeItem('bagrutDvWanted');
+  renderKeepScroll(); toast('נותק מהדרייב — הנתונים לא נמחקו');
+}
+async function driveTok(){
+  if(dv.exp>Date.now()&&dv.token) return dv.token;
+  const ok=await driveSilent();
+  if(!ok){ dv.state='error'; dv.lastErr='נדרשת התחברות מחדש'; throw new Error('נדרשת התחברות מחדש לדרייב'); }
+  return dv.token;
+}
+
+/* ---- קריאות דרייב ---- */
+async function dvFetch(url,opt){
+  const tok=await driveTok();
+  opt=opt||{}; opt.headers=Object.assign({Authorization:'Bearer '+tok},opt.headers||{});
+  const r=await fetch(url,opt);
+  if(r.status===401){ dv.token=''; dv.exp=0; throw new Error('ההרשאה פגה'); }
+  if(!r.ok) throw new Error('דרייב החזיר '+r.status);
+  return r;
+}
+async function driveIndex(){
+  const r=await dvFetch(DRIVE_API+'/files?spaces=appDataFolder&pageSize=200&fields=files(id,name,modifiedTime,appProperties)');
+  const j=await r.json();
+  dv.files={};
+  (j.files||[]).forEach(f=>{ const m=/^sim-(.+)\.json$/.exec(f.name); if(m) dv.files[m[1]]={fid:f.id,mtime:f.modifiedTime,ver:+((f.appProperties||{}).ver||0)}; });
+  return dv.files;
+}
+async function driveLoad(pid){
+  const f=dv.files[pid]; if(!f) return null;
+  const r=await dvFetch(DRIVE_API+'/files/'+f.fid+'?alt=media');
+  return await r.json();
+}
+async function driveWrite(pid,pl){
+  const f=dv.files[pid];
+  const meta={name:'sim-'+pid+'.json',mimeType:'application/json',appProperties:{ver:String(pl.version),schema:String(SCHEMA_VER)}};
+  if(!f) meta.parents=['appDataFolder'];
+  const bnd='-------bagrut'+Date.now();
+  const body='--'+bnd+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(meta)+
+    '\r\n--'+bnd+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(pl)+'\r\n--'+bnd+'--';
+  const url=DRIVE_UP+'/files'+(f?('/'+f.fid):'')+'?uploadType=multipart&fields=id,modifiedTime,appProperties';
+  const r=await dvFetch(url,{method:f?'PATCH':'POST',headers:{'Content-Type':'multipart/related; boundary='+bnd},body});
+  const j=await r.json();
+  dv.files[pid]={fid:j.id,mtime:j.modifiedTime,ver:pl.version};
+  return j;
+}
+
+/* ---- סנכרון ---- */
+function localVer(pid){ return +(LS.getItem('bagrutDvVer:'+pid)||0); }
+function setLocalVer(pid,v){ LS.setItem('bagrutDvVer:'+pid,String(v)); }
+function markDirty(pid){ dv.queue[pid]=true; LS.setItem('bagrutDvQueue',JSON.stringify(Object.keys(dv.queue))); }
+function clearDirty(pid){ delete dv.queue[pid]; LS.setItem('bagrutDvQueue',JSON.stringify(Object.keys(dv.queue))); }
+function loadQueue(){ try{ (JSON.parse(LS.getItem('bagrutDvQueue')||'[]')||[]).forEach(id=>dv.queue[id]=true); }catch(e){} }
+function dvStatus(){
+  if(!driveEnabled()) return 'off';
+  if(!dv.on) return 'nodrive';
+  if(!navigator.onLine) return 'offline';
+  if(dv.busy) return 'saving';
+  if(Object.keys(dv.queue).length) return 'local';
+  if(dv.state==='conflict') return 'conflict';
+  if(dv.state==='error') return 'error';
+  return 'synced';
+}
+let dvTimer=null;
+function queueDriveSave(pid){
+  pid=pid||currentProfileId;
+  markDirty(pid); renderSyncInd();
+  if(!dv.on||!driveEnabled()) return;
+  clearTimeout(dvTimer);
+  dvTimer=setTimeout(()=>driveSave(pid),4000);          // 4 שניות — לא 500ms
+}
+async function driveSave(pid,force){
+  if(!dv.on||!driveEnabled()) return;
+  if(!navigator.onLine){ renderSyncInd(); return; }
+  const stt=(pid===currentProfileId)?state:loadProfileState(pid);
+  if(!stt) return;
+  const nextVer=localVer(pid)+1;
+  const pl=syncPayload(pid,stt,nextVer);
+  const sig=payloadSig(pl);
+  if(!force&&dv.sig[pid]===sig){ clearDirty(pid); renderSyncInd(); return; }   // אין שינוי אמיתי
+  dv.busy=true; renderSyncInd();
+  try{
+    if(!dv.files[pid]) await driveIndex();
+    const remote=dv.files[pid];
+    if(remote&&remote.ver>localVer(pid)){                                       // מישהו אחר הקדים
+      dv.busy=false; dv.state='conflict'; renderSyncInd();
+      driveConflict(pid); return;
+    }
+    await driveWrite(pid,pl);
+    setLocalVer(pid,nextVer); dv.sig[pid]=sig; clearDirty(pid);
+    dv.lastSync=Date.now(); dv.state='synced'; dv.lastErr='';
+    LS.setItem('bagrutDvLast',String(dv.lastSync));
+  }catch(e){
+    dv.state='error'; dv.lastErr=e.message;                                     // נשאר בתור
+  }
+  dv.busy=false; renderSyncInd();
+}
+async function driveSyncAll(initial){
+  if(!dv.on||!driveEnabled()) return;
+  dv.busy=true; renderSyncInd();
+  try{
+    await driveIndex();
+    for(const pid of Object.keys(dv.files)){
+      const rv=dv.files[pid].ver, lv=localVer(pid);
+      const dirty=!!dv.queue[pid];
+      if(rv>lv&&!dirty){                                                        // הדרייב חדש והמקומי נקי
+        const pl=await driveLoad(pid);
+        if(pl&&+pl.schemaVer>SCHEMA_VER){ dv.state='error'; dv.lastErr='הקובץ בדרייב נשמר בגרסה חדשה יותר של התוכנה — יש לעדכן'; continue; }
+        if(pl) driveApplyRemote(pid,pl,rv);
+      }else if(rv>lv&&dirty){ dv.state='conflict'; driveConflict(pid); }
+    }
+    for(const pid of Object.keys(dv.queue)) await driveSave(pid);
+    if(dv.state!=='conflict'&&dv.state!=='error'){ dv.state='synced'; dv.lastSync=Date.now(); LS.setItem('bagrutDvLast',String(dv.lastSync)); }
+  }catch(e){ dv.state='error'; dv.lastErr=e.message; }
+  dv.busy=false; renderSyncInd(); if(initial) render();
+}
+function driveApplyRemote(pid,pl,rv){
+  const cur=(pid===currentProfileId)?state:loadProfileState(pid);
+  const merged=applyPayload(cur,pl);
+  if(pid===currentProfileId){ state=merged; save(true); }
+  else saveProfileState(pid,merged);
+  const pr=profiles.find(p=>p.id===pid);
+  if(pr&&pl.name&&pr.name!==pl.name){ pr.name=pl.name; saveProfiles(); }
+  setLocalVer(pid,rv); dv.sig[pid]=payloadSig(pl);
+}
+
+/* ---- מיזוג ברמת המפתח ----
+   שני מכשירים שערכו מקצועות שונים יתמזגו לבד. שאלה נשאלת רק על אותו ציון בדיוק. */
+function mergeStates(mine,theirs,base){
+  base=base||{};
+  const out=JSON.parse(JSON.stringify(theirs));
+  const clash=[];
+  const byId=o=>{ const m={}; ((o&&o.students)||[]).forEach(s=>m[s.id]=s); return m; };
+  const M=byId(mine), T=byId(theirs), B=byId(base);
+  // תלמידות שנוספו רק אצלי
+  Object.keys(M).forEach(id=>{ if(!T[id]&&!B[id]) out.students.push(JSON.parse(JSON.stringify(M[id]))); });
+  const O=byId(out);
+  Object.keys(M).forEach(id=>{
+    const m=M[id], t=O[id], b=B[id]||{};
+    if(!t) return;
+    ['grades','gstat','codes','notes','ov','units','mugbarNames','shw','hid'].forEach(fld=>{
+      const mm=m[fld]||{}, tt=t[fld]||{}, bb=b[fld]||{};
+      t[fld]=t[fld]||{};
+      Object.keys(mm).forEach(k=>{
+        const a=mm[k], c=tt[k], z=bb[k];
+        if(JSON.stringify(a)===JSON.stringify(c)) return;               // זהה
+        if(JSON.stringify(c)===JSON.stringify(z)) { t[fld][k]=a; return; } // רק אני שיניתי
+        if(JSON.stringify(a)===JSON.stringify(z)) return;                  // רק הם שינו
+        clash.push({id,name:m.name,fld,key:k,mine:a,theirs:c});            // שניים שינו
+      });
+      Object.keys(bb).forEach(k=>{ if(!(k in mm)&&(k in tt)&&JSON.stringify(tt[k])===JSON.stringify(bb[k])) delete t[fld][k]; }); // מחקתי
+    });
+  });
+  // כיתות — איחוד
+  out.classes=[...new Set([...(theirs.classes||[]),...(mine.classes||[])])];
+  return {merged:out,clash};
+}
+let cf={pid:'',mine:null,theirs:null,pl:null,clash:[],pick:{}};
+async function driveConflict(pid){
+  try{
+    const pl=await driveLoad(pid); if(!pl) return;
+    const mine=loadProfileState(pid);
+    autoSnapshot(true);
+    const res=mergeStates(mine,applyPayload(mine,pl),null);
+    cf={pid,mine,theirs:pl.state,pl,clash:res.clash,pick:{},merged:res.merged};
+    if(!res.clash.length){ driveResolve('merge'); return; }                 // מיזוג שקט
+    renderConflict();
+    document.getElementById('cfModal').classList.add('show');
+  }catch(e){ dv.state='error'; dv.lastErr=e.message; renderSyncInd(); }
+}
+function renderConflict(){
+  const box=document.getElementById('cfBox'); if(!box) return;
+  const t=new Date(cf.pl.savedAt||Date.now()).toLocaleString('he-IL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+  const lbl={grades:'ציון',gstat:'סימון צבע',codes:'סמל שאלון',notes:'הערה',ov:'התאמה אישית',units:'יח"ל',mugbarNames:'שם מקצוע'};
+  box.innerHTML=`
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+    <h2 class="sec" style="margin:0;">${ic('layers',18)}אותם נתונים נערכו בשני מכשירים</h2>
+    <button class="btn sec sm" onclick="document.getElementById('cfModal').classList.remove('show')">${ic('x',14)}סגירה</button>
+  </div>
+  <div class="lossBox" style="margin:0 0 10px;">
+    <div class="lossHead">${ic('shield',15)}<span>אף נתון לא יימחק</span></div>
+    <div style="font-size:12.5px; line-height:1.7;">מ<b>${esc(cf.pl.device||'מכשיר אחר')}</b> נשמרה גרסה ב-${t}.
+      כל מה שלא התנגש <b>מוזג אוטומטית</b>. נותרו <b>${cf.clash.length}</b> מקומות שבהם אותו נתון בדיוק שונה בשני המכשירים —
+      בחרי בכל אחד. נקודת שמירה של הגרסה שלך נוצרה כבר.</div>
+    <button class="btn sec sm" style="margin-top:8px;" onclick="exportJSON()">${ic('down',13)}הורדת הגרסה שלי כקובץ</button>
+  </div>
+  <div class="scroll" style="max-height:44vh;"><table class="tbl"><thead><tr>
+    <th>תלמידה</th><th>מה</th><th>הגרסה שלי</th><th>מ${esc(cf.pl.device||'מכשיר אחר')}</th><th>בחירה</th></tr></thead><tbody>
+  ${cf.clash.map((c,i)=>`<tr>
+    <td style="font-weight:700;">${esc(c.name||'')}</td>
+    <td>${esc(lbl[c.fld]||c.fld)}<br><small class="note">${esc(clashLabel(c))}</small></td>
+    <td class="${cf.pick[i]==='mine'?'g-red':''}" style="font-weight:800;">${esc(String(c.mine??'—'))}</td>
+    <td class="${cf.pick[i]==='theirs'?'g-red':''}" style="font-weight:800;">${esc(String(c.theirs??'—'))}</td>
+    <td><button class="btn ${cf.pick[i]==='mine'?'ok':'sec'} sm" onclick="cfPick(${i},'mine')">שלי</button>
+        <button class="btn ${cf.pick[i]==='theirs'?'ok':'sec'} sm" onclick="cfPick(${i},'theirs')">שלהם</button></td>
+  </tr>`).join('')}
+  </tbody></table></div>
+  <div class="toolbar" style="margin-top:10px;">
+    <button class="btn sec sm" onclick="cfAll('mine')">הכול שלי</button>
+    <button class="btn sec sm" onclick="cfAll('theirs')">הכול שלהם</button>
+    <button class="btn ok" style="margin-inline-start:auto;" onclick="driveResolve('merge')">${ic('check',14)}סיום ומיזוג (${Object.keys(cf.pick).length}/${cf.clash.length})</button>
+  </div>`;
+}
+function clashLabel(c){
+  const p=String(c.key).split('.');
+  const sj=SUBJ_MAP[p[0]]; if(!sj) return c.key;
+  const u=sj.opts[sj.opts.length-1];
+  const cmp=(sj.comps(u)[+p[1]]||{}).n||'';
+  const part=p[2]==='m'?'מגן':p[2]==='e'?'בחינה':'';
+  return [sj.name,cmp,part].filter(Boolean).join(' · ');
+}
+function cfPick(i,which){ cf.pick[i]=which; renderConflict(); }
+function cfAll(which){ cf.clash.forEach((c,i)=>cf.pick[i]=which); renderConflict(); }
+async function driveResolve(){
+  const out=cf.merged;
+  cf.clash.forEach((c,i)=>{
+    if((cf.pick[i]||'theirs')==='mine'){
+      const s=(out.students||[]).find(x=>x.id===c.id);
+      if(s){ s[c.fld]=s[c.fld]||{}; s[c.fld][c.key]=c.mine; }
+    }
+  });
+  pushUndo('מיזוג מהדרייב');
+  saveProfileState(cf.pid,out);
+  setLocalVer(cf.pid,(dv.files[cf.pid]||{}).ver||localVer(cf.pid));
+  clearDirty(cf.pid); dv.state='saving';
+  const el=document.getElementById('cfModal'); if(el) el.classList.remove('show');
+  render();
+  await driveSave(cf.pid,true);
+  toast('הנתונים מוזגו וסונכרנו');
+}
+
+/* ---- חיווי ---- */
+const DVS={ off:{t:'',c:''}, nodrive:{t:'לא מחובר לדרייב',c:'dvOff'}, local:{t:'נשמר במכשיר',c:'dvLocal'},
+  saving:{t:'מסנכרן…',c:'dvSaving'}, synced:{t:'מסונכרן',c:'dvOk'},
+  offline:{t:'אין אינטרנט — ממתין',c:'dvWarn'}, conflict:{t:'גרסה חדשה ממכשיר אחר',c:'dvWarn'},
+  error:{t:'הסנכרון נכשל',c:'dvBad'} };
+function renderSyncInd(){
+  const el=document.getElementById('syncInd'); if(!el) return;
+  const s=dvStatus();
+  if(s==='off'){ el.style.display='none'; return; }
+  const d=DVS[s]||DVS.nodrive;
+  el.style.display='inline-flex'; el.className='syncInd '+d.c;
+  el.title=dv.lastErr||d.t;
+  el.innerHTML=`${ic(s==='synced'?'check':s==='saving'?'refresh':s==='nodrive'?'folder':'warn',13)}<span class="hide-sm">${d.t}</span>`;
+  el.onclick=()=>{ if(!dv.on) setTab('settings'); else driveSyncAll(); };
+}
+function driveInfoDlg(){
+  infoDlg('סנכרון בין מכשירים — טרם הוגדר',
+    'הסנכרון דרך Google Drive מוכן בקוד, אבל דורש מזהה לקוח מ-Google Cloud.\n\n'+
+    'עד שהוא יוגדר, התוכנה עובדת בדיוק כמו קודם: הנתונים נשמרים בדפדפן של המכשיר הזה, והגיבוי לקובץ פועל כרגיל.\n\n'+
+    'חשוב לדעת: גם אחרי ההגדרה, הנתונים נשמרים בחשבון הדרייב שלך בתיקייה נסתרת של האפליקציה. ספק התוכנה אינו מחזיק ואינו רואה אותם.');
+}
+function drivePanelHtml(){
+  const s=dvStatus();
+  const last=+(LS.getItem('bagrutDvLast')||0);
+  const lastTxt=last?new Date(last).toLocaleString('he-IL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'טרם סונכרן';
+  if(!driveEnabled()) return `<div class="note">הסנכרון מוכן בקוד אך טרם הוגדר מזהה לקוח של Google.
+    התוכנה עובדת מקומית כרגיל. <button class="btn sec sm" onclick="driveInfoDlg()">${ic('info',13)}מה זה אומר</button></div>`;
+  const qn=Object.keys(dv.queue).length;
+  return `<div class="toolbar" style="margin-bottom:6px;">
+    <span class="badge ${s==='synced'?'b-ok':s==='error'?'b-bad':'b-warn'}">${(DVS[s]||{}).t||''}</span>
+    ${dv.on?`<button class="btn sm" onclick="driveSyncAll()">${ic('refresh',13)}סנכרן עכשיו</button>
+      <button class="btn dz sm" onclick="driveDisconnect()">${ic('x',13)}ניתוק החשבון</button>`
+     :`<button class="btn ok sm" onclick="driveConnect()">${ic('folder',13)}חיבור לגוגל דרייב</button>`}
+  </div>
+  <div class="gRow"><label>שם המכשיר</label><input type="text" value="${esc(driveName())}" onchange="setDriveName(this.value)"></div>
+  <div class="note">סנכרון אחרון: ${esc(lastTxt)}${qn?` · <b>${qn} ממתינים</b>`:''}${dv.lastErr?` · <span class="g-red">${esc(dv.lastErr)}</span>`:''}<br>
+    הנתונים נשמרים בתיקייה <b>נסתרת של האפליקציה</b> בדרייב שלך. לתוכנה אין גישה לשום קובץ אחר, ולספק אין גישה כלל.
+    שכבת הסימולציה, הלוגו ונקודות השמירה נשארים מקומיים ואינם מסתנכרנים.</div>`;
 }
 
 /* ============ מצב שמירה ============ */
@@ -6381,6 +6799,21 @@ if(!state.wizDone&&!isLocked()&&STORAGE_OK) setTimeout(openWizard,600);
 fileInit();
 updAutoInit();
 licRefresh(); trialSyncIdb();
+// סנכרון דרייב — רק אם הוגדר מזהה לקוח והמשתמשת חיברה בעבר
+loadQueue(); renderSyncInd();
+if(driveEnabled()){
+  driveSilent().then(ok=>{ renderSyncInd(); if(ok) driveSyncAll(true); });
+  window.addEventListener('online',()=>{ renderSyncInd(); if(dv.on) driveSyncAll(); });
+  window.addEventListener('offline',()=>renderSyncInd());
+  // חזרה לפוקוס: בודקים גרסה בלבד. לא טוענים כשהמקומי מלוכלך — באייפון זה
+  // האירוע הנפוץ ביותר, וטעינה עיוורת היא הדרך הבטוחה לאבד עבודה.
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState!=='visible'||!dv.on) return;
+    if(Date.now()-dv.lastSync<45000) return;
+    driveSyncAll();
+  });
+  window.addEventListener('beforeunload',()=>{ if(Object.keys(dv.queue).length) driveSave(currentProfileId,true); });
+}
 // סרגל ההזנה מתכווץ בגלילה כדי לפנות גובה לטבלה
 (function(){ let last=false;
   window.addEventListener('scroll',()=>{ const on=window.scrollY>90;
