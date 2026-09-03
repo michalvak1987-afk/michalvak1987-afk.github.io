@@ -432,7 +432,7 @@ table.tbl.grades td{padding:7px 6px;}
 .gcell input[type=number]{width:64px; height:34px; text-align:center; border-radius:10px; font-size:15px;}
 .gcell+.gcell{margin-top:5px; padding-top:5px; border-top:1px dashed #e6eaf4;}
 /* מסך מלא לטבלה */
-.card.tblfull{position:fixed; inset:0; padding-top:calc(14px + env(safe-area-inset-top)); z-index:420; margin:0; border-radius:0; max-width:none; overflow:auto;
+.card.tblfull{position:fixed; inset:0; padding-top:calc(10px + env(safe-area-inset-top)); z-index:420; margin:0; border-radius:0; max-width:none; overflow:auto;
   background:rgba(255,255,255,.99); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); animation:none; box-shadow:none;}
 .card.tblfull .scroll{max-height:calc(100dvh - 120px) !important; max-height:calc(100vh - 120px);}
 /* תצוגה צפופה — יותר תלמידות במסך */
@@ -678,8 +678,10 @@ select.fSel.on{border-color:var(--brand); background:#eef2ff; color:#3730a3; box
 /* --- micro-interactions: קצר, 120-250ms, בלי קפיצות --- */
 button.btn,.hbtn,.schip,.setCard,.hero .hIco{transition:transform var(--t-fast) var(--ease), box-shadow var(--t-base) var(--ease), background var(--t-base) var(--ease), border-color var(--t-base) var(--ease);}
 button.btn:active,.hbtn:active{transform:translateY(1px) scale(.985);}
-@keyframes tabIn{from{opacity:0; transform:translateY(5px);}to{opacity:1; transform:none;}}
-#main.tabbing{animation:tabIn var(--t-slow) var(--ease) both;}
+/* חשוב: בלי transform! אלמנט שמנפיש transform יוצר containing block,
+   ואז position:fixed של "מסך מלא" נתלה ב-#main במקום בחלון — והטבלה נעלמת. */
+@keyframes tabIn{from{opacity:.35;}to{opacity:1;}}
+#main.tabbing{animation:tabIn var(--t-base) var(--ease);}
 @keyframes okPop{0%{transform:scale(.4); opacity:0;}60%{transform:scale(1.12); opacity:1;}100%{transform:scale(1); opacity:1;}}
 .okMark{display:inline-flex; animation:okPop var(--t-slow) var(--ease) both;}
 @media (prefers-reduced-motion:reduce){
@@ -864,8 +866,9 @@ table.tbl.grades tbody tr:focus-within td:first-child{background:#eaf0ff;}
 @media(max-width:820px){.wzStep i{display:none;} .wzStep.now i{display:inline;} .wzT2.tot{margin-inline-start:0;}}
 /* --- מסך מלא: הכרטיס עמודת flex, אזור הגלילה תופס את מה שנשאר.
        כך הטבלה לא יכולה "להיעלם" בגלל גובה שהתמוטט או גלילה שנשארה. --- */
-.card.tblfull{display:flex; flex-direction:column; overflow:hidden;}
-.card.tblfull>.scroll{flex:1 1 auto; min-height:0; max-height:none !important; overflow:auto;}
+.card.tblfull{display:flex; flex-direction:column; overflow:hidden;
+  height:100dvh; height:100vh;}                    /* גובה מפורש — לא תלוי ב-inset בלבד */
+.card.tblfull>.scroll{flex:1 1 auto; min-height:180px; max-height:none !important; overflow:auto;}
 .card.tblfull .fltBar,.card.tblfull .fsBar{flex:0 0 auto;}
 .fsBar{display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:9px;}
 .fsBar .fsT{font-family:var(--font-head,'Rubik'),sans-serif; font-size:15px; font-weight:800; color:var(--ink);}
@@ -885,6 +888,96 @@ table.tbl.grades tbody tr:focus-within td:first-child{background:#eaf0ff;}
 .dense .badge{font-size:10px; padding:1px 6px;}
 .dense .gstatDot{width:9px; height:9px;}
 .dense button.rowCode{display:none;}
+/* ============ שלב 6 — סימולציה. השפה הכתומה נשמרת במלואה. ============ */
+.simHero{display:flex; align-items:center; gap:14px; padding:11px 18px; margin-bottom:10px;
+  background:linear-gradient(120deg,rgba(245,158,11,.10),rgba(245,158,11,.04) 60%,rgba(255,255,255,0));
+  border:1px solid #fde68a; border-inline-start:4px solid var(--warn); border-radius:var(--r-lg); box-shadow:var(--el1); color:var(--warn);}
+.simHero .simIco{background:linear-gradient(140deg,#d97706,#f59e0b); box-shadow:0 4px 14px rgba(217,119,6,.3);}
+.simHero .hT{color:var(--ink);} .simHero .hS{color:#7c4a06;}
+.simHero .hArt{color:var(--warn); opacity:.4;}
+.simCnt{display:inline-flex; align-items:center; font-size:11.5px; font-weight:800; padding:4px 11px; border-radius:var(--r-pill);
+  background:var(--soft); color:var(--muted); border:var(--hair); white-space:nowrap;}
+.simCnt.on{background:#fff7ed; border-color:var(--warn); color:#b45309;}
+/* --- שלושת המצבים --- */
+.triState{display:flex; align-items:stretch; gap:8px; margin-bottom:12px; flex-wrap:wrap;}
+.triState>svg{align-self:center; stroke:var(--muted); opacity:.5; flex:0 0 auto;}
+.tsBox{flex:1 1 190px; display:flex; flex-direction:column; gap:2px; padding:9px 13px; border-radius:var(--r-md);
+  border:var(--hair); background:rgba(255,255,255,.65); min-width:0;}
+.tsBox>svg{stroke:currentColor;}
+.tsBox b{font-family:var(--font-head,'Rubik'),sans-serif; font-size:13px; font-weight:800; color:var(--ink);}
+.tsBox i{font-style:normal; font-size:11px; font-weight:600; color:var(--muted);}
+.tsBox.real{border-color:#a7f3d0; background:#f6fffb; color:var(--ok);}
+.tsBox.sim{border-color:#fcd34d; background:#fffdf5; color:var(--warn);}
+.tsBox.imp{border-color:#c7d2fe; background:#f7f8ff; color:var(--brand);}
+@media(max-width:820px){.triState>svg{display:none;} .tsBox{flex-basis:100%;}}
+/* --- כרטיסי תרחיש --- */
+.preGrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:8px;}
+.preCard{display:flex; flex-direction:column; align-items:flex-start; gap:2px; text-align:right; cursor:pointer;
+  font-family:inherit; padding:10px 12px; border-radius:var(--r-md); border:1.5px solid var(--line); background:#fff;
+  transition:border-color var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease), transform var(--t-fast) var(--ease);}
+.preCard:hover{border-color:var(--warn); box-shadow:var(--el1); transform:translateY(-1px);}
+.preCard.on{border-color:var(--warn); background:#fffdf5; box-shadow:0 0 0 2px rgba(245,158,11,.16);}
+.preCard .preT{display:flex; align-items:center; gap:6px; font-family:var(--font-head,'Rubik'),sans-serif; font-size:13px; font-weight:800; color:var(--ink);}
+.preCard .preS{font-size:11px; font-weight:600; color:var(--muted); line-height:1.4;}
+.preRec{font-size:9.5px; font-weight:800; padding:1px 6px; border-radius:var(--r-pill); background:#fff7ed; color:#b45309; border:1px solid #fcd34d;}
+/* --- השוואה עם חצים ותגי דלתא --- */
+.cmp{display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap;}
+.cmp>svg{stroke:var(--muted); opacity:.55; flex:0 0 auto;}
+.cmpA{font-family:var(--font-num,'Rubik'),sans-serif; font-weight:700; color:var(--muted);}
+.cmpB{font-family:var(--font-num,'Rubik'),sans-serif; font-weight:800; font-size:14.5px; color:var(--ink);}
+.cmpB.up{color:var(--ok);} .cmpB.dn{color:#b0335a;}
+.dBadge{font-size:10.5px; font-weight:800; padding:1px 7px; border-radius:var(--r-pill); white-space:nowrap;}
+.dBadge.up{background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0;}
+.dBadge.dn{background:#fff1f4; color:#9f1239; border:1px solid #f3bfcb;}
+.kpi .kd{font-size:11px; font-weight:800; margin-inline-start:5px; padding:0 5px; border-radius:var(--r-pill); background:rgba(255,255,255,.24);}
+/* ============ שלב 6 — Control Center להתראות ============
+   הצבעים הקיימים בלבד. חומרה מקבלת בולטות דרך פריסה — קו צד עבה, לא צבע חדש. */
+.alGrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(196px,1fr)); gap:9px; margin-bottom:12px;}
+.alCard{display:flex; align-items:center; gap:11px; text-align:right; cursor:pointer; font-family:inherit;
+  padding:11px 13px; border-radius:var(--r-md); border:1px solid var(--line); background:rgba(255,255,255,.72);
+  border-inline-start:4px solid var(--line);
+  transition:border-color var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease), transform var(--t-fast) var(--ease);}
+.alCard:hover{box-shadow:var(--el2); transform:translateY(-1px);}
+.alCard .alIco{flex:0 0 auto; width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+  background:var(--soft); color:var(--muted);}
+.alCard .alIco svg{stroke:currentColor;}
+.alCard .alTxt{display:flex; flex-direction:column; min-width:0;}
+.alCard .alN{font-family:var(--font-num,'Rubik'),sans-serif; font-size:21px; font-weight:800; line-height:1.05; color:var(--ink);}
+.alCard .alL{font-size:12px; font-weight:800; color:var(--ink); line-height:1.25;}
+.alCard .alS{font-size:10.5px; font-weight:600; color:var(--muted);}
+.alCard.bad{border-inline-start-color:#b0335a;} .alCard.bad .alIco{background:#fff1f4; color:#9f1239;}
+.alCard.warn{border-inline-start-color:var(--warn);} .alCard.warn .alIco{background:#fffbeb; color:#92400e;}
+.alCard.pot{border-inline-start-color:var(--brand2);} .alCard.pot .alIco{background:#f5f3ff; color:#6d28d9;}
+.alCard.miss{border-inline-start-color:#94a3b8;} .alCard.miss .alIco{background:var(--soft); color:#64748b;}
+.alCard.on{background:#fff; box-shadow:0 0 0 2px rgba(79,70,229,.18), var(--el1);}
+/* חומרה = בולטות בפריסה */
+.alRow.sev-bad td:first-child{box-shadow:inset 3px 0 0 #b0335a;}
+.alRow.sev-warn td:first-child{box-shadow:inset 3px 0 0 var(--warn);}
+.alGo{white-space:nowrap; margin-top:6px;}
+/* --- תצוגת כרטיסים: אותו רינדור, פריסה אחרת --- */
+.alCardsOn .alTable,.alCardsOn .alTable tbody,.alCardsOn .alTable tr,.alCardsOn .alTable td{display:block; width:auto;}
+.alCardsOn .alTable thead{display:none;}
+.alCardsOn .alTable tr{border:var(--hair); border-inline-start-width:4px; border-radius:var(--r-md); padding:10px 12px; margin-bottom:8px; background:rgba(255,255,255,.7);}
+.alCardsOn .alTable tr.sev-bad{border-inline-start-color:#b0335a;}
+.alCardsOn .alTable tr.sev-warn{border-inline-start-color:var(--warn);}
+.alCardsOn .alTable tr.sev-low{border-inline-start-color:#c7d2fe;}
+.alCardsOn .alTable td{border:0; padding:2px 0;}
+.alCardsOn .alTable tr.alRow td:first-child{box-shadow:none;}
+.alCardsOn .alTable td:nth-child(2){font-size:17px; font-weight:800;}
+@media(max-width:820px){
+  .alTable,.alTable tbody,.alTable tr,.alTable td{display:block; width:auto;}
+  .alTable thead{display:none;}
+  .alTable tr{border:var(--hair); border-inline-start-width:4px; border-radius:var(--r-md); padding:10px 12px; margin-bottom:8px; background:rgba(255,255,255,.7);}
+  .alTable tr.sev-bad{border-inline-start-color:#b0335a;} .alTable tr.sev-warn{border-inline-start-color:var(--warn);}
+  .alTable td{border:0; padding:2px 0;} .alTable tr.alRow td:first-child{box-shadow:none;}
+  .alGrid{grid-template-columns:repeat(2,1fr);}
+}
+/* --- תצוגה צפופה בטבלת התלמידות --- */
+.dense table.tbl td{padding:3px 6px;}
+.dense .stName{gap:6px;}
+.dense table.tbl select{height:26px; font-size:12px; padding:2px 7px;}
+.dense button.btn.sm{padding:3px 8px; font-size:11.5px;}
+.dense button.btn.xq{padding:3px 5px;}
 </style>
 </head>
 <body>
@@ -2617,7 +2710,8 @@ function cmdGo(i){
   else if(x.t==='subj'){ entrySubj=x.id; setTab('entry'); }
 }
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'&&(entryFull||simFull)){ e.preventDefault(); if(entryFull) toggleEntryFull(); else toggleSimFull(); return; }
+  if(e.key==='Escape'&&(entryFull||simFull||stFull)){ e.preventDefault();
+    if(entryFull) toggleEntryFull(); else if(simFull) toggleSimFull(); else toggleStFull(); return; }
   if((e.ctrlKey||e.metaKey)&&(e.key==='k'||e.key==='K')){ e.preventDefault(); openCmd(); }
 });
 
@@ -2681,13 +2775,14 @@ function renderTabs(){
 /* ============ ניווט ============ */
 let currentTab='dash', charts={};
 function setTab(t){
-  if((simFull&&t!=='sim')||(entryFull&&t!=='entry')){ simFull=false; entryFull=false; document.body.style.overflow=''; }
+  if((simFull&&t!=='sim')||(entryFull&&t!=='entry')||(stFull&&t!=='students')){ simFull=false; entryFull=false; stFull=false; document.body.style.overflow=''; }
   currentTab=t;
   renderTabs();
   render();
   // מעבר עדין וקצר בין מסכים (מכובה אוטומטית אם המשתמש ביקש פחות אנימציות)
   const m=document.getElementById('main');
-  if(m){ m.classList.remove('tabbing'); void m.offsetWidth; m.classList.add('tabbing'); }
+  if(m){ m.classList.remove('tabbing'); void m.offsetWidth; m.classList.add('tabbing');
+    setTimeout(()=>m.classList.remove('tabbing'),240); }   // לא משאירים מחלקת אנימציה תלויה
 }
 // רינדור שמשמר את מיקום הגלילה, השדה הפעיל ומיקום הסמן — כדי שלא נקפוץ לראש הרשימה
 function renderKeepScroll(){
@@ -2725,9 +2820,9 @@ function render(){
 function classFilterHtml(id,val){
   return `<select id="${id}" onchange="renderKeepScroll()"><option value="">כל השכבה</option>${state.classes.map(c=>`<option ${val===c?'selected':''}>${c}</option>`).join('')}</select>`;
 }
-let alertFilter='all';
+let alertFilter='all', alertCards=false;   // כרטיסים/טבלה — מסלול רינדור אחד, בחירה אחת
 const alertMore=new Set();   // תלמידות שהמקצועות החסרים שלהן פתוחים במלואם
-let dashClass='', entryClass='', entrySubj='lashon', reportClass='', alertClass='', entryFull=false, entryDense=false;
+let dashClass='', entryClass='', entrySubj='lashon', reportClass='', alertClass='', entryFull=false, entryDense=false, stFull=false, stDense=false;
 function filteredStudents(cls){
   return state.students.filter(s=>!cls||s.cls===cls);
 }
@@ -2995,8 +3090,14 @@ function renderStudents(m){
     </div>
   </div>
   ${dupBanner()}
-  <div class="card" style="margin-top:14px;">
-    ${secHead('users2',`כל התלמידות · ${state.students.length}`,'לחיצה על שם פותחת את כרטיס התלמידה')}
+  <div class="card ${stFull?'tblfull':''} ${stDense?'dense':''}" id="stCard" style="margin-top:14px;">
+    ${stFull?`<div class="fsBar">
+      <span class="fsT">${ic('users2',16)} כל התלמידות · ${state.students.length}</span>
+      <button class="btn sec sm" onclick="stDense=!stDense;renderKeepScroll()">${ic(stDense?'expand':'layers',13)}${stDense?'רגיל':'צפוף'}</button>
+      <button class="btn warn sm fsX" onclick="toggleStFull()">${ic('x',14)}יציאה ממסך מלא <kbd>Esc</kbd></button>
+    </div>`:`${secHead('users2',`כל התלמידות · ${state.students.length}`,'לחיצה על שם פותחת את כרטיס התלמידה',
+      `<button class="btn sec sm" onclick="stDense=!stDense;renderKeepScroll()">${ic(stDense?'expand':'layers',13)}${stDense?'רגיל':'צפוף'}</button>
+       <button class="btn sec sm" onclick="toggleStFull()">${ic('expand',13)}מסך מלא</button>`)}`}
     <div class="scroll">${allStudentsTable()}</div>
   </div>
   ${nAll?classSummary():''}`;
@@ -4023,6 +4124,12 @@ function applyEntryColor(){
 
 /* ============ סימולציה — סביבה עצמאית שלא נוגעת בציונים האמיתיים ============ */
 let simSplit='', simPredict=false, simBonus=0, simClass='', simSubj='lashon', simFull=false, simDense=false, calcOn=false;
+function toggleStFull(){
+  stFull=!stFull;
+  document.body.style.overflow=stFull?'hidden':'';
+  render();
+  fsReset('stCard');
+}
 function toggleEntryFull(){
   entryFull=!entryFull;
   document.body.style.overflow=entryFull?'hidden':'';
@@ -4047,6 +4154,35 @@ function toggleSimFull(){
   if(simFull) setTimeout(()=>{ const c=document.getElementById('simCard'); if(c) c.scrollTop=0; },50);
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&(simFull||entryFull)){ simFull=false; entryFull=false; document.body.style.overflow=''; render(); } });
+/* ============ כרטיסי תרחיש ============
+   הערה: המדידה בנתונים אמיתיים מראה שהבחינה נמוכה מהמגן באופן שיטתי.
+   לכן אין כאן תרחיש שנקרא "אופטימי" — הכינויים מתארים מה התרחיש עושה,
+   והפער המדוד מוצג על הכרטיס כדי שההחלטה תהיה מיודעת. */
+// כרטיס KPI לסימולציה: המספר בתרחיש, הדלתא, והמצב האמיתי מתחת
+function simKpi(k,icon,label,base,sim){
+  const d=sim-base;
+  return `<div class="kpi ${k}">
+    <div class="ico">${ic(icon,24)}</div>
+    <div class="txt">
+      <div class="n" data-to="${sim}">0</div>
+      <div class="t">${label}${d?`<span class="kd ${d>0?'up':'dn'}">${d>0?'▲+'+d:'▼'+Math.abs(d)}</span>`:''}</div>
+      <div class="ks">במצב האמיתי: ${base}</div>
+    </div></div>`;
+}
+function predPresets(){
+  const lv=state.predLevel;
+  const g=autoGap(simSubj); const gapTxt=(g===null)?'טרם נמדד':((g>0?'+':'')+Math.round(g*10)/10+' נק׳');
+  return [
+    {t:'כיול לפי הנתונים שלכם',s:`הפער המדוד במקצוע הנבחר: ${gapTxt}`,on:lv==='auto',rec:true,
+     go:`simPredict=true;state.predLevel='auto';save();renderKeepScroll()`},
+    {t:'בחינה = מגן',s:'בלי פער. מציג את התקרה, לא את הצפוי',on:lv===0,
+     go:`simPredict=true;state.predLevel=0;save();renderKeepScroll()`},
+    {t:'מגן פחות 5',s:'הנחה מתונה של ירידה בבחינה',on:lv===-5,
+     go:`simPredict=true;state.predLevel=-5;save();renderKeepScroll()`},
+    {t:'מגן פחות 10',s:'הנחה זהירה — לתכנון מול מקרה גרוע',on:lv===-10,
+     go:`simPredict=true;state.predLevel=-10;save();renderKeepScroll()`}
+  ];
+}
 function renderSim(m){
   const opts={split:simSplit===''?null:+simSplit, predict:simPredict, bonus:+simBonus, sim:true};
   const simSubj=null;                                            // הסימולציה חוצה מקצועות
@@ -4068,20 +4204,35 @@ function renderSim(m){
   const nSim=simCount();
   const simSubjObj=SUBJ_MAP[simSubj]||SUBJECTS[0];
   m.innerHTML=`
-  <div class="card" style="margin-bottom:14px; background:linear-gradient(135deg,#fffbeb,#fff); border:2px solid #f59e0b;">
-    <h2 class="sec">🧪 סימולציה — איך זה עובד? פשוט:</h2>
-    <div style="font-size:13.5px; line-height:1.8;">
-      <b>1.</b> הטבלה למטה היא <b>העתק ניסוי</b> של הציונים האמיתיים — שני בה מה שתרצי. כל שינוי נצבע <span style="background:#fff7ed; border:1px solid #f59e0b; color:#b45309; padding:1px 6px; border-radius:6px; font-weight:700;">בכתום</span> ו<b>לא נוגע</b> בטבלת הציונים האמיתית.<br>
-      <b>2.</b> רוצה חיזוי אוטומטי? סמני 🔮 למטה — כל בחינה שחסרה תושלם לפי ציון המגן. (ברירת המחדל: ידני — את שולטת.)<br>
-      <b>3.</b> עמודת <b>מבחני כיתה</b> (סגולה) — מזינים ציוני מבחנים שנעשו בכיתה. הם <b>אינם חלק מהציון הרשמי</b>, אבל החיזוי משתמש בהם במקום המגן — וזה מדייק אותו משמעותית.<br>
-      <b>4.</b> התוצאות למטה משוות תמיד: <b>מצב אמיתי ← מול ← התרחיש שלך.</b>
-    </div>
-    <div class="toolbar" style="margin-top:10px; margin-bottom:0;">
-      <span class="pill" style="${nSim?'background:#fff7ed; border-color:#f59e0b; color:#b45309; font-weight:700;':''}">${nSim} שינויי ניסוי</span>
-      <button class="btn warn sm" onclick="clearSim()">🧹 מחיקת השינויים</button>
-      <button class="btn ok sm" onclick="commitSim()">💾 העברת השינויים לטבלה האמיתית</button>
-    </div>
+  ${simFull?'':`<div class="simHero dec">
+    <span class="hIco simIco">${ic('lab',24)}</span>
+    <span class="hTxt">
+      <h1 class="hT">סימולציה</h1>
+      <div class="hS"><b>סביבת ניסוי בטוחה</b> — השינויים כאן אינם משפיעים על הציונים האמיתיים.</div>
+    </span>
+    <span class="hAct">
+      <span class="simCnt ${nSim?'on':''}">${nSim} שינויי ניסוי</span>
+      <button class="btn warn sm" onclick="clearSim()" ${nSim?'':'disabled style="opacity:.5;"'}>${ic('refresh',14)}מחיקת השינויים</button>
+      <button class="btn ok sm" onclick="commitSim()" ${nSim?'':'disabled style="opacity:.5;"'}>${ic('check',14)}העברה לטבלה האמיתית</button>
+    </span>
+    <span class="hArt">${art('lab')}</span>
   </div>
+  <div class="triState">
+    <span class="tsBox real">${ic('shield',15)}<b>נתונים אמיתיים</b><i>הטבלה המקורית — לא נוגעים בה</i></span>
+    ${ic('arrowLeft',16)}
+    <span class="tsBox sim">${ic('lab',15)}<b>סימולציה</b><i>${nSim} שינויי ניסוי${simPredict?' · 🔮 חיזוי פעיל':''}</i></span>
+    ${ic('arrowLeft',16)}
+    <span class="tsBox imp">${ic('trend',15)}<b>השפעה</b><i>${changed.length} תלמידות משנות מצב</i></span>
+  </div>
+  <div class="card" style="margin-bottom:14px; padding:11px 14px;">
+    <span class="dzLink" onclick="toggleBox('simHelp')">${openBoxes.simHelp?'▴':'▾'} איך זה עובד?</span>
+    ${openBoxes.simHelp?`<div style="font-size:13px; line-height:1.85; margin-top:8px;">
+      <b>1.</b> הטבלה למטה היא <b>העתק ניסוי</b> של הציונים האמיתיים. כל שינוי נצבע <span style="background:#fff7ed; border:1px solid #f59e0b; color:#b45309; padding:1px 6px; border-radius:6px; font-weight:700;">בכתום</span> ואינו נוגע בטבלה המקורית.<br>
+      <b>2.</b> רוצה חיזוי אוטומטי? סמני 🔮 — כל בחינה שחסרה תושלם לפי ציון המגן. ברירת המחדל ידנית.<br>
+      <b>3.</b> עמודת <b>מבחני כיתה</b> (סגולה) — ציוני מבחנים שנעשו בכיתה. אינם חלק מהציון הרשמי, אבל החיזוי משתמש בהם במקום המגן ומדייק משמעותית.<br>
+      <b>4.</b> התוצאות למטה תמיד משוות: מצב אמיתי ← מול ← התרחיש שלך.
+    </div>`:''}
+  </div>`}
   <div class="card ${simFull?'tblfull':''} ${simDense?'dense':''}" id="simCard" style="margin-bottom:14px;">
     <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
       <h3 class="sec" style="margin:0;">✏️ טבלת הניסוי — שני ציונים חופשי</h3>
@@ -4099,16 +4250,15 @@ function renderSim(m){
     <div class="scroll" style="max-height:${simFull?'calc(100dvh - 190px)':(simDense?'62vh':'52vh')};">${simGrid(simSubjObj,studs.slice().sort((a,b)=>a.name.localeCompare(b.name)))}</div>
   </div>
   <div class="card" style="margin-bottom:14px;">
-    <h3 class="sec">⚙️ תרחישים כלליים (אופציונלי)</h3>
-    <div class="toolbar" style="margin-bottom:0;">
+    ${secHead('target','תרחישים כלליים','חלים על כל התלמידות המוצגות · אופציונלי')}
+    <div class="preGrid">
+      ${predPresets().map(x=>`<button class="preCard ${x.on?'on':''}" onclick="${x.go}">
+        <span class="preT">${x.t}${x.rec?'<span class="preRec">מומלץ</span>':''}</span>
+        <span class="preS">${x.s}</span>
+      </button>`).join('')}
+    </div>
+    <div class="toolbar" style="margin:10px 0 0;">
       <label><input type="checkbox" ${simPredict?'checked':''} onchange="simPredict=this.checked;renderKeepScroll()"> 🔮 חיזוי אוטומטי</label>
-      <label>רמת החיזוי:</label>
-      <select onchange="state.predLevel=(this.value==='auto'?'auto':+this.value);save();renderKeepScroll()" ${simPredict?'':'disabled'}>
-        <option value="0" ${state.predLevel===0?'selected':''}>אופטימי — בחינה = מגן</option>
-        <option value="-5" ${state.predLevel===-5?'selected':''}>מציאותי — מגן פחות 5</option>
-        <option value="-10" ${state.predLevel===-10?'selected':''}>זהיר — מגן פחות 10</option>
-        <option value="auto" ${state.predLevel==='auto'?'selected':''}>🎯 כיול אוטומטי לפי הנתונים (מומלץ)</option>
-      </select>
       <label>חלוקת מגן/בחינה בכל הבחינות:</label>
       <select onchange="simSplit=this.value;renderKeepScroll()">
         <option value="" ${simSplit===''?'selected':''}>לפי ההגדרות הקיימות</option>
@@ -4130,20 +4280,26 @@ function renderSim(m){
   ${simPredict?predictionPanel(studs):''}
   ${fltBar(simSubj,allStuds.length,studs.length)}
   <div class="kpis">
-    <div class="kpi k2"><div class="n">${sE}${delta(bE,sE)}</div><div class="t">זכאיות בתרחיש (אמיתי: ${bE})</div></div>
-    <div class="kpi k4"><div class="n">${sX}${delta(bX,sX)}</div><div class="t">מצטיינות בתרחיש (אמיתי: ${bX})</div></div>
-    <div class="kpi k3"><div class="n">${sP}${delta(bP,sP)}</div><div class="t">פוטנציאל בתרחיש (אמיתי: ${bP})</div></div>
-    <div class="kpi k5"><div class="n">${sB}${delta(bB,sB)}</div><div class="t">עם מעכבים בתרחיש (אמיתי: ${bB})</div></div>
+    ${simKpi('k2','shield','זכאיות',bE,sE)}
+    ${simKpi('k4','star','מצטיינות',bX,sX)}
+    ${simKpi('k3','sparkles','פוטנציאל',bP,sP)}
+    ${simKpi('k5','warn','עם מעכבים',bB,sB)}
   </div>
   <div class="card">
-    <h3 class="sec">תלמידות שהתרחיש משנה את מצבן (${changed.length})</h3>
-    <div class="scroll" style="max-height:55vh;">
-    ${changed.length?`<table class="tbl"><thead><tr><th>שם</th><th>כיתה</th><th>ממוצע אמיתי</th><th>ממוצע בתרחיש</th><th>סטטוס אמיתי</th><th>סטטוס בתרחיש</th></tr></thead><tbody>
-    ${changed.map(x=>`<tr><td><span class="name-link" onclick="openStudent('${x.st.id}')">${esc(x.st.name)}</span></td><td>${esc(x.st.cls)}</td>
-      <td>${fmt(x.b.avg)}</td><td class="${(x.s.avg||0)>(x.b.avg||0)?'delta-up':(x.s.avg||0)<(x.b.avg||0)?'delta-dn':''}">${fmt(x.s.avg)}</td>
-      <td><span class="badge ${x.b.cls}">${x.b.status}</span></td><td><span class="badge ${x.s.cls}">${x.s.status}</span></td></tr>`).join('')}
-    </tbody></table>`:'<div class="note">אין שינוי בין המצב האמיתי לתרחיש — שני ציון בטבלת הניסוי או בחרי תרחיש כללי</div>'}
-    </div>
+    ${secHead('trend',`תלמידות שהתרחיש משנה את מצבן · ${changed.length}`,'ממוצע וסטטוס — אמיתי מול תרחיש')}
+    ${changed.length?`<div class="scroll" style="max-height:55vh;">
+    <table class="tbl"><thead><tr><th>שם</th><th>כיתה</th><th>ממוצע</th><th>סטטוס</th></tr></thead><tbody>
+    ${changed.map(x=>{
+      const up=(x.s.avg||0)>(x.b.avg||0), dn=(x.s.avg||0)<(x.b.avg||0);
+      const d=(x.s.avg!==null&&x.b.avg!==null)?Math.round((x.s.avg-x.b.avg)*10)/10:null;
+      return `<tr><td><span class="stName" onclick="openStudent('${x.st.id}')">${avatar(x.st.name,26)}<span class="name-link">${esc(x.st.name)}</span></span></td>
+      <td>${esc(x.st.cls)}</td>
+      <td><span class="cmp"><span class="cmpA">${fmt(x.b.avg)}</span>${ic('arrowLeft',13)}<span class="cmpB ${up?'up':dn?'dn':''}">${fmt(x.s.avg)}</span>
+        ${d!==null&&d!==0?`<span class="dBadge ${d>0?'up':'dn'}">${d>0?'▲+':'▼'}${d>0?d:Math.abs(d)}</span>`:''}</span></td>
+      <td><span class="cmp"><span class="badge ${x.b.cls}">${x.b.status}</span>${ic('arrowLeft',13)}<span class="badge ${x.s.cls}">${x.s.status}</span></span></td></tr>`;}).join('')}
+    </tbody></table></div>`
+    :emptyState('lab','התרחיש לא משנה כלום — עדיין',
+      'שנו ציון בטבלת הניסוי, סמנו 🔮 חיזוי אוטומטי, או בחרו תרחיש כללי — וכאן יופיעו התלמידות שמצבן משתנה.',null,[])}
   </div>`;
 }
 // טבלת עריכה של הסימולציה: מציגה את הציונים האמיתיים, שינויים נשמרים בשכבת הניסוי בלבד
@@ -4179,10 +4335,10 @@ function simGrid(subj,studs){
         tds+=`<td><div class="eWrap"><div class="eTag"></div><div class="eBox one"><div class="gcell"><small>&nbsp;</small><input type="number" min="0" max="100" data-k="s|${st.id}|${key}" class="${cls(key)}" value="${g[key]??''}" onchange="setGradeSim('${st.id}','${key}',this.value)">${need}</div></div></div></td>`;
       }else{
         const eff=c.s;
-        const eSplit=(r.flips||[]).some(f=>f.comp===c.n)?(100-eff):eff;
+        const eSplit=(rSim.flips||[]).some(f=>f.comp===c.n)?(100-eff):eff;
         const rM=eff>0?`<div class="gcell"><small>מגן ${eSplit}%</small><input type="number" min="0" max="100" data-k="s|${st.id}|${key}.m" class="${cls(key+'.m')}" value="${g[key+'.m']??''}" onchange="setGradeSim('${st.id}','${key}.m',this.value)"></div>`:'';
         const rE=eff<100?`<div class="gcell"><small>בחינה ${100-eSplit}%</small><input type="number" min="0" max="100" data-k="s|${st.id}|${key}.e" class="${cls(key+'.e')}" value="${g[key+'.e']??''}" onchange="setGradeSim('${st.id}','${key}.e',this.value)"></div>`:'';
-        const dvS=(r.details||[])[i], cvS=(dvS&&dvS.val!==null&&dvS.val!==undefined)?Math.round(dvS.val):null;
+        const dvS=(rSim.details||[])[i], cvS=(dvS&&dvS.val!==null&&dvS.val!==undefined)?Math.round(dvS.val):null;
         const avgS=(rM&&rE)?`<div class="eAvg${cvS===null?' pend':''}">${cvS===null?'ממתין לשני הציונים':`משוקלל <b>${cvS}</b>`}</div>`:'';
         tds+=`<td><div class="eWrap"><div class="eTag"></div><div class="eBox">${rM}${rE}</div>${avgS}</div></td>`;
       }
@@ -4374,20 +4530,41 @@ function renderAlerts(m){
   const show=rows.filter(x=>alertFilter==='all'?true:x.items.some(i=>i.sev===alertFilter));
   const chip=(f,label,n,cls)=>`<button class="btn ${alertFilter===f?'':'sec'} sm" onclick="alertFilter='${f}';renderKeepScroll()"
       style="${alertFilter===f?'':'opacity:'+(n?1:.45)}">${label} ${n?`<b>${n}</b>`:''}</button>`;
+  const nStud=s=>rows.filter(x=>x.items.some(i=>i.sev===s)).length;
+  const sum=(f,icon,label,n,cls,sub)=>`<button class="alCard ${cls} ${alertFilter===f?'on':''}" onclick="alertFilter='${f}';renderKeepScroll()">
+    <span class="alIco">${ic(icon,18)}</span>
+    <span class="alTxt"><span class="alN">${n}</span><span class="alL">${label}</span><span class="alS">${sub}</span></span></button>`;
   m.innerHTML=`
-  <div class="card" style="margin-bottom:14px;">
-    <div class="toolbar" style="margin-bottom:0;">
-      <label>כיתה:</label><select onchange="alertClass=this.value;renderKeepScroll()"><option value="">כל השכבה</option>${state.classes.map(c=>`<option ${alertClass===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
-      <span style="width:8px;"></span>
+  ${hero('bell','התראות','מי דורשת טיפול עכשיו — נגזר אוטומטית מהציונים',
+    [`<button class="btn sec sm" onclick="setTab('entry')">${ic('pen',14)}הזנת ציונים</button>`,
+     `<button class="btn sec sm" onclick="setTab('reports')">${ic('file',14)}דוח</button>`],'bell')}
+  <div class="alGrid">
+    ${sum('bad','warn','מעכבים',nBad,'bad',nStud('bad')+' תלמידות')}
+    ${sum('warn','trend','גבוליים ופערים',nWarn,'warn',nStud('warn')+' תלמידות')}
+    ${sum('pot','sparkles','קרובות להצטיינות',nPot,'pot',nStud('pot')+' תלמידות')}
+    ${sum('miss','clipboard','חסרים',nMiss,'miss',nStud('miss')+' תלמידות')}
+  </div>
+  <div class="eBar">
+    <span class="eGrp">
+      <span class="eLbl">${ic('layers',13)}כיתה</span>
+      <select onchange="alertClass=this.value;renderKeepScroll()"><option value="">כל השכבה</option>${state.classes.map(c=>`<option ${alertClass===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+    </span>
+    <span class="eSep"></span>
+    <span class="eGrp">
       ${chip('all','הכול',rows.length)}
       ${chip('bad','🔴 מעכבים',nBad)}
       ${chip('warn','🟠 גבוליים ופערים',nWarn)}
       ${chip('pot','⭐ קרובות להצטיינות',nPot)}
       ${chip('miss','⚪ חסרים',nMiss)}
-    </div>
+    </span>
+    <span class="eSep"></span>
+    <span class="eGrp">
+      <button class="btn sec sm ${alertCards?'on':''}" onclick="alertCards=!alertCards;renderKeepScroll()"
+        title="${alertCards?'מעבר לטבלה':'מעבר לכרטיסים'}">${ic(alertCards?'grid':'layers',13)}${alertCards?'כרטיסים':'טבלה'}</button>
+    </span>
   </div>
-  ${show.length?`<div class="card"><div class="scroll" style="max-height:70vh;">
-    <table class="tbl"><thead><tr><th>תלמידה</th><th>ממוצע</th><th>מה דורש טיפול</th></tr></thead><tbody>
+  ${show.length?`<div class="card ${alertCards?'alCardsOn':''}"><div class="scroll" style="max-height:70vh;">
+    <table class="tbl alTable"><thead><tr><th>תלמידה</th><th>ממוצע</th><th>מה דורש טיפול</th></tr></thead><tbody>
     ${show.map(x=>{
       let its=alertFilter==='all'?x.items:x.items.filter(i=>i.sev===alertFilter);
       const col={bad:'b-bad',warn:'b-warn',pot:'b-pot',miss:'b-miss'};
@@ -4402,14 +4579,16 @@ function renderAlerts(m){
         moreBtn=`<button class="badge b-miss bLink" title="צמצום" onclick="alertMore.delete('${x.st.id}');renderKeepScroll()">צמצום</button>`;
         its=rest.concat(miss);
       }
-      return `<tr>
-        <td><span class="name-link" onclick="openStudent('${x.st.id}')">${esc(x.st.name)}</span><br><small style="color:var(--muted)">${esc(x.st.cls)}</small></td>
+      return `<tr class="alRow sev-${x.items.some(i=>i.sev==='bad')?'bad':x.items.some(i=>i.sev==='warn')?'warn':'low'}">
+        <td><span class="stName" onclick="openStudent('${x.st.id}')">${avatar(x.st.name,28)}<span><span class="name-link">${esc(x.st.name)}</span><br><small style="color:var(--muted)">${esc(x.st.cls)}</small></span></span></td>
         <td class="${gradeClass(x.r.avg)}">${fmt(x.r.avg)}</td>
         <td style="text-align:right;"><div style="display:flex; gap:5px; flex-wrap:wrap;">
           ${its.map(i=>i.sid
             ? `<button class="badge ${col[i.sev]} bLink" title="${esc(i.ttl)}" onclick="goSubj('${i.sid}','${x.st.id}')">${esc(i.t)}${i.miss?` <b>${i.miss}</b>`:''}${ic('arrowLeft',11)}</button>`
             : `<span class="badge ${col[i.sev]}" title="${esc(i.ttl)}">${esc(i.t)}</span>`).join('')}${moreBtn}
-        </div></td></tr>`;
+        </div>
+        <button class="btn sec sm alGo" onclick="openStudent('${x.st.id}')">${ic('pen',13)}פתיחת הכרטיס</button>
+        </td></tr>`;
     }).join('')}
     </tbody></table></div>
     <div class="note" style="margin-top:8px;">${show.length} תלמידות · לחיצה על שם פותחת את כרטיס התלמידה. ציונים שטרם דווחו למשרד מסומנים באדום בטבלאות ואינם מופיעים כאן.</div>
@@ -5419,7 +5598,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='7.3';
+const APP_VERSION='7.6';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
