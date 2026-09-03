@@ -1004,9 +1004,10 @@ table.tbl.grades tbody tr:focus-within td:first-child{background:#eaf0ff;}
   #printArea .secFlash{animation:none;}
 }
 /* ============ קטגוריות בהגדרות + אזור מסוכן ============ */
-.sGrp{display:flex; align-items:center; gap:7px; margin:16px 2px 8px; font-size:11.5px; font-weight:800;
-  color:var(--muted); letter-spacing:.3px;}
-.sGrp svg{stroke:currentColor; opacity:.8;}
+.sGrp{display:flex; align-items:center; gap:8px; margin:20px 2px 9px; font-size:14px; font-weight:800;
+  color:var(--h2,#4338ca); letter-spacing:-.1px; font-family:var(--font-head,'Rubik'),sans-serif;}
+.sGrp svg{stroke:currentColor; opacity:1;}
+.sGrp::after{background:linear-gradient(90deg,var(--line),transparent);}
 .sGrp::after{content:''; flex:1 1 auto; height:1px; background:var(--line);}
 .dzCard{border:1px solid #f3bfcb; border-inline-start:4px solid #b3223f; border-radius:var(--r-md);
   padding:12px 14px; background:linear-gradient(120deg,rgba(179,34,63,.045),rgba(255,255,255,0));}
@@ -1038,6 +1039,8 @@ table.tbl.grades tbody tr:focus-within td:first-child{background:#eaf0ff;}
 .hHead .hChev{flex:0 0 auto; font-size:15px; color:var(--muted);}
 .hBody{padding:12px 15px 14px; font-size:13.5px; line-height:1.9; animation:fadeUp .2s ease both;}
 @media(max-width:820px){.hGrid{grid-template-columns:1fr;} .hHead{padding:10px 12px;} .hBody{padding:11px 12px;}}
+.bkWarn{font-size:10.5px; font-weight:700; color:#92400e; background:#fffbeb; border:1px solid #fde68a;
+  border-radius:var(--r-pill); padding:2px 8px; margin-top:4px; display:inline-block; white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -5026,7 +5029,15 @@ function renderSettings(m){
   ${isPro()?sGrp('gear','כלים מתקדמים'):''}
   ${isPro()?sCard('bulk','gear','שינוי גורף — מקצוע שלם',
     'החלת סמל שאלון, חלוקת מגן/בחינה או משקל על כל התלמידות בכיתה בבת אחת.','',
-    `<div class="toolbar">
+    `<div class="lossBox" style="margin:0 0 10px;">
+       <div class="lossHead">${ic('info',15)}<span>איך זה עובד</span></div>
+       <div style="font-size:12.5px; line-height:1.7;">
+         <b>ברירת מחדל</b> — משנה את המקצוע לכל התלמידות בכל רמות היח"ל. זו הפעולה הרגילה.<br>
+         <b>כפה על כולן</b> — מופיע רק אם יש תלמידות עם <b>התאמה אישית</b> ברכיב. התאמה אישית תמיד גוברת על ברירת המחדל,
+         ולכן אצלן שינוי ברירת המחדל לבדו לא ישנה דבר. "כפה" מוחק את ההתאמות ומשווה את כולן.
+       </div>
+     </div>
+     <div class="toolbar">
        <label>מקצוע:</label>
        <select id="bkSubj" onchange="bulkSubj=this.value;renderKeepScroll()">${SUBJECTS.filter(s=>!s.internalOnly).map(s=>`<option value="${s.id}" ${bulkSubj===s.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
        <label>כיתה:</label>
@@ -5077,12 +5088,24 @@ function bulkRows(){
         return `<select id="bc_${i}" style="font-size:11px; max-width:145px;"><option value="">— ללא שינוי —</option>${opts.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')}<option value="__c">אחר — הקלדה…</option></select>${nC?`<br><span class="pill">${nC} עם סמל</span>`:''}`;})()}</td>
       <td>${c.t==='e'?`<select id="bs_${i}"><option value="">— ללא שינוי —</option>${[70,60,50,40,30,20,0].map(s=>`<option value="${s}">מגן ${s}% / בחינה ${100-s}%</option>`).join('')}</select>`:'<span class="note">הערכה פנימית</span>'}</td>
       <td><input type="number" id="bw_${i}" min="0" max="100" placeholder="ללא" style="width:60px;"></td>
-      <td><button class="btn ok sm" onclick="bulkApply(${i})">החל</button>${nOv?`<br><span class="pill" title="לתלמידות אלה יש התאמה אישית שתידרס">${nOv} מותאמות</span>`:''}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn ok sm" onclick="bulkApply(${i},'def')" title="משנה את ברירת המחדל של המקצוע בכל רמות היח\"ל">${ic('check',13)}ברירת מחדל</button>
+        ${nOv?`<button class="btn dz sm" style="margin-top:4px;" onclick="bulkApply(${i},'force')" title="דורס גם את ${nOv} התלמידות שיש להן התאמה אישית">${ic('users2',13)}כפה על כולן</button>
+        <div class="bkWarn" title="אצל תלמידות אלה ההתאמה האישית גוברת על ברירת המחדל">⚠️ ${nOv} עם התאמה אישית</div>`:''}
+      </td>
     </tr>`;
   }).join('')}
   </tbody></table></div>`;
 }
-function bulkApply(i){
+/* שינוי גורף.
+   mode='def'   — משנה את *ברירת המחדל* של המקצוע (state.custom) בכל רמות היח"ל.
+                  זו הפעולה הנכונה ברוב המקרים, והיא נראית מיד בעמודת "ברירת מחדל".
+   mode='force' — בנוסף מוחק את ההתאמות האישיות של הרכיב, כדי שהשינוי יחול גם
+                  על תלמידות שיש להן חלוקה משלהן (למשל מי שנבחנה בשנה אחרת).
+   הבהרה חשובה: התאמה אישית של תלמידה *גוברת* על ברירת המחדל — ולכן שינוי
+   ברירת מחדל לבדו לא ישנה דבר אצל מי שיש לה התאמה. זה מה שנראה כמו "לא מתעדכן". */
+function bulkApply(i,mode){
+  mode=mode||'def';
   const subj=SUBJ_MAP[bulkSubj]||SUBJECTS[0];
   const key=subj.id+'.'+i;
   const sEl=document.getElementById('bs_'+i), wEl=document.getElementById('bw_'+i), cEl=document.getElementById('bc_'+i);
@@ -5091,20 +5114,30 @@ function bulkApply(i){
   if(cVal==='__c'){ const t=prompt('הקלידי סמל שאלון להחלה על כל התלמידות:',''); if(t===null) return; cVal=t.trim(); }
   if(sVal===''&&wVal===''&&cVal===''){ toast('בחרי סמל שאלון, חלוקה או משקל'); return; }
   const targets=bulkTargets();
-  if(!targets.length){ toast('אין תלמידות בבחירה'); return; }
+  const nOv=state.students.filter(s=>(s.ov||{})[key]).length;
   const what=[cVal?`סמל ${cVal}`:'',sVal!==''?`מגן ${sVal}%/בחינה ${100-sVal}%`:'',wVal!==''?`משקל ${wVal}%`:''].filter(Boolean).join(' · ');
-  if(!confirm(`להחיל על ${targets.length} תלמידות ב${esc(subj.name)} — ${esc(String(what))}?`)) return;
+  const lines=[`${subj.name} · ${(getComps(subj,subj.opts[subj.opts.length-1])[i]||{}).n||''}`,'',what,''];
+  if(sVal!==''||wVal!=='') lines.push('• ברירת המחדל של המקצוע תשתנה בכל רמות היח"ל');
+  if(cVal) lines.push(`• סמל השאלון יוחל על ${targets.length} תלמידות`);
+  if(mode==='force'&&nOv) lines.push(`• ${nOv} התאמות אישיות ברכיב זה יימחקו`);
+  else if(nOv&&(sVal!==''||wVal!=='')) lines.push(`• ${nOv} תלמידות עם התאמה אישית — אצלן לא ישתנה דבר (ההתאמה גוברת)`);
+  if(!confirm('אישור שינוי גורף\n\n'+lines.join('\n'))) return;
   pushUndo('שינוי גורף — '+subj.name);
-  logChange('bulk',null,subj.name+' · '+String(what),'',targets.length+' תלמידות');
-  targets.forEach(st=>{
-    if(cVal){ st.codes=st.codes||{}; st.codes[key]=cVal; }
-    if(sVal!==''||wVal!==''){
-      st.ov=st.ov||{}; st.ov[key]=Object.assign({},st.ov[key]);
-      if(sVal!=='') st.ov[key].s=+sVal;
-      if(wVal!=='') st.ov[key].w=+wVal;
-    }
-  });
-  save(); render(); toast(`הוחל על ${targets.length} תלמידות`);
+  logChange('bulk',null,subj.name+' · '+String(what),'',(mode==='force'?'כפוי · ':'')+targets.length+' תלמידות');
+  // ברירת המחדל — בכל רמות היח"ל של המקצוע
+  if(sVal!==''||wVal!==''){
+    subj.opts.filter(u=>u>0).forEach(u=>{
+      const ck2=subj.id+'.'+u+'.'+i;
+      state.custom[ck2]=state.custom[ck2]||{};
+      if(sVal!=='') state.custom[ck2].s=+sVal;
+      if(wVal!=='') state.custom[ck2].w=+wVal;
+    });
+    if(mode==='force') state.students.forEach(st=>{ if(st.ov&&st.ov[key]) delete st.ov[key]; });
+  }
+  if(cVal) targets.forEach(st=>{ st.codes=st.codes||{}; st.codes[key]=cVal; });
+  clearCompCache();
+  save(); render();
+  toast(mode==='force'?`הוחל בכפייה — כולל ${nOv} התאמות שנמחקו`:'ברירת המחדל עודכנה');
 }
 function bulkCodesAll(){
   const subj=SUBJ_MAP[bulkSubj]||SUBJECTS[0];
@@ -5730,7 +5763,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='8.0';
+const APP_VERSION='8.1';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
@@ -6111,6 +6144,7 @@ function renderHelp(m){
     <b>"תלמידה עם 92 לא מסומנת מצטיינת"</b> — בדקי את תנאי היח"ל: נדרש מתמטיקה 4-5 ואנגלית 5. אפשר לשנות בהגדרות.<br>
     <b>"איפה קטלוג השאלונים?"</b> — <b>הגדרות ← קטלוג שאלונים — בגרות גמישה</b>. עד גרסה 6.5 הוא הוצג רק ב"מצב מקצועי" ולכן נראה כאילו נעלם; עכשיו הוא תמיד שם. בטבלה: המקצוע, מספר היחידות, אחוז הניקוד, סמל השאלון ואופן ההיבחנות, עם סינון לפי מקצוע.<br>
     <b>"אני רואה שם ולא מספר שאלון"</b> — בכוונה. ליד הציון מוצג <b>שם התוכן</b> — "משנה", "דינים ומבוא", "לקט", "תפילה כמפגש", "בח\"מ" — כי זה מה שמזהה את השאלון בעבודה היומית. מספר הסמל נשמר במלואו: הוא מופיע במעבר עכבר על התג, בחלון הבחירה, בקטלוג, בדוחות ובייצוא לאקסל. באנגלית מוצגת האות: A, B, C, E, G.<br>
+        <b>"שיניתי חלוקת מגן/בחינה ולא קרה כלום"</b> — כנראה לתלמידות יש <b>התאמה אישית</b> ברכיב הזה, והיא <b>תמיד גוברת</b> על ברירת המחדל. בהגדרות ← שינוי גורף מופיעה אזהרה "N עם התאמה אישית" ולידה כפתור <b>"כפה על כולן"</b> שמוחק את ההתאמות ומשווה את כולן. הכפתור <b>"ברירת מחדל"</b> משנה את המקצוע בכל רמות היח"ל — וזו הפעולה הרגילה.<br>
         <b>"מיון וסינון"</b> — בראש הזנת הציונים, הסימולציה והדוחות יש סרגל: <b>יח"ל</b> (במקצוע שנבחר), <b>מלאות/חסרות</b>, <b>סטטוס</b> (מצטיינות, פוטנציאל, זכאיות, מעכבים, גבוליות), ומיון לפי שם / כיתה / יח"ל. כשסינון פעיל מוצג "מוצגות 12 מתוך 41" וכפתור ניקוי — כדי שלא ייווצר רושם שנתונים נעלמו. <b>שימו לב:</b> פעולות גורפות (צביעה, סמל שאלון) והייצוא לאקסל, ההדפסה והמייל — כולם עובדים על <b>מה שמוצג בפועל</b>. זה בכוונה: מסנן ומחיל = בדיוק מה שרואים.<br>
         <b>"רישיון והתנסות"</b> — התוכנה פתוחה לגמרי 14 יום. מיום 7 מופיע פס תזכורת, ובתום ההתנסות נדרש קוד רישיון של המוסד. <b>הנתונים אינם נמחקים בשום שלב</b>, וגיבוי לקובץ פתוח גם במסך הנעילה. הקוד נגזר משם המוסד ולכן אינו יכול "לאבד" — הספק מנפיק אותו מחדש בכל רגע. הרישיון לתמיד, בלי תאריך תפוגה.<br>
     <b>"צריך מקצוע שאינו ברשימה"</b> — יש 3 משבצות פתוחות למקצועות מוגברים והתמחויות: בכרטיס התלמיד/ה כותבים את שם המקצוע (פיזיקה, ביולוגיה, תקשורת…) ובוחרים יח"ל ומשקלים. למקצוע עם מבנה חריג — פנו לספק.<br>
