@@ -5985,7 +5985,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='8.8';
+const APP_VERSION='8.9';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
@@ -6248,6 +6248,16 @@ async function driveWrite(pid,pl){
 }
 
 /* ---- סנכרון ---- */
+/* נקודת המקור למיזוג: העותק שעליו שני המכשירים הסכימו בפעם האחרונה.
+   בלעדיו אי אפשר להבדיל בין "אני שיניתי" לבין "שניים שינו" — וכל הבדל היה נהפך לשאלה. */
+const MRG_FLD=['grades','gstat','codes','notes','ov','units','mugbarNames','shw','hid'];
+function baseOf(stt){
+  if(!stt) return null;
+  return {classes:(stt.classes||[]).slice(), students:(stt.students||[]).map(s=>{
+    const o={id:s.id}; MRG_FLD.forEach(f=>{ if(s[f]) o[f]=s[f]; }); return o; })};
+}
+function saveBase(pid,stt){ try{ LS.setItem('bagrutDvBase:'+pid,JSON.stringify(baseOf(stt))); }catch(e){} }
+function loadBase(pid){ try{ return JSON.parse(LS.getItem('bagrutDvBase:'+pid)||'null'); }catch(e){ return null; } }
 function localVer(pid){ return +(LS.getItem('bagrutDvVer:'+pid)||0); }
 function setLocalVer(pid,v){ LS.setItem('bagrutDvVer:'+pid,String(v)); }
 function markDirty(pid){ dv.queue[pid]=true; LS.setItem('bagrutDvQueue',JSON.stringify(Object.keys(dv.queue))); }
@@ -6282,14 +6292,14 @@ async function driveSave(pid,force){
   if(!force&&dv.sig[pid]===sig){ clearDirty(pid); renderSyncInd(); return; }   // אין שינוי אמיתי
   dv.busy=true; renderSyncInd();
   try{
-    if(!dv.files[pid]) await driveIndex();
+    await driveIndex();                          // תמיד טרי: אינדקס מיושן = דריסה שקטה של מכשיר אחר
     const remote=dv.files[pid];
     if(remote&&remote.ver>localVer(pid)){                                       // מישהו אחר הקדים
       dv.busy=false; dv.state='conflict'; renderSyncInd();
       driveConflict(pid); return;
     }
     await driveWrite(pid,pl);
-    setLocalVer(pid,nextVer); dv.sig[pid]=sig; clearDirty(pid);
+    setLocalVer(pid,nextVer); dv.sig[pid]=sig; clearDirty(pid); saveBase(pid,stt);
     dv.lastSync=Date.now(); dv.state='synced'; dv.lastErr='';
     LS.setItem('bagrutDvLast',String(dv.lastSync));
   }catch(e){
@@ -6300,6 +6310,7 @@ async function driveSave(pid,force){
 async function driveSyncAll(initial){
   if(!dv.on||!driveEnabled()) return;
   dv.busy=true; renderSyncInd();
+  const conf={};
   try{
     await driveIndex();
     for(const pid of Object.keys(dv.files)){
@@ -6309,9 +6320,9 @@ async function driveSyncAll(initial){
         const pl=await driveLoad(pid);
         if(pl&&+pl.schemaVer>SCHEMA_VER){ dv.state='error'; dv.lastErr='הקובץ בדרייב נשמר בגרסה חדשה יותר של התוכנה — יש לעדכן'; continue; }
         if(pl) driveApplyRemote(pid,pl,rv);
-      }else if(rv>lv&&dirty){ dv.state='conflict'; driveConflict(pid); }
+      }else if(rv>lv&&dirty){ dv.state='conflict'; conf[pid]=true; await driveConflict(pid); }
     }
-    for(const pid of Object.keys(dv.queue)) await driveSave(pid);
+    for(const pid of Object.keys(dv.queue)) if(!conf[pid]) await driveSave(pid);
     if(dv.state!=='conflict'&&dv.state!=='error'){ dv.state='synced'; dv.lastSync=Date.now(); LS.setItem('bagrutDvLast',String(dv.lastSync)); }
   }catch(e){ dv.state='error'; dv.lastErr=e.message; }
   dv.busy=false; renderSyncInd(); if(initial) render();
@@ -6323,7 +6334,7 @@ function driveApplyRemote(pid,pl,rv){
   else saveProfileState(pid,merged);
   const pr=profiles.find(p=>p.id===pid);
   if(pr&&pl.name&&pr.name!==pl.name){ pr.name=pl.name; saveProfiles(); }
-  setLocalVer(pid,rv); dv.sig[pid]=payloadSig(pl);
+  setLocalVer(pid,rv); dv.sig[pid]=payloadSig(pl); saveBase(pid,merged);
 }
 
 /* ---- מיזוג ברמת המפתח ----
@@ -6363,9 +6374,9 @@ async function driveConflict(pid){
     const pl=await driveLoad(pid); if(!pl) return;
     const mine=loadProfileState(pid);
     autoSnapshot(true);
-    const res=mergeStates(mine,applyPayload(mine,pl),null);
+    const res=mergeStates(mine,applyPayload(mine,pl),loadBase(pid));
     cf={pid,mine,theirs:pl.state,pl,clash:res.clash,pick:{},merged:res.merged};
-    if(!res.clash.length){ driveResolve('merge'); return; }                 // מיזוג שקט
+    if(!res.clash.length){ await driveResolve('merge'); return; }        // חובה להמתין — אחרת ההעלאה נקטעת                 // מיזוג שקט
     renderConflict();
     document.getElementById('cfModal').classList.add('show');
   }catch(e){ dv.state='error'; dv.lastErr=e.message; renderSyncInd(); }
@@ -6422,7 +6433,9 @@ async function driveResolve(){
     }
   });
   pushUndo('מיזוג מהדרייב');
-  saveProfileState(cf.pid,out);
+  if(cf.pid===currentProfileId){ state=out; save(true); }                 // חובה: גם הזיכרון, לא רק האחסון
+  else saveProfileState(cf.pid,out);
+  saveBase(cf.pid,out);
   setLocalVer(cf.pid,(dv.files[cf.pid]||{}).ver||localVer(cf.pid));
   clearDirty(cf.pid); dv.state='saving';
   const el=document.getElementById('cfModal'); if(el) el.classList.remove('show');
