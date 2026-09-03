@@ -131,6 +131,8 @@ header.app h1{font-size:22px; font-weight:800; letter-spacing:-.4px; text-shadow
 header.app .sub{opacity:.85; font-size:12.5px;}
 #hdrCenter{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); display:flex; align-items:center; gap:14px; text-align:center; pointer-events:none; z-index:2;}
 #hdrCenter .ttl{text-align:center; min-width:0;}
+/* גרפיקה אחת בכותרת: הלוגו. הכובע שליד הכותרת מוסתר כדי לא לכפול. */
+#hdrCenter>.glassIcon{display:none;}
 header.app h1,header.app .sub,.coordLine{direction:rtl; unicode-bidi:plaintext;}
 #hdrActions{margin-inline-start:auto; display:flex; gap:8px; align-items:center; z-index:3;}
 .glassIcon{width:56px; height:56px; border-radius:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
@@ -164,8 +166,7 @@ nav.tabs button{border:none; background:transparent; padding:9px 16px; border-ra
 nav.tabs button{transition:all .18s ease;}
 nav.tabs button.active{background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; box-shadow:0 4px 14px rgba(79,70,229,.35); transform:translateY(-1px);}
 nav.tabs button{position:relative;}
-nav.tabs button.active::after{content:''; position:absolute; inset-inline:22%; bottom:-9px; height:3px; border-radius:3px 3px 0 0;
-  background:linear-gradient(90deg,var(--brand),var(--brand2));}
+nav.tabs button.active{box-shadow:0 4px 14px rgba(79,70,229,.35), 0 0 0 3px rgba(79,70,229,.14);}
 nav.tabs button.active .ic svg{stroke-width:2.4;}
 nav.tabs button:focus-visible{outline:2px solid var(--brand); outline-offset:2px;}
 nav.tabs button:hover:not(.active){background:var(--soft); color:var(--ink);}
@@ -283,7 +284,7 @@ table.tbl.grades tr:hover td:first-child{background:#f2f6ff;}
   #logoSlot img,#logoSlot>span{height:34px !important; width:auto !important; max-width:96px !important;}
   #logoSlot svg{max-height:34px; width:auto;}
   #hdrCenter{flex:1 1 auto; min-width:0; gap:9px; margin-inline-start:10px;}
-  #hdrCenter>.glassIcon{display:none;}
+  /* (נשמר לתאימות) */
   header.app h1{font-size:16.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;}
   header.app{flex-wrap:nowrap;}
   #hdrActions{gap:6px; flex-shrink:0;}
@@ -304,6 +305,7 @@ table.tbl.grades tr:hover td:first-child{background:#f2f6ff;}
   .ring .rn{font-size:21px;}
   .ring-wrap{gap:12px;}
   .chartbox{height:230px;}
+  .chartbox.tall{height:340px;}
   h2.sec{font-size:15px;} h3.sec{font-size:13.5px;}
   /* ⚠️ קריטי לאייפון: פונט קטן מ-16px גורם לספארי להגדיל את כל העמוד בכל הקלקה */
   input[type=number],input[type=text],select,textarea{font-size:16px !important;}
@@ -357,6 +359,7 @@ table.tbl.grades tr:hover td:first-child{background:#f2f6ff;}
 .al-pot{background:#f5f3ff; border-right:4px solid var(--brand2);}
 .al-miss{background:#f8fafc; border-right:4px solid #94a3b8;}
 .chartbox{position:relative; height:280px;}
+.chartbox.tall{height:420px;}
 .subj-card{border:1px solid var(--line); border-radius:13px; margin-bottom:11px; overflow:hidden; box-shadow:0 2px 10px rgba(30,41,80,.05);}
 .subj-head{background:linear-gradient(135deg,#f1f4fb,#e9eefb); padding:11px 14px; font-weight:800; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;}
 .subj-head:hover{background:linear-gradient(135deg,#e9eefb,#e0e8fa);}
@@ -710,6 +713,24 @@ tr.rowFlash td{animation:rowFlash 1.5s var(--ease) both;}
 .symBtn{display:flex; flex-direction:column; align-items:center; gap:2px; line-height:1.25;}
 .symBtn b{font-size:13.5px; font-weight:800;}
 .symBtn i{font-style:normal; font-size:10.5px; font-weight:700; opacity:.6; font-family:ui-monospace,monospace; direction:ltr;}
+/* --- יישור אנכי מוחלט של תאי הציונים ---
+   כל תא בנוי מאותן שורות בגובה קבוע: תג הסמל, תוויות האחוזים, השדות,
+   ורק אחר כך "משוקלל". כך כל השדות בשורה עומדים על אותו קו בדיוק. */
+table.tbl.grades td{vertical-align:top;}
+table.tbl.grades td.cEmpty{color:#cbd5e1; vertical-align:middle; text-align:center;}
+.eWrap{display:grid; grid-template-rows:auto auto auto; justify-items:center; align-content:start;}
+.eTag{grid-row:1; height:19px; display:flex; align-items:flex-start; justify-content:center;}
+.eBox{grid-row:2;}
+.eAvg{grid-row:3;}
+.eBox.one{grid-template-columns:auto;}
+.eBox.one .gcell small{visibility:hidden;}
+@media(max-width:820px){.eTag{height:17px;}}
+/* --- מחוון ה-KPI ברוחב מלא --- */
+.kpi .txt{flex:1 1 auto;}
+.kpi .kbar{width:100%;}
+/* --- כרטיס המקרא: קומפקטי --- */
+.legendCard{padding:9px 13px !important; font-size:12px;}
+.legendCard .badge{font-size:11px;}
 </style>
 </head>
 <body>
@@ -1649,6 +1670,7 @@ function tip(text,inner,cls){
 
 /* ============ אזורים מתקפלים ============ */
 let openBoxes={};
+function toggleRings(){ openBoxes.rings=(openBoxes.rings===false); renderKeepScroll(); }
 function toggleBox(k){ openBoxes[k]=!openBoxes[k]; renderKeepScroll(); }
 
 /* ============ הערות (לכל קובייה ולכל מקצוע) ============ */
@@ -2372,7 +2394,7 @@ function kpiCard(k,icon,val,label,pct,sub,dec){
     <div class="ico">${ic(icon,24)}</div>
     <div class="txt">${kpiNum(val,'',dec)}<div class="t">${label}</div>
       ${sub?`<div class="ks">${sub}</div>`:''}
-      ${p!==null?`<div class="kbar"><i style="width:${p.toFixed(1)}%"></i></div>`:''}
+      ${(p!==null&&p>0)?`<div class="kbar"><i style="width:${p.toFixed(1)}%"></i></div>`:''}
     </div></div>`;
 }
 function kpiNum(v,suf,dec){
@@ -2660,21 +2682,27 @@ function renderDash(m){
     ${kpiCard('k5','warn',blocked,'עם מקצועות מעכבים',n?blocked/n*100:null,'מתחת ל-'+state.thresholds.pass)}
     ${kpiCard('k6','chart',avgAll,'ממוצע שכבתי',avgAll,'',true)}
   </div>`:''}
-  ${n?`<div class="card" style="margin-bottom:16px;"><div class="ring-wrap">
+  ${n?`<div class="card" style="margin-bottom:16px; padding:${openBoxes.rings===false?'10px 17px':'17px'};">
+    <div class="secHead" style="margin-bottom:${openBoxes.rings===false?'0':'10px'}; cursor:pointer;" onclick="toggleRings()">
+      <span class="shIco">${ic('target',16)}</span>
+      <span><span class="shT">אחוזים במבט אחד</span><span class="shS">אותם מספרים שבכרטיסים, ביחס לכל השכבה</span></span>
+      <span class="shR"><span style="font-size:15px; color:var(--muted);">${openBoxes.rings===false?'▾':'▴'}</span></span>
+    </div>
+    ${openBoxes.rings===false?'':`<div class="ring-wrap">
     ${ring(elig/n*100,'זכאות','#10b981',elig+' מתוך '+n)}
     ${ring(exc/n*100,'מצטיינות','#9333ea',exc+' תלמידות')}
     ${ring(pot/n*100,'פוטנציאל','#f59e0b',pot+' תלמידות')}
     ${ring(blocked/n*100,'עם מעכבים','#b0335a',blocked+' תלמידות')}
     ${ring(Math.max(0,Math.min(100,avgAll||0)),'ממוצע שכבתי','#4f46e5',avgAll===null?'—':String(avgAll))}
-  </div></div>`:''}
+  </div>`}</div>`:''}
   ${(()=>{ let r=0,b=0; studs.forEach(s=>Object.values(s.gstat||{}).forEach(v=>{v==='r'?r++:v==='b'?b++:0;}));
-    return (r||b)?`<div class="card" style="padding:10px 14px; margin-bottom:14px;">${statusLegend()}
+    return (r||b)?`<div class="card legendCard" style="margin-bottom:14px;">${statusLegend()}
       <div style="margin-top:6px; font-size:13px;">${r?`<span class="badge b-warn">🔴 ${r} ציונים אמיתיים שטרם דווחו למשרד</span> `:''}${b?`<span class="badge" style="background:#dbeafe; color:#1e40af;">🔵 ${b} ציונים פיקטיביים בשימוש</span>`:''}</div></div>`:''; })()}
   ${n?insightsHtml(results):''}
   ${n?`<div class="grid2">
     <div class="card">${secHead('chart','התפלגות סטטוס','כמה תלמידות בכל מצב')}<div class="chartbox"><canvas id="chStatus"></canvas></div></div>
     <div class="card">${secHead('users2','ממוצע וזכאות לפי כיתה','השוואה בין הכיתות בשכבה')}<div class="chartbox"><canvas id="chClass"></canvas></div></div>
-    <div class="card">${secHead('book','ממוצע לפי מקצוע','אילו מקצועות חזקים ואילו דורשים תשומת לב')}<div class="chartbox"><canvas id="chSubj"></canvas></div></div>
+    <div class="card">${secHead('book','ממוצע לפי מקצוע','אילו מקצועות חזקים ואילו דורשים תשומת לב')}<div class="chartbox tall"><canvas id="chSubj"></canvas></div></div>
     <div class="card">${secHead('trend','התפלגות ממוצעים','פיזור הממוצעים בשכבה')}<div class="chartbox"><canvas id="chHist"></canvas></div></div>
   </div>`:''}
   ${n?`<div class="card" style="margin-top:14px;">
@@ -2709,13 +2737,18 @@ function drawDashCharts(results,cls){
     data:{labels:classes,datasets:[{label:'ממוצע משוקלל',data:cavg,backgroundColor:'#6366f1',borderRadius:6},{label:'% זכאות',data:celig,backgroundColor:'#10b981',borderRadius:6}]},
     options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100}},plugins:{legend:{rtl:true}}}});
   const savg=SUBJECTS.map(sub=>{const vs=results.map(x=>x.r.per[sub.id]).filter(r=>r&&r.active&&r.final!==null).map(r=>r.final); return avgOf(vs);});
+  // הצבעים תואמים לשפה הסמנטית של המערכת: סגול=הצטיינות, אינדיגו=תקין,
+  // כתום=גבולי, בורדו=מתחת לסף המעכב, אפור=אין נתונים. אין כאן צבע חדש.
+  const subjColor=v=>v===null?'#cbd5e1':v>state.thresholds.excel?'#9333ea':v>=75?'#6366f1':v>=state.thresholds.pass?'#f59e0b':'#b0335a';
   charts.sj=new Chart(document.getElementById('chSubj'),{type:'bar',
-    data:{labels:SUBJECTS.map(s=>s.name),datasets:[{label:'ממוצע',data:savg,backgroundColor:savg.map(v=>v===null?'#cbd5e1':v>=90?'#f59e0b':v>=75?'#6366f1':v>=55?'#f97316':'#ef4444'),borderRadius:6}]},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{min:0,max:100}},plugins:{legend:{display:false}}}});
+    data:{labels:SUBJECTS.map(s=>s.name),datasets:[{label:'ממוצע',data:savg,backgroundColor:savg.map(subjColor),borderRadius:6}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      scales:{x:{min:0,max:100},y:{ticks:{autoSkip:false,font:{size:11}}}},
+      plugins:{legend:{display:false}}}});
   const bins=[0,0,0,0,0,0]; const labels=['<55','55-64','65-74','75-84','85-89','90+'];
   results.forEach(x=>{const v=x.r.avg; if(v===null)return; if(v<55)bins[0]++;else if(v<65)bins[1]++;else if(v<75)bins[2]++;else if(v<85)bins[3]++;else if(v<90)bins[4]++;else bins[5]++;});
   charts.hi=new Chart(document.getElementById('chHist'),{type:'bar',
-    data:{labels,datasets:[{label:'תלמידות',data:bins,backgroundColor:['#ef4444','#f97316','#eab308','#6366f1','#8b5cf6','#f59e0b'],borderRadius:6}]},
+    data:{labels,datasets:[{label:'תלמידות',data:bins,backgroundColor:['#b0335a','#e0820c','#eab308','#6366f1','#f59e0b','#9333ea'],borderRadius:6}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
 }
 
@@ -3380,7 +3413,7 @@ function entryGrid(subj,studs){
     if(subj.named) tds+=`<td><input type="text" data-k="n|${st.id}|${subj.id}" style="width:110px;" value="${esc((st.mugbarNames||{})[subj.id]||'')}" onchange="setMugbarName('${st.id}','${subj.id}',this.value)"></td>`;
     headComps.forEach((hc,i)=>{
       const c=comps[i];
-      if(u===0||!c||!c.w){ tds+='<td style="color:#cbd5e1;">—</td>'; return; }
+      if(u===0||!c||!c.w){ tds+='<td class="cEmpty">—</td>'; return; }
       const key=subj.id+'.'+i, g=st.grades||{};
       const nt=noteOf(st,key);
       const kc=k=>((g[k]==null?'cell-miss':'')+gstatCls(st,k));
@@ -3388,11 +3421,12 @@ function entryGrid(subj,studs){
       const dot=k=>`<button class="gstatDot ${gstatOf(st,k)}" onclick="cycleGstat('${st.id}','${k}')" title="החלפת סימון: שחור → אדום → כחול"></button>`;
       // תג סמל השאלון — מוצג ליד הציון; לחיצה עליו פותחת בחירה
       const myCode=((st.codes||{})[key]||'');
-      const codeTag=codeOptions(key).length
+      // שורת התג קיימת בכל תא — גם כשאין קטלוג שאלונים — כדי שכל השדות יעמדו על אותו קו
+      const codeTag=`<div class="eTag">${codeOptions(key).length
         ? `<button class="rowCode${myCode?'':' empty'}" onclick="pickCode('${st.id}','${key}')" title="${myCode?('סמל שאלון '+esc(myCode)+' — לחצי לשינוי'):'בחירת סמל שאלון'}">${myCode?esc(codeShort(myCode)):'סמל +'}</button>`
-        : '';
+        : ''}</div>`;
       if(c.t==='i'){
-        tds+=`<td class="${nt?'hasNote':''}" ${nt?`onclick="if(event.target===this)infoDlg('הערה',${JSON.stringify(nt)})"`:''}><div class="eWrap">${codeTag}<div class="gcell"><input type="number" min="0" max="100" data-k="g|${st.id}|${key}" class="${kc(key)}" ${ct(key)} value="${g[key]??''}" onchange="setGrade('${st.id}','${key}',this.value)">${dot(key)}</div></div></td>`;
+        tds+=`<td class="${nt?'hasNote':''}" ${nt?`onclick="if(event.target===this)infoDlg('הערה',${JSON.stringify(nt)})"`:''}><div class="eWrap">${codeTag}<div class="eBox one"><div class="gcell"><small>&nbsp;</small><input type="number" min="0" max="100" data-k="g|${st.id}|${key}" class="${kc(key)}" ${ct(key)} value="${g[key]??''}" onchange="setGrade('${st.id}','${key}',this.value)">${dot(key)}</div></div></div></td>`;
       }else{
         const eff=c.s;
         const eSplit=(r.flips||[]).some(f=>f.comp===c.n)?(100-eff):eff;   // אם היה היפוך — מציגים את החלוקה שבפועל
@@ -3844,7 +3878,7 @@ function simGrid(subj,studs){
           need=nd.ok?`<span class="needbadge" title="הזיני ציון זה כדי שהמקצוע יעבור">צריך ${nd.x}</span>`
                     :`<span class="badge b-bad" style="font-size:11px;">לא ניתן</span>`;
         }
-        tds+=`<td><div class="gcell"><input type="number" min="0" max="100" data-k="s|${st.id}|${key}" class="${cls(key)}" value="${g[key]??''}" onchange="setGradeSim('${st.id}','${key}',this.value)">${need}</div></td>`;
+        tds+=`<td><div class="eWrap"><div class="eTag"></div><div class="eBox one"><div class="gcell"><small>&nbsp;</small><input type="number" min="0" max="100" data-k="s|${st.id}|${key}" class="${cls(key)}" value="${g[key]??''}" onchange="setGradeSim('${st.id}','${key}',this.value)">${need}</div></div></div></td>`;
       }else{
         const eff=c.s;
         const eSplit=(r.flips||[]).some(f=>f.comp===c.n)?(100-eff):eff;
@@ -3852,7 +3886,7 @@ function simGrid(subj,studs){
         const rE=eff<100?`<div class="gcell"><small>בחינה ${100-eSplit}%</small><input type="number" min="0" max="100" data-k="s|${st.id}|${key}.e" class="${cls(key+'.e')}" value="${g[key+'.e']??''}" onchange="setGradeSim('${st.id}','${key}.e',this.value)"></div>`:'';
         const dvS=(r.details||[])[i], cvS=(dvS&&dvS.val!==null&&dvS.val!==undefined)?Math.round(dvS.val):null;
         const avgS=(rM&&rE)?`<div class="eAvg${cvS===null?' pend':''}">${cvS===null?'ממתין לשני הציונים':`משוקלל <b>${cvS}</b>`}</div>`:'';
-        tds+=`<td><div class="eWrap"><div class="eBox">${rM}${rE}</div>${avgS}</div></td>`;
+        tds+=`<td><div class="eWrap"><div class="eTag"></div><div class="eBox">${rM}${rE}</div>${avgS}</div></td>`;
       }
     });
     // מבחני כיתה — לא נכנסים לציון הרשמי, רק משפרים את החיזוי
@@ -5051,7 +5085,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='6.5';
+const APP_VERSION='6.7';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
