@@ -731,6 +731,64 @@ table.tbl.grades td.cEmpty{color:#cbd5e1; vertical-align:middle; text-align:cent
 /* --- כרטיס המקרא: קומפקטי --- */
 .legendCard{padding:9px 13px !important; font-size:12px;}
 .legendCard .badge{font-size:11px;}
+/* ============ שלב 4 — תלמידות ============ */
+/* אווטאר: גוון נטרלי אחיד. לא נצבע לפי סטטוס — כדי לא ליצור שפת צבעים שנייה. */
+.av{display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto; border-radius:50%;
+  background:linear-gradient(140deg,#e2e8f4,#cdd7ea); color:#41506b; font-family:var(--font-head,'Rubik'),sans-serif;
+  font-weight:800; letter-spacing:-.3px; border:1px solid rgba(255,255,255,.8); box-shadow:var(--el1);
+  user-select:none;}
+.stName{display:inline-flex; align-items:center; gap:8px; cursor:pointer;}
+.stName .name-link{cursor:pointer;}
+/* --- כרטיסי סיכום כיתה --- */
+.clsGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(232px,1fr)); gap:10px;}
+.clsCard{border:var(--hair); border-radius:var(--r-md); padding:11px 13px; background:rgba(255,255,255,.6);
+  transition:border-color var(--t-base) var(--ease), box-shadow var(--t-base) var(--ease);}
+.clsCard:hover{border-color:#c7d2fe; box-shadow:var(--el2);}
+.clsCard .ccTop{display:flex; align-items:baseline; gap:8px; margin-bottom:9px;}
+.clsCard .ccName{font-family:var(--font-head,'Rubik'),sans-serif; font-size:15px; font-weight:800; color:var(--ink);}
+.clsCard .ccN{font-size:11.5px; font-weight:700; color:var(--muted); margin-inline-start:auto;}
+.clsCard .ccStats{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; padding:8px 0; border-top:var(--hair); border-bottom:var(--hair);}
+.clsCard .ccStat{display:flex; flex-direction:column; align-items:center; gap:1px; min-width:0;}
+.clsCard .ccStat b{font-family:var(--font-num,'Rubik'),sans-serif; font-size:15px; font-weight:800; line-height:1.1;}
+.clsCard .ccStat i{font-style:normal; font-size:9.5px; font-weight:700; color:var(--muted); text-align:center; line-height:1.2;}
+.clsCard .ccAct{display:flex; gap:6px; margin-top:9px;}
+.clsCard .ccAct .btn{flex:1 1 auto; justify-content:center; font-size:11.5px;}
+/* --- Action Cards --- */
+.actCard{border:var(--hair2);}
+@media(max-width:820px){.clsGrid{grid-template-columns:1fr;}}
+/* ============ שלב 4 — כרטיס תלמידה ============ */
+.stSum{display:flex; align-items:center; gap:13px; flex-wrap:wrap;}
+.stSum .stId{min-width:0; flex:0 1 auto;}
+.stSum .stNm{font-family:var(--font-head,'Rubik'),sans-serif; font-size:18px; font-weight:800; letter-spacing:-.3px; line-height:1.2; color:var(--ink);}
+.stSum .stMeta{display:flex; align-items:center; gap:6px; margin-top:4px; flex-wrap:wrap;}
+.stSum .stMeta select{font-size:12px; padding:2px 8px; height:24px;}
+.stSum .stStats{display:flex; gap:7px; margin-inline-start:auto; flex-wrap:wrap;}
+.stSum .stStat{display:flex; flex-direction:column; align-items:center; gap:1px; min-width:62px;
+  background:var(--soft); border:var(--hair); border-radius:var(--r-md); padding:6px 10px;}
+.stSum .stStat b{font-family:var(--font-num,'Rubik'),sans-serif; font-size:16px; font-weight:800; line-height:1.05;}
+.stSum .stStat i{font-style:normal; font-size:9.5px; font-weight:700; color:var(--muted); white-space:nowrap;}
+.stSum .stX{flex:0 0 auto; padding:6px 9px;}
+.stLg{margin-top:9px;}
+/* --- כותרת מקצוע קומפקטית --- */
+.subj-head{gap:10px;}
+.subj-head .shL{display:flex; align-items:center; gap:7px; flex-wrap:wrap; min-width:0;}
+.subj-head .sjName{font-family:var(--font-head,'Rubik'),sans-serif; font-size:14px; font-weight:800; color:var(--ink);}
+.subj-head .shTools{display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin-inline-start:auto;}
+.subj-head .shScore{display:flex; align-items:center; gap:6px; flex:0 0 auto;}
+.sfTag{display:inline-flex; align-items:center; gap:3px; font-size:10.5px; font-weight:800; padding:2px 7px;
+  border-radius:var(--r-pill); background:var(--soft); color:var(--muted); border:var(--hair); white-space:nowrap;}
+.sfTag svg{stroke:currentColor;}
+.sfTag.on{background:#f5f3ff; color:#6d28d9; border-color:#ddd6fe;}
+.sfTag.warn{background:#fffbeb; color:#92400e; border-color:#fde68a;}
+.sfTag.bad{background:#fff1f4; color:#9f1239; border-color:#f3bfcb;}
+@media(max-width:820px){
+  .stSum{gap:10px;}
+  .stSum .stNm{font-size:16px;}
+  .stSum .stStats{margin-inline-start:0; flex-basis:100%; justify-content:space-between;}
+  .stSum .stStat{min-width:0; flex:1 1 auto; padding:5px 6px;}
+  .stSum .stStat b{font-size:14px;}
+  .subj-head .shTools{margin-inline-start:0; flex-basis:100%;}
+}
 </style>
 </head>
 <body>
@@ -2123,7 +2181,7 @@ function calcStudent(st,opts){
   const T=state.thresholds;
   if(!anyFinal){ status='אין נתונים'; cls='b-miss'; }
   else if(blockers.length>0){ status='מעכבים: '+blockers.length; cls='b-bad'; }
-  else if(!complete){ status='חסר נתונים'; cls='b-miss'; }
+  else if(!complete){ status='ממוצע חלקי'; cls='b-miss'; }
   else if(avg>T.excel&&unitsOk){ status='מצטיינת ⭐'; cls='b-exc'; }
   else if(avg>=T.potential&&avg<=T.excel&&unitsOk){ status='פוטנציאל הצטיינות'; cls='b-pot'; }
   else{ status='זכאית'; cls='b-ok'; }
@@ -2722,7 +2780,7 @@ function topTable(results){
 }
 const PALETTE=['#9333ea','#f59e0b','#10b981','#b0335a','#94a3b8','#64748b'];
 function drawDashCharts(results,cls){
-  const order=['מצטיינת','פוטנציאל','זכאית','מעכבים','חסר נתונים'];
+  const order=['מצטיינת','פוטנציאל','זכאית','מעכבים','ממוצע חלקי'];
   const cnt=[results.filter(x=>x.r.excellent).length, results.filter(x=>x.r.potential).length,
     results.filter(x=>x.r.eligible&&!x.r.excellent&&!x.r.potential).length,
     results.filter(x=>x.r.blockers.length>0).length,
@@ -2753,24 +2811,72 @@ function drawDashCharts(results,cls){
 }
 
 /* ============ תלמידות ============ */
+/* ============ שלב 4 — עזרי מסך התלמידות ============ */
+// ראשי תיבות משם עברי. גוון נטרלי אחיד — לעולם לא לפי סטטוס,
+// כדי שלא ייווצר צבע נוסף שמתחרה בשפת הצבעים של הציונים.
+function initials(name){
+  const w=String(name||'').replace(/["'׳״]/g,'').split(/[\s\-]+/).filter(Boolean);
+  if(!w.length) return '–';
+  if(w.length===1) return w[0].slice(0,2);
+  return (w[0][0]||'')+(w[1][0]||'');
+}
+function avatar(name,size){
+  const s=size||30;
+  return `<span class="av" style="width:${s}px;height:${s}px;font-size:${Math.round(s*0.42)}px" aria-hidden="true">${esc(initials(name))}</span>`;
+}
+// סיכום לכל כיתה — נגזר מ-calcStudent הקיים בלבד
+function classSummary(){
+  if(!state.classes.length) return '';
+  const cards=state.classes.map(c=>{
+    const ss=state.students.filter(s=>s.cls===c);
+    const rs=ss.map(s=>calcStudent(s));
+    const avg=avgOf(rs.map(r=>r.avg).filter(v=>v!==null));
+    const exc=rs.filter(r=>r.excellent).length;
+    const bad=rs.filter(r=>r.blockers.length>0).length;
+    const miss=rs.filter(r=>r.missing.length>0).length;
+    return `<div class="clsCard">
+      <div class="ccTop"><span class="ccName">${esc(c)}</span>
+        <span class="ccN">${ss.length} תלמידות</span></div>
+      <div class="ccStats">
+        <span class="ccStat"><b class="${gradeClass(avg)}">${fmt(avg)}</b><i>ממוצע</i></span>
+        <span class="ccStat"><b>${exc}</b><i>מצטיינות</i></span>
+        <span class="ccStat"><b class="${bad?'grade-bad':''}">${bad}</b><i>דורשות טיפול</i></span>
+        <span class="ccStat"><b>${miss}</b><i>עם חסרים</i></span>
+      </div>
+      <div class="ccAct">
+        <button class="btn sec sm" onclick="entryClass='${esc(c)}';setTab('entry')">${ic('pen',13)}הזנת ציונים</button>
+        <button class="btn sec sm" onclick="reportClass='${esc(c)}';setTab('reports')">${ic('file',13)}דוח</button>
+      </div></div>`;
+  }).join('');
+  return `<div class="card" style="margin-bottom:14px;">
+    ${secHead('layers','סיכום לפי כיתה','מבט מהיר על כל כיתה בשכבה')}
+    <div class="clsGrid">${cards}</div></div>`;
+}
 function renderStudents(m){
+  const nAll=state.students.length;
   m.innerHTML=`
+  ${hero('users2','תלמידות',
+    nAll?`${nAll} תלמידות ב-${state.classes.length} כיתות · ניהול שמות, כיתות וכרטיסי תלמידה`
+        :'ניהול שמות, כיתות וכרטיסי תלמידה',
+    [`<button class="btn sm" onclick="document.getElementById('xlsxFile').click()">${ic('up',14)}ייבוא מאקסל</button>`,
+     `<button class="btn sec sm" onclick="setTab('entry')">${ic('pen',14)}הזנת ציונים</button>`],'education')}
+  ${nAll?classSummary():''}
   <div class="grid2">
-    <div class="card">
-      <h3 class="sec">הוספת תלמידה</h3>
+    <div class="card actCard">
+      ${secHead('plus','הוספת תלמידה','שם אחד, או הדבקת רשימה שלמה')}
       ${state.classes.length?'':'<div class="alert-item al-info" style="margin-bottom:8px;">👈 שלב ראשון: צרי כיתה בחלונית "ניהול כיתות", ואז אפשר להוסיף תלמידות.</div>'}
       <div class="toolbar">
         <input type="text" id="newName" placeholder="שם התלמידה" style="width:180px;" ${state.classes.length?'':'disabled'}>
         <select id="newCls" ${state.classes.length?'':'disabled'}>${state.classes.length?state.classes.map(c=>`<option>${esc(c)}</option>`).join(''):'<option value="">— אין כיתות —</option>'}</select>
-        <button class="btn ok" onclick="addStudent()" ${state.classes.length?'':'disabled style="opacity:.5;"'}>➕ הוספה</button>
+        <button class="btn ok" onclick="addStudent()" ${state.classes.length?'':'disabled style="opacity:.5;"'}>${ic('plus',14)}הוספה</button>
       </div>
       <div class="note">אפשר גם להדביק רשימה: שם אחד בכל שורה</div>
       <textarea id="bulkNames" rows="3" style="width:100%; margin-top:6px; border:1px solid #cbd5e1; border-radius:8px; padding:8px; font-family:inherit;" placeholder="שרה כהן&#10;רבקה לוי&#10;..."></textarea>
       <button class="btn sec sm" style="margin-top:6px;" onclick="bulkAdd()">הוספת כל הרשימה</button>
     </div>
-    <div class="card">
-      <h3 class="sec">ניהול כיתות</h3>
-      <div class="toolbar"><input type="text" id="newClsName" placeholder="למשל: יב-3" style="width:140px;"><button class="btn ok sm" onclick="addClass()">➕ כיתה</button></div>
+    <div class="card actCard">
+      ${secHead('layers','ניהול כיתות','יצירת כיתות ומחיקתן')}
+      <div class="toolbar"><input type="text" id="newClsName" placeholder="למשל: יב-3" style="width:140px;"><button class="btn ok sm" onclick="addClass()">${ic('plus',13)}כיתה</button></div>
       <div>${state.classes.map(c=>`<span class="pill" style="margin:3px; display:inline-block;">${esc(c)} · ${state.students.filter(s=>s.cls===c).length} תלמידות
         <a style="color:var(--bad); cursor:pointer; font-weight:800;" onclick="delClass('${esc(c)}')">✕</a></span>`).join('')||'<span class="note">אין כיתות — צרי כיתה למעלה, או ייבאי קובץ אקסל והכיתה תיווצר אוטומטית</span>'}</div>
       <div class="dangerZone">
@@ -2798,11 +2904,13 @@ function renderStudents(m){
   </div>`;
 }
 function allStudentsTable(){
-  if(!state.students.length) return '<div class="note">עדיין אין תלמידות</div>';
+  if(!state.students.length) return emptyState('empty','עדיין אין תלמידות',
+    'הוסיפו שם אחד בחלונית שמעל, הדביקו רשימה שלמה, או ייבאו את קובץ הסימולטור וכל הכיתה תיכנס בלחיצה אחת.',null,
+    [`<button class="btn" onclick="document.getElementById('xlsxFile').click()">${ic('up',15)}ייבוא מאקסל</button>`]);
   const rows=state.students.map(st=>({st,r:calcStudent(st)})).sort((a,b)=>a.st.cls.localeCompare(b.st.cls)||a.st.name.localeCompare(b.st.name));
   return `<table class="tbl grades"><thead><tr><th>שם</th><th class="cCls">כיתה</th><th>ממוצע</th><th>יח"ל</th><th>מעכבים</th><th>חסרים</th><th>סטטוס</th><th></th></tr></thead><tbody>
   ${rows.map(x=>`<tr>
-    <td><span class="name-link" onclick="openStudent('${x.st.id}')">${esc(x.st.name)}</span></td>
+    <td><span class="stName" onclick="openStudent('${x.st.id}')">${avatar(x.st.name)}<span class="name-link">${esc(x.st.name)}</span></span></td>
     <td class="cCls"><select onchange="setStudentClass('${x.st.id}',this.value)">${state.classes.map(c=>`<option ${x.st.cls===c?'selected':''}>${esc(c)}</option>`).join('')}</select></td>
     <td class="${gradeClass(x.r.avg)}">${fmt(x.r.avg)}</td>
     <td>${x.r.totalUnits}</td>
@@ -2872,16 +2980,27 @@ function openStudent(id){
   if(!st) return;
   const box=document.getElementById('studentBox');
   const r=calcStudent(st);
+  const nMiss=r.missing.length, nBad=r.blockers.length;
   box.innerHTML=`
   <div class="stHead">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
-    <h2 class="sec" style="margin:0;">✏️ ${esc(st.name)}
-      <select onchange="setStudentClass('${st.id}',this.value)" style="margin-inline-start:4px;">${state.classes.map(c=>`<option ${st.cls===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
-      <span class="badge ${r.cls}" style="margin-inline-start:8px;">${r.status}</span>
-      <span class="pill">ממוצע: ${fmt(r.avg)}</span><span class="pill">${r.totalUnits} יח"ל</span></h2>
-    <button class="btn sec sm" onclick="closeStudent()">סגירה ✕</button>
+  <div class="stSum">
+    ${avatar(st.name,46)}
+    <div class="stId">
+      <div class="stNm">${esc(st.name)}</div>
+      <div class="stMeta">
+        <select onchange="setStudentClass('${st.id}',this.value)">${state.classes.map(c=>`<option ${st.cls===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+        <span class="badge ${r.cls}">${r.status}</span>
+      </div>
+    </div>
+    <div class="stStats">
+      <span class="stStat"><b class="${gradeClass(r.avg)}">${fmt(r.avg)}</b><i>ממוצע</i></span>
+      <span class="stStat"><b>${r.totalUnits}</b><i>יח"ל</i></span>
+      <span class="stStat"><b class="${nMiss?'grade-warn':''}">${nMiss}</b><i>מקצועות חסרים</i></span>
+      <span class="stStat"><b class="${nBad?'grade-bad':''}">${nBad}</b><i>מעכבים</i></span>
+    </div>
+    <button class="btn sec sm stX" onclick="closeStudent()" title="סגירה">${ic('x',15)}</button>
   </div>
-  <div>${statusLegend()}</div>
+  <div class="stLg">${statusLegend()}</div>
   </div>
   <div class="stBody">
   ${SUBJECTS.map(subj=>studentSubjEditor(st,subj)).join('')}
@@ -2971,7 +3090,21 @@ function studentSubjEditor(st,subj){
   const presetSel=subj.named?`<select onclick="event.stopPropagation()" onchange="applyMugbarPreset('${st.id}','${subj.id}',this.value)" style="font-size:11.5px;" title="החלת מבנה משקלים וסמלי שאלונים מקטלוג בית הספר">
     <option value="">📋 מבנה מהקטלוג...</option>
     ${Object.keys(MUGBAR_PRESETS).map(p=>`<option>${esc(p)}</option>`).join('')}</select>`:'';
-  return `<div class="subj-card open"><div class="subj-head"><span>${esc(subj.name)} ${nameInput} ${unitsSel} ${noteBtn(st,subj.id,'הערה כללית — '+subj.name)} ${bonusBtn} ${presetSel} ${testChip} ${resetBtn}</span><span>${finalHtml}</span></div>
+  const nt=noteOf(st,subj.id);
+  const flags=[
+    u===0?'':(custom?`<span class="sfTag on" title="לתלמידה זו יש התאמה אישית במקצוע">${ic('pen',11)}מותאם</span>`:''),
+    nt?`<span class="sfTag" title="${esc(nt)}">${ic('note',11)}הערה</span>`:'',
+    (u!==0&&r.missing)?`<span class="sfTag warn" title="טרם הוזנו כל הרכיבים">${r.missing} חסרים</span>`:'',
+    (u!==0&&r.blocker&&!subj.internalOnly)?`<span class="sfTag bad">מעכב</span>`:''
+  ].filter(Boolean).join('');
+  return `<div class="subj-card open">
+    <div class="subj-head">
+      <span class="shL">
+        <span class="sjName">${esc(subj.name)}</span>${nameInput}${unitsSel}${flags}
+      </span>
+      <span class="shTools">${noteBtn(st,subj.id,'הערה כללית — '+subj.name)}${bonusBtn}${presetSel}${testChip}${resetBtn}</span>
+      <span class="shScore">${finalHtml}</span>
+    </div>
   <div class="subj-body">${body}</div></div>`;
 }
 function addBonus(id,sid,i){
@@ -3365,7 +3498,7 @@ function fltBar(subj,total,shown){
     <span class="fLbl">${ic('search',14)} סינון</span>
     ${sel('u',uPh,uOpts)}
     ${sel('fill','מלאות וחסרות',[['miss',subj?'חסר ציון במקצוע':'חסר ציון באחד המקצועות'],['done',subj?'הושלם במקצוע':'כל המקצועות הושלמו']])}
-    ${sel('stat','כל הסטטוסים',[['exc','⭐ מצטיינות'],['pot','✨ פוטנציאל'],['elig','✓ זכאיות'],['bad','🚩 עם מעכבים'],['brd','⚠️ גבוליות'],['inc','… חסר נתונים']])}
+    ${sel('stat','כל הסטטוסים',[['exc','⭐ מצטיינות'],['pot','✨ פוטנציאל'],['elig','✓ זכאיות'],['bad','🚩 עם מעכבים'],['brd','⚠️ גבוליות'],['inc','… ממוצע חלקי']])}
     <span class="fLbl" style="margin-inline-start:8px;">מיון</span>
     <select class="fSel" onchange="fltSet('sort',this.value)">
       ${[['name','שם'],['cls','כיתה ואז שם'],['uDesc','יח"ל — מהגבוה'],['uAsc','יח"ל — מהנמוך']]
@@ -5085,7 +5218,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='6.7';
+const APP_VERSION='6.8';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
