@@ -23,6 +23,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Assistant:wght@400;600;700;800&family=Heebo:wght@400;600;700;800;900&family=Varela+Round&family=Noto+Sans+Hebrew:wght@400;600;700;800&family=Secular+One&family=Frank+Ruhl+Libre:wght@400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root{
   --bg:#eef1f9; --card:#fff; --ink:#16233a; --muted:#64748b;
@@ -802,6 +803,13 @@ table.tbl.grades td.cEmpty{color:#cbd5e1; vertical-align:middle; text-align:cent
 .cmpCard .clsCard{padding:9px 11px;}
 .cmpCard .clsCard .ccStats{padding:6px 0;}
 .cmpCard .clsCard .ccAct{margin-top:7px;}
+/* --- כפתור מחיקה שקט: אפור עד שנוגעים בו --- */
+button.btn.xq{background:transparent; color:#a5b0c2; border:1px solid transparent; box-shadow:none;
+  padding:4px 7px; display:inline-flex; align-items:center; justify-content:center;}
+button.btn.xq svg{stroke:currentColor; stroke-width:2.2;}
+button.btn.xq:hover{background:#fff1f4; color:#b3223f; border-color:#f3bfcb; box-shadow:none; filter:none; transform:none;}
+button.btn.xq:active{background:#ffe4ea; transform:scale(.94);}
+button.btn.xq:focus-visible{outline:2px solid var(--bad); outline-offset:1px;}
 </style>
 </head>
 <body>
@@ -1943,7 +1951,7 @@ function exportLog(){
   const rows=lg.map(x=>({'תאריך':new Date(x.t).toLocaleString('he-IL'),'סוג':x.ty,'תלמידה':x.s,'פרטים':x.d,'מ':x.f,'ל':x.o}));
   const wb=XLSX.utils.book_new();
   addSheet(wb,XLSX.utils.json_to_sheet(rows),'יומן שינויים');
-  XLSX.writeFile(wb,`יומן-שינויים-${new Date().toISOString().slice(0,10)}.xlsx`);
+  saveXlsx(wb,`יומן-שינויים-${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 function doUndo(){
   const u=undoStack.pop();
@@ -2007,7 +2015,7 @@ function renderTestsDlg(){
     <td><input type="text" value="${esc(t.n)}" style="width:150px;" onchange="tdSet(${i},'n',this.value)"></td>
     <td><input type="number" min="0" max="100" value="${t.g}" onchange="tdSet(${i},'g',this.value)"></td>
     <td><input type="number" min="0.5" max="10" step="0.5" value="${t.w}" style="width:60px;" onchange="tdSet(${i},'w',this.value)"></td>
-    <td><button class="btn bad sm" onclick="tdDel(${i})">✕</button></td></tr>`).join('')}
+    <td><button class="btn xq sm" onclick="tdDel(${i})" title="מחיקה">${ic('x',14)}</button></td></tr>`).join('')}
   ${arr.length?'':'<tr><td colspan="4" class="note" style="text-align:center; padding:14px;">עדיין לא הוזנו בדיקות</td></tr>'}
   </tbody>
   ${arr.length?`<tfoot><tr><th>ממוצע משוקלל</th><th class="${gradeClass(avg)}" style="font-size:16px;">${avg}</th><th colspan="2"></th></tr></tfoot>`:''}
@@ -2931,8 +2939,8 @@ function allStudentsTable(){
     <td>${x.r.blockers.length?`<span class="badge b-bad">${x.r.blockers.map(s=>s.name).join(', ')}</span>`:'—'}</td>
     <td>${x.r.missing.length||'—'}</td>
     <td class="status-cell"><span class="badge ${x.r.cls}">${x.r.status}</span></td>
-    <td><button class="btn sec sm" onclick="openStudent('${x.st.id}')">✏️ ציונים</button>
-        <button class="btn bad sm" onclick="delStudent('${x.st.id}')">✕</button></td>
+    <td><button class="btn sec sm" onclick="openStudent('${x.st.id}')">${ic('pen',13)}ציונים</button>
+        <button class="btn xq sm" onclick="delStudent('${x.st.id}')" title="מחיקת ${esc(x.st.name)}">${ic('x',14)}</button></td>
   </tr>`).join('')}</tbody></table>`;
 }
 function addStudent(){
@@ -4697,10 +4705,42 @@ function setCustom(sid,u,i,field,val){
 }
 
 /* ============ אקסל ============ */
-// כל גיליון נפתח מימין לשמאל — תקן ישראלי. RTL:true הוא חלק מתקן ה-XLSX,
-// ולכן אקסל, Google Sheets ו-LibreOffice מכבדים אותו.
+/* ============ ייצוא לאקסל בתקן ישראלי (מימין לשמאל) ============
+   הערה חשובה: SheetJS 0.18.5 *לא* כותב את המאפיין rightToLeft לקובץ,
+   גם כשמגדירים ws['!views']=[{RTL:true}] — בדקנו את ה-XML שנוצר.
+   לכן אחרי הכתיבה פותחים את ה-ZIP ומוסיפים rightToLeft="1" לכל גיליון.
+   כך אקסל, Google Sheets ו-LibreOffice פותחים את הקובץ עם עמודה A בימין. */
 function sheetRTL(ws){ ws['!views']=[{RTL:true}]; return ws; }
 function addSheet(wb,ws,name){ XLSX.utils.book_append_sheet(wb,sheetRTL(ws),name); }
+function dlBlob(blob,fname){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=fname;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1500);
+}
+async function saveXlsx(wb,fname){
+  // בלי JSZip — נופלים חזרה לכתיבה רגילה. הנתונים תמיד יוצאים; רק כיוון התצוגה לא ייכפה.
+  if(typeof JSZip==='undefined'){ XLSX.writeFile(wb,fname); toast('הקובץ נשמר'); return; }
+  try{
+    const arr=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+    const zip=await JSZip.loadAsync(arr);
+    const names=Object.keys(zip.files).filter(n=>/^xl\/worksheets\/sheet\d+\.xml$/.test(n));
+    for(const n of names){
+      let s=await zip.file(n).async('string');
+      // חשוב: התו שאחרי sheetView חייב להיות רווח / סוגר — אחרת הביטוי תופס גם
+      // את התג העוטף <sheetViews> והופך אותו ל-XML פגום.
+      if(/<sheetView[ \/>]/.test(s)) s=s.replace(/<sheetView(?=[ \/>])(?![^>]*rightToLeft)/g,'<sheetView rightToLeft="1"');
+      else s=s.replace('<sheetData','<sheetViews><sheetView rightToLeft="1" workbookViewId="0"/></sheetViews><sheetData');
+      zip.file(n,s);
+    }
+    const blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',
+      mimeType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    dlBlob(blob,fname);
+    toast('הקובץ נשמר — נפתח מימין לשמאל');
+  }catch(e){
+    XLSX.writeFile(wb,fname); toast('הקובץ נשמר');
+  }
+}
 function exportExcel(cls){
   cls=typeof cls==='string'?cls:'';
   const studs=repStuds(cls);
@@ -4758,7 +4798,7 @@ function exportExcel(cls){
       'ממוצע':avgOf(rs.map(r=>r.avg).filter(v=>v!==null))??''};
   });
   addSheet(wb,XLSX.utils.json_to_sheet(anRows),'ניתוח כיתתי');
-  XLSX.writeFile(wb,`דוח-בגרות-${cls||'שכבה'}-${new Date().toISOString().slice(0,10)}.xlsx`);
+  saveXlsx(wb,`דוח-בגרות-${cls||'שכבה'}-${new Date().toISOString().slice(0,10)}.xlsx`);
   toast('הקובץ ירד למחשב');
 }
 /* ייבוא חכם של קובץ הסימולטור המקורי (אקסל) — מזהה את המבנה וממלא את כל הציונים */
@@ -5236,7 +5276,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='6.9';
+const APP_VERSION='7.0';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
