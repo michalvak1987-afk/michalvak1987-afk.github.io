@@ -5985,7 +5985,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='9.0';
+const APP_VERSION='9.2';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
@@ -6319,18 +6319,24 @@ async function driveSyncAll(initial){
       if(rv>lv&&!dirty){                                                        // הדרייב חדש והמקומי נקי
         const pl=await driveLoad(pid);
         if(pl&&+pl.schemaVer>SCHEMA_VER){ dv.state='error'; dv.lastErr='הקובץ בדרייב נשמר בגרסה חדשה יותר של התוכנה — יש לעדכן'; continue; }
+        const cur0=(pid===currentProfileId)?state:loadProfileState(pid);
+        if(pl&&!((pl.state.students||[]).length)&&cur0&&(cur0.students||[]).length){
+          markDirty(pid); dv.wiped=(cur0.students||[]).length;                  // קובץ ריק לא מוחק מכשיר מלא — מעלים את שלנו
+          continue;
+        }
         if(pl) driveApplyRemote(pid,pl,rv);
       }else if(rv>lv&&dirty){ dv.state='conflict'; conf[pid]=true; await driveConflict(pid); }
     }
     for(const pid of Object.keys(dv.queue)) if(!conf[pid]) await driveSave(pid);
     if(initial) driveLanding();
+    if(dv.wiped){ toast('הקובץ בדרייב היה ריק — '+dv.wiped+' תלמידות שוחזרו מהמכשיר הזה'); dv.wiped=0; }
     if(dv.state!=='conflict'&&dv.state!=='error'){ dv.state='synced'; dv.lastSync=Date.now(); LS.setItem('bagrutDvLast',String(dv.lastSync)); }
   }catch(e){ dv.state='error'; dv.lastErr=e.message; }
   dv.busy=false; renderSyncInd(); if(initial) render();
 }
 function driveRegisterProfile(pid,pl){
   let pr=profiles.find(p=>p.id===pid);
-  if(!pr){ pr={id:pid,name:pl.name||''}; if(!pr.name) pr.unnamed=1; profiles.push(pr); saveProfiles(); return true; }
+  if(!pr){ pr={id:pid,name:pl.name||''}; if(!pr.name) pr.unnamed=1; profiles.push(pr); saveProfiles(); dv.newProf=true; return true; }
   if(pl.name&&pr.name!==pl.name){ pr.name=pl.name; delete pr.unnamed; saveProfiles(); }
   return false;
 }
@@ -6340,7 +6346,7 @@ function profEmpty(pid){
   return !s||!(s.students||[]).length;
 }
 function driveLanding(){
-  if(!dv.newProf) return; dv.newProf=false;
+  dv.newProf=false;
   const full=profiles.filter(p=>!profEmpty(p.id));
   if(!full.length) return;
   if(profEmpty(currentProfileId)){
@@ -6354,12 +6360,11 @@ function driveLanding(){
   }
 }
 function driveApplyRemote(pid,pl,rv){
-  const isNew=driveRegisterProfile(pid,pl);                 // חובה לפני הכתיבה: בלי רשומת פרופיל הנתונים בלתי נגישים
+  driveRegisterProfile(pid,pl);                             // חובה לפני הכתיבה: בלי רשומת פרופיל הנתונים בלתי נגישים
   const cur=(pid===currentProfileId)?state:loadProfileState(pid);
   const merged=applyPayload(cur,pl);
   if(pid===currentProfileId){ state=merged; save(true); }
   else saveProfileState(pid,merged);
-  if(isNew) dv.newProf=true;
   setLocalVer(pid,rv); dv.sig[pid]=payloadSig(pl); saveBase(pid,merged);
 }
 
@@ -6371,8 +6376,13 @@ function mergeStates(mine,theirs,base){
   const clash=[];
   const byId=o=>{ const m={}; ((o&&o.students)||[]).forEach(s=>m[s.id]=s); return m; };
   const M=byId(mine), T=byId(theirs), B=byId(base);
-  // תלמידות שנוספו רק אצלי
-  Object.keys(M).forEach(id=>{ if(!T[id]&&!B[id]) out.students.push(JSON.parse(JSON.stringify(M[id]))); });
+  /* שומר סף נגד מחיקה סיטונית: קובץ ריק או מחיקה של חלק גדול מהתלמידות אינם "החלטה" —
+     הם כמעט תמיד תקלה. במצב כזה לא מוחקים כלום, גם במחיר שתלמידה שנמחקה במתכוון תחזור. */
+  const nMine=Object.keys(M).length, nTheirs=Object.keys(T).length, nBase=Object.keys(B).length;
+  const gone=Object.keys(B).filter(id=>M[id]&&!T[id]).length;
+  const wipe=(nTheirs===0&&nMine>0)||(gone>Math.max(2,Math.floor(nBase*0.4)));
+  // תלמידות שנוספו רק אצלי — ובמצב חשוד גם כל מי שנעלמה מהצד השני
+  Object.keys(M).forEach(id=>{ if(!T[id]&&(!B[id]||wipe)) out.students.push(JSON.parse(JSON.stringify(M[id]))); });
   const O=byId(out);
   Object.keys(M).forEach(id=>{
     const m=M[id], t=O[id], b=B[id]||{};
@@ -6387,12 +6397,13 @@ function mergeStates(mine,theirs,base){
         if(JSON.stringify(a)===JSON.stringify(z)) return;                  // רק הם שינו
         clash.push({id,name:m.name,fld,key:k,mine:a,theirs:c});            // שניים שינו
       });
-      Object.keys(bb).forEach(k=>{ if(!(k in mm)&&(k in tt)&&JSON.stringify(tt[k])===JSON.stringify(bb[k])) delete t[fld][k]; }); // מחקתי
+      if(!wipe) Object.keys(bb).forEach(k=>{ if(!(k in mm)&&(k in tt)&&JSON.stringify(tt[k])===JSON.stringify(bb[k])) delete t[fld][k]; }); // מחקתי
     });
   });
   // כיתות — איחוד
   out.classes=[...new Set([...(theirs.classes||[]),...(mine.classes||[])])];
-  return {merged:out,clash};
+  if(wipe&&(mine.logo||theirs.logo)) out.logo=theirs.logo||mine.logo;
+  return {merged:out,clash,wipe:wipe?gone||nMine:0};
 }
 let cf={pid:'',mine:null,theirs:null,pl:null,clash:[],pick:{}};
 async function driveConflict(pid){
@@ -6402,6 +6413,7 @@ async function driveConflict(pid){
     autoSnapshot(true);
     const res=mergeStates(mine,applyPayload(mine,pl),loadBase(pid));
     cf={pid,mine,theirs:pl.state,pl,clash:res.clash,pick:{},merged:res.merged};
+    if(res.wipe) dv.wiped=res.wipe;
     if(!res.clash.length){ await driveResolve('merge'); return; }        // חובה להמתין — אחרת ההעלאה נקטעת                 // מיזוג שקט
     renderConflict();
     document.getElementById('cfModal').classList.add('show');
@@ -6466,6 +6478,7 @@ async function driveResolve(){
   setLocalVer(cf.pid,(dv.files[cf.pid]||{}).ver||localVer(cf.pid));
   clearDirty(cf.pid); dv.state='saving';
   const el=document.getElementById('cfModal'); if(el) el.classList.remove('show');
+  driveLanding();                                            // אחרת נשארים על הפרופיל הריק גם כשהנתונים כבר כאן
   render();
   await driveSave(cf.pid,true);
   toast('הנתונים מוזגו וסונכרנו');
