@@ -1140,6 +1140,31 @@ table.tbl.grades tbody tr:focus-within td:first-child{background:#eaf0ff;}
   .scroll{position:relative;}
   table.tbl.grades{min-width:520px;}
 }
+/* --- הבטחת ההפרדה בסימולציה --- */
+.simVow{display:flex; align-items:flex-start; gap:9px; padding:9px 13px; margin-bottom:10px; font-size:12.5px; line-height:1.6;
+  background:#f6fffb; border:1px solid #a7f3d0; border-inline-start:4px solid var(--ok); border-radius:var(--r-md); color:#065f46;}
+.simVow svg{flex:0 0 auto; stroke:currentColor; margin-top:2px;}
+.commitBox{border:1px solid #f3bfcb; border-inline-start:4px solid #b3223f; margin-bottom:14px;
+  background:linear-gradient(120deg,rgba(179,34,63,.04),rgba(255,255,255,0));}
+.commitBox .cbHead{display:flex; align-items:center; gap:8px; font-weight:800; color:#9f1239; font-size:13.5px; margin-bottom:7px;}
+.commitBox .cbHead svg{stroke:currentColor;}
+/* --- חיווי בהזנת ציונים --- */
+.simNote{display:flex; align-items:center; gap:9px; padding:8px 13px; margin-bottom:10px; font-size:12.5px;
+  background:#fffdf5; border:1px solid #fcd34d; border-inline-start:4px solid var(--warn); border-radius:var(--r-md); color:#7c4a06;}
+.simNote svg{flex:0 0 auto; stroke:currentColor;}
+.simNote .btn{margin-inline-start:auto; flex:0 0 auto;}
+@media(max-width:820px){.simNote{flex-wrap:wrap;} .simNote .btn{margin-inline-start:0;}}
+/* --- כרטיס תלמידה: מתג מצב אמיתי/סימולציה --- */
+.stSeg{display:inline-flex; gap:2px; padding:3px; border-radius:var(--r-pill); background:var(--soft); border:var(--hair); margin-top:9px;}
+.segBtn{display:inline-flex; align-items:center; gap:5px; font-family:inherit; font-size:12px; font-weight:800; cursor:pointer;
+  padding:5px 13px; border:0; border-radius:var(--r-pill); background:transparent; color:var(--muted);
+  transition:background var(--t-base) var(--ease), color var(--t-base) var(--ease);}
+.segBtn svg{stroke:currentColor;}
+.segBtn:hover{color:var(--ink);}
+.segBtn.on{background:#fff; color:var(--brand); box-shadow:var(--el1);}
+.segBtn.sim.on{background:linear-gradient(140deg,#d97706,#f59e0b); color:#fff;}
+.stHead.simMode{background:linear-gradient(180deg,#fffdf5,#fff); border-bottom-color:#fcd34d;}
+.stHead.simMode .stNm::after{content:'· ניסוי'; font-size:11.5px; font-weight:800; color:var(--warn); margin-inline-start:7px;}
 </style>
 </head>
 <body>
@@ -1507,7 +1532,10 @@ function setGradeSim(id,key,val){
     if((st.grades||{})[key]===v) delete st.simg[key]; // חזרה לערך האמיתי = ביטול השינוי
     else st.simg[key]=v;
   }
-  save(); renderKeepScroll();
+  save();
+  const modal=document.getElementById('studentModal');
+  if(modal&&modal.classList.contains('show')) refreshOpenViews(id);
+  else renderKeepScroll();
 }
 function clearSim(){
   const n=simCount();
@@ -1520,7 +1548,10 @@ function clearSim(){
 function commitSim(){
   const n=simCount();
   if(!n){ toast('אין שינויים בתרחיש'); return; }
-  if(!confirm('להעביר '+n+' ציונים מהניסוי אל טבלת הציונים האמיתית?')) return;
+  const who=state.students.filter(s=>s.simg&&Object.keys(s.simg).length);
+  const list=who.slice(0,8).map(s=>'  • '+s.name+' ('+Object.keys(s.simg).length+')').join('\n');
+  if(!confirm(`⚠️ העברה לטבלת הציונים האמיתית\n\n${n} ציונים מהניסוי ייכתבו אל הציונים האמיתיים של ${who.length} תלמידות:\n${list}${who.length>8?'\n  • ועוד '+(who.length-8):''}\n\nזו הפעולה היחידה בסימולציה שנוגעת בנתונים האמיתיים.\n\nלהמשיך?`)) return;
+  if(!confirm('אישור אחרון\n\nאחרי ההעברה שכבת הניסוי תתרוקן והציונים יהיו אמיתיים לכל דבר —\nכולל בדוחות, בייצוא ובחישוב הזכאות.\n\n(אם טעית: ↩️ בטל בסרגל העליון מחזיר את המצב.)\n\nלהעביר?')) return;
   pushUndo('העברת ניסוי לטבלה');
   state.students.forEach(s=>{
     if(!s.simg) return;
@@ -1969,6 +2000,19 @@ function envChecks(){
   const out=[];
   const chk=(n,ok,note)=>out.push({n,ok,note:note||''});
   chk('שמירה בדפדפן',STORAGE_OK,STORAGE_OK?'הנתונים נשמרים בין פתיחות':(STORAGE_WHY+' — הנתונים לא יישמרו!'));
+  // בדיקה חיה של ההפרדה: אף ציון ניסוי לא נכתב לציונים האמיתיים
+  (function(){
+    let nSim=0, leaked=[], who=0;
+    state.students.forEach(s=>{
+      const sg=s.simg||{}; const ks=Object.keys(sg);
+      if(!ks.length) return; who++;
+      ks.forEach(k=>{ nSim++; if((s.grades||{})[k]===sg[k]) leaked.push(s.name+' · '+k); });
+    });
+    chk('שכבת הסימולציה מופרדת', leaked.length===0,
+      nSim? (leaked.length? `⚠️ ${leaked.length} ציוני ניסוי נמצאו גם בציונים האמיתיים: ${leaked.slice(0,3).join(', ')}`
+                          : `${nSim} שינויי ניסוי אצל ${who} תלמידות — אף אחד מהם אינו בציונים האמיתיים ✓`)
+          : 'אין שינויי ניסוי כרגע. ההזנה בסימולציה נשמרת בשכבה נפרדת (simg) ולא בציונים.');
+  })();
   chk('אופן הפתיחה',location.protocol!=='file:',location.protocol==='file:'
     ?'הקובץ נפתח ישירות מהמכשיר — בנייד זה חוסם שמירה. פתחו את כתובת האינטרנט (https).'
     :'נפתח מכתובת אינטרנט — תקין');
@@ -3361,32 +3405,53 @@ function delStudent(id){
 }
 
 /* ============ עורך תלמידה (מודאל) ============ */
-function openStudent(id){
+/* כרטיס התלמידה עובד בשני מצבים:
+   'real' — הציונים האמיתיים (ברירת מחדל).
+   'sim'  — שכבת הניסוי. הזנה כאן נשמרת ב-simg בלבד, בדיוק כמו בטבלת הסימולציה.
+   כשנכנסים מלשונית הסימולציה — נפתח אוטומטית במצב ניסוי. */
+let stMode='real', stOpenId='';
+function setStMode(m){ stMode=m; if(stOpenId) openStudent(stOpenId,m); }
+function openStudent(id,mode){
   const st=state.students.find(s=>s.id===id);
   if(!st) return;
+  stOpenId=id;
+  stMode=mode||((typeof currentTab!=='undefined'&&currentTab==='sim')?'sim':'real');
   const box=document.getElementById('studentBox');
   const r=calcStudent(st);
-  const nMiss=r.missing.length, nBad=r.blockers.length;
+  const isSim=stMode==='sim';
+  const rReal=calcStudent(st);
+  const rShow=isSim?calcStudent(st,{sim:true}):rReal;
+  const nMiss=rShow.missing.length, nBad=rShow.blockers.length;
+  const nMySim=st.simg?Object.keys(st.simg).length:0;
   box.innerHTML=`
-  <div class="stHead">
+  <div class="stHead${isSim?' simMode':''}">
   <div class="stSum">
     ${avatar(st.name,46)}
     <div class="stId">
       <div class="stNm">${esc(st.name)}</div>
       <div class="stMeta">
         <select onchange="setStudentClass('${st.id}',this.value)">${state.classes.map(c=>`<option ${st.cls===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
-        <span class="badge ${r.cls}">${r.status}</span>
+        <span class="badge ${rShow.cls}">${rShow.status}</span>
+        ${isSim&&rReal.status!==rShow.status?`<span class="schip">${ic('arrowLeft',12)}אמיתי: ${rReal.status}</span>`:''}
       </div>
     </div>
     <div class="stStats">
-      <span class="stStat"><b class="${gradeClass(r.avg)}">${fmt(r.avg)}</b><i>ממוצע</i></span>
-      <span class="stStat"><b>${r.totalUnits}</b><i>יח"ל</i></span>
+      <span class="stStat"><b class="${gradeClass(rShow.avg)}">${fmt(rShow.avg)}</b><i>${isSim?'ממוצע בתרחיש':'ממוצע'}</i></span>
+      ${isSim&&rReal.avg!==rShow.avg?`<span class="stStat"><b class="${gradeClass(rReal.avg)}" style="opacity:.6;">${fmt(rReal.avg)}</b><i>ממוצע אמיתי</i></span>`:''}
+      <span class="stStat"><b>${rShow.totalUnits}</b><i>יח"ל</i></span>
       <span class="stStat"><b class="${nMiss?'grade-warn':''}">${nMiss}</b><i>מקצועות חסרים</i></span>
       <span class="stStat"><b class="${nBad?'grade-bad':''}">${nBad}</b><i>מעכבים</i></span>
     </div>
     <button class="btn sec sm stX" onclick="closeStudent()" title="סגירה">${ic('x',15)}</button>
   </div>
-  <div class="stLg">${statusLegend()}</div>
+  <div class="stSeg">
+    <button class="segBtn ${isSim?'':'on'}" onclick="setStMode('real')">${ic('shield',13)}ציונים אמיתיים</button>
+    <button class="segBtn sim ${isSim?'on':''}" onclick="setStMode('sim')">${ic('lab',13)}סימולציה${nMySim?` · ${nMySim}`:''}</button>
+  </div>
+  ${isSim?`<div class="simVow" style="margin:9px 0 0;">${ic('lab',15)}<span><b>מצב סימולציה.</b>
+     כל ציון שתזיני כאן נשמר בשכבת הניסוי בלבד ואינו נוגע בציונים האמיתיים.
+     מבנה המקצוע — משקל, חלוקת מגן/בחינה, סמל שאלון, יח"ל, הערות וצבעים — הוא נתון אמיתי ולכן אינו נערך במצב זה.</span></div>`
+   :`<div class="stLg">${statusLegend()}</div>`}
   </div>
   <div class="stBody">
   ${SUBJECTS.map(subj=>studentSubjEditor(st,subj)).join('')}
@@ -3395,8 +3460,9 @@ function openStudent(id){
   document.getElementById('studentModal').classList.add('show');
 }
 function studentSubjEditor(st,subj){
+  const isSim=(typeof stMode!=='undefined'&&stMode==='sim');
   const u=getUnits(st,subj);
-  const r=calcSubject(st,subj);
+  const r=calcSubject(st,subj,isSim?{sim:true}:undefined);
   const unitsSel=subj.opts.length>1?`<select onchange="setUnits('${st.id}','${subj.id}',this.value)">${subj.opts.map(o=>`<option value="${o}" ${o===u?'selected':''}>${o===0?'לא נלמד':o+' יח"ל'}</option>`).join('')}</select>`:`<span class="pill">${u} יח"ל</span>`;
   const nameInput=subj.named?`<input type="text" style="width:130px;" placeholder="שם המקצוע" value="${esc((st.mugbarNames||{})[subj.id]||'')}" onchange="setMugbarName('${st.id}','${subj.id}',this.value)">`:'';
   const custom=hasOverrides(st,subj);
@@ -3406,6 +3472,9 @@ function studentSubjEditor(st,subj){
     const baseComps=getComps(subj,u);
     const comps=getCompsFor(st,subj,u);
     const stOv=st.ov||{}, codes=st.codes||{};
+    const gv=gradesOf(st,isSim);
+    const setG=(k)=>isSim?`setGradeSim('${st.id}','${k}',this.value)`:`setGrade('${st.id}','${k}',this.value)`;
+    const simCls=(k)=>isSim&&isSimKey(st,k)?' sim-cell':'';
     body=`<div class="comp-grid">${comps.map((c,i)=>{
       // במקצועות מוגברים וברכיב "עבודה נוספת" מציגים גם רכיבים במשקל 0 כדי לאפשר הפעלה; בשאר מסתירים
       if(isHidden(st,subj.id+'.'+i)) return '';
@@ -3424,11 +3493,11 @@ function studentSubjEditor(st,subj){
       if(c.t==='i'){
         return `<div class="comp-box" ${wOv?'style="border-color:var(--brand2);"':c.b?'style="background:#f0fdf4; border-color:#86efac;"':''}>
         <button class="compHide" onclick="hideComp('${st.id}','${key}',${c.w||0},'${esc(c.n).replace(/'/g,"")}')" title="הסרת הרכיב">✕</button><div class="cn">${esc(c.n)}${c.b&&!c.w?' <span class="pill" style="background:#dcfce7; color:#166534;">לשיפור ציון — הזיני משקל להפעלה</span>':''}</div>
-        <div class="comp-row"><span class="lbl">ציון</span><input type="number" min="0" max="100" data-k="${key}" class="${gstatCls(st,key).trim()}" value="${g[key]??''}" onchange="setGrade('${st.id}','${key}',this.value)">${stBtn(key)}
+        <div class="comp-row"><span class="lbl">ציון</span><input type="number" min="0" max="100" data-k="${key}" class="${gstatCls(st,key).trim()}${simCls(key)}" value="${gv[key]??''}" onchange="${isSim?`setGradeSim('${st.id}','${key}',this.value)`:`setGrade('${st.id}','${key}',this.value)`}">${isSim?'':stBtn(key)}
         ${(()=>{const dv=(r.details||[])[i]; const v=dv&&dv.val!==null&&dv.val!==undefined?dv.val:null;
           return (v!==null&&c.w)?`<span class="pill" title="תרומה לציון הסופי">= ${Math.round(v*c.w/100*10)/10} נק׳ מתוך ${c.w}</span>`:'';})()}</div>
-        <div class="comp-row"><span class="lbl">משקל</span>${wIn}</div>
-        ${codeOptions(key).length?`<div class="comp-row"><span class="lbl">סמל</span>${codeSelect(st,key)} ${noteBtn(st,key,subj.name+' · '+c.n)}</div>`:`<div class="comp-row">${noteBtn(st,key,subj.name+' · '+c.n)}</div>`}</div>`;
+        ${isSim?'':`<div class="comp-row"><span class="lbl">משקל</span>${wIn}</div>`}
+        ${isSim?'':codeOptions(key).length?`<div class="comp-row"><span class="lbl">סמל</span>${codeSelect(st,key)} ${noteBtn(st,key,subj.name+' · '+c.n)}</div>`:`<div class="comp-row">${noteBtn(st,key,subj.name+' · '+c.n)}</div>`}</div>`;
       }
       const fl=(r.flips||[]).find(f=>f.comp===c.n);
       const flBadge=fl?` <span class="badge b-warn" title="ציון הבחינה (${fl.e}) גבוה מהמגן (${fl.m}) — המשקל הגדול עבר לבחינה: מגן ${fl.s}% / בחינה ${100-fl.s}%">🔀 היפוך לטובת הבחינה</span>`:'';
@@ -3444,14 +3513,14 @@ function studentSubjEditor(st,subj){
         <span class="${gradeClass(cVal)}" style="font-size:14px;">${cVal===null?'—':cVal}</span>
         ${contrib!==null?`<span class="pill" title="תרומת הרכיב לציון הסופי במקצוע: ${cVal} × ${c.w}%">= ${contrib} נק׳ מתוך ${c.w}</span>`:''}
       </div>`;
-      const rowM=eff>0?`<div class="comp-row"><span class="lbl">ציון מגן</span><input type="number" min="0" max="100" data-k="${key}.m" class="${gstatCls(st,key+'.m').trim()}" value="${g[key+'.m']??''}" onchange="setGrade('${st.id}','${key}.m',this.value)">${stBtn(key+'.m')}<span class="pill">${eff}%</span></div>`:'';
-      const rowE=eff<100?`<div class="comp-row"><span class="lbl">ציון בחינה</span><input type="number" min="0" max="100" data-k="${key}.e" class="${gstatCls(st,key+'.e').trim()}" value="${g[key+'.e']??''}" onchange="setGrade('${st.id}','${key}.e',this.value)">${stBtn(key+'.e')}<span class="pill">${100-eff}%</span>${eff===0?' <span class="pill" style="background:#e0e7ff; color:#3730a3;">ללא מגן — 100% בחינה</span>':''}</div>`:'';
+      const rowM=eff>0?`<div class="comp-row"><span class="lbl">ציון מגן</span><input type="number" min="0" max="100" data-k="${key}.m" class="${gstatCls(st,key+'.m').trim()}${simCls(key+'.m')}" value="${gv[key+'.m']??''}" onchange="${isSim?`setGradeSim('${st.id}','${key}.m',this.value)`:`setGrade('${st.id}','${key}.m',this.value)`}">${isSim?'':stBtn(key+'.m')}<span class="pill">${eff}%</span></div>`:'';
+      const rowE=eff<100?`<div class="comp-row"><span class="lbl">ציון בחינה</span><input type="number" min="0" max="100" data-k="${key}.e" class="${gstatCls(st,key+'.e').trim()}${simCls(key+'.e')}" value="${gv[key+'.e']??''}" onchange="${isSim?`setGradeSim('${st.id}','${key}.e',this.value)`:`setGrade('${st.id}','${key}.e',this.value)`}">${isSim?'':stBtn(key+'.e')}<span class="pill">${100-eff}%</span>${eff===0?' <span class="pill" style="background:#e0e7ff; color:#3730a3;">ללא מגן — 100% בחינה</span>':''}</div>`:'';
       return `<div class="comp-box" ${(wOv||sOv)?'style="border-color:var(--brand2); box-shadow:0 0 0 1px var(--brand2);"':''}>
       <button class="compHide" onclick="hideComp('${st.id}','${key}',${c.w||0},'${esc(c.n).replace(/'/g,"")}')" title="הסרת הרכיב">✕</button><div class="cn">${esc(c.n)}${c.w?'':' <span class="pill">כבוי — הזיני משקל להפעלה</span>'}${flBadge}</div>
       ${rowM}${rowE}${rowFinal}
-      <div class="comp-row"><span class="lbl">חלוקה</span>${sSel}</div>
-      <div class="comp-row"><span class="lbl">משקל</span>${wIn}</div>
-      ${codeOptions(key).length?`<div class="comp-row"><span class="lbl">סמל</span>${codeSelect(st,key)} ${noteBtn(st,key,subj.name+' · '+c.n)}</div>`:`<div class="comp-row">${noteBtn(st,key,subj.name+' · '+c.n)}</div>`}</div>`;
+      ${isSim?'':`<div class="comp-row"><span class="lbl">חלוקה</span>${sSel}</div>
+      <div class="comp-row"><span class="lbl">משקל</span>${wIn}</div>`}
+      ${isSim?'':(codeOptions(key).length?`<div class="comp-row"><span class="lbl">סמל</span>${codeSelect(st,key)} ${noteBtn(st,key,subj.name+' · '+c.n)}</div>`:`<div class="comp-row">${noteBtn(st,key,subj.name+' · '+c.n)}</div>`)}</div>`;
     }).join('')}</div>`;
     const hid=comps.map((c,i)=>({c,i})).filter(x=>isHidden(st,subj.id+'.'+x.i));
     if(hid.length) body+=`<div class="hiddenChips"><span class="note" style="align-self:center;">רכיבים שהוסרו:</span>
@@ -3649,6 +3718,8 @@ function renderEntry(m){
       <button class="btn ok sm" onclick="applyEntryColor()">${ic('check',13)}החל על ${studs.length} תלמידות${fltOn()?' (המסוננות)':''}</button>
     </div>
   </div>`:''}
+  ${(!entryFull&&simCount())?`<div class="simNote">${ic('lab',14)}<span>יש <b>${simCount()}</b> שינויי ניסוי בסימולציה — הם <b>אינם מוצגים כאן</b> ואינם משפיעים על הציונים שבטבלה הזאת.</span>
+    <button class="btn sec sm" onclick="setTab('sim')">${ic('arrowLeft',13)}לסימולציה</button></div>`:''}
   <div class="card ${entryFull?'tblfull':''} ${entryDense?'dense':''}" id="entryCard">
     ${entryFull?`<div class="fsBar">
       <span class="fsT">${ic('pen',16)} ${esc(subj.name)}</span>
@@ -4400,10 +4471,12 @@ function renderSim(m){
     <span class="hAct">
       <span class="simCnt ${nSim?'on':''}">${nSim} שינויי ניסוי</span>
       <button class="btn warn sm" onclick="clearSim()" ${nSim?'':'disabled style="opacity:.5;"'}>${ic('refresh',14)}מחיקת השינויים</button>
-      <button class="btn ok sm" onclick="commitSim()" ${nSim?'':'disabled style="opacity:.5;"'}>${ic('check',14)}העברה לטבלה האמיתית</button>
     </span>
     <span class="hArt">${art('lab')}</span>
   </div>
+  <div class="simVow">${ic('shield',15)}<span><b>הציונים שתזיני כאן לא נכתבים לטבלת הציונים.</b>
+    הם חיים בשכבת ניסוי נפרדת, לא מופיעים בהזנת ציונים, לא בדוחות, לא בייצוא לאקסל, ולא בממוצע האמיתי.
+    ${nSim?`כרגע יש <b>${nSim}</b> שינויי ניסוי.`:''}</span></div>
   <div class="triState">
     <span class="tsBox real">${ic('shield',15)}<b>נתונים אמיתיים</b><i>הטבלה המקורית — לא נוגעים בה</i></span>
     ${ic('arrowLeft',16)}
@@ -4472,6 +4545,16 @@ function renderSim(m){
     ${simKpi('k3','sparkles','פוטנציאל',bP,sP)}
     ${simKpi('k5','warn','עם מעכבים',bB,sB)}
   </div>
+  ${nSim?`<div class="card commitBox">
+    <div class="cbHead">${ic('warn',16)}<span>העברת הניסוי לטבלה האמיתית</span></div>
+    <div style="font-size:13px; line-height:1.7;">אם החלטת שהתרחיש הוא המצב הנכון, אפשר להעביר את
+      <b>${nSim}</b> שינויי הניסוי אל טבלת הציונים. <b>זו הפעולה היחידה שנוגעת בציונים האמיתיים</b>,
+      והיא דורשת אישור כפול. אחרי ההעברה שכבת הניסוי מתרוקנת. ↩️ בטל מחזיר את המצב.</div>
+    <div class="toolbar" style="margin:9px 0 0;">
+      <button class="btn dz sm" onclick="commitSim()">${ic('arrowLeft',13)}העברה לטבלה האמיתית (${nSim})</button>
+      <button class="btn sec sm" onclick="clearSim()">${ic('refresh',13)}מחיקת הניסוי במקום</button>
+    </div>
+  </div>`:''}
   <div class="card">
     ${secHead('trend',`תלמידות שהתרחיש משנה את מצבן · ${changed.length}`,'ממוצע וסטטוס — אמיתי מול תרחיש')}
     ${changed.length?`<div class="scroll" style="max-height:55vh;">
@@ -4504,7 +4587,7 @@ function simGrid(subj,studs){
     const rSim=calcSubject(st,subj,{sim:true});
     const ic=internalComp(st,subj); const intIdx=ic?ic.i:-1;
     const g=gradesOf(st,true);
-    let tds=`<td><span class="name-link" onclick="openStudent('${st.id}')">${esc(st.name)}</span><br><small style="color:var(--muted)">${esc(st.cls)}</small></td>`;
+    let tds=`<td><span class="name-link" onclick="openStudent('${st.id}','sim')">${esc(st.name)}</span><br><small style="color:var(--muted)">${esc(st.cls)}</small></td>`;
     if(subj.opts.length>1) tds+=`<td>${u===0?'—':u}</td>`;
     headComps.forEach((hc,i)=>{
       const c=comps[i];
@@ -5862,7 +5945,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='8.3';
+const APP_VERSION='8.5';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
@@ -6243,6 +6326,11 @@ function renderHelp(m){
     <b>"תלמידה עם 92 לא מסומנת מצטיינת"</b> — בדקי את תנאי היח"ל: נדרש מתמטיקה 4-5 ואנגלית 5. אפשר לשנות בהגדרות.<br>
     <b>"איפה קטלוג השאלונים?"</b> — <b>הגדרות ← קטלוג שאלונים — בגרות גמישה</b>. עד גרסה 6.5 הוא הוצג רק ב"מצב מקצועי" ולכן נראה כאילו נעלם; עכשיו הוא תמיד שם. בטבלה: המקצוע, מספר היחידות, אחוז הניקוד, סמל השאלון ואופן ההיבחנות, עם סינון לפי מקצוע.<br>
     <b>"אני רואה שם ולא מספר שאלון"</b> — בכוונה. ליד הציון מוצג <b>שם התוכן</b> — "משנה", "דינים ומבוא", "לקט", "תפילה כמפגש", "בח\"מ" — כי זה מה שמזהה את השאלון בעבודה היומית. מספר הסמל נשמר במלואו: הוא מופיע במעבר עכבר על התג, בחלון הבחירה, בקטלוג, בדוחות ובייצוא לאקסל. באנגלית מוצגת האות: A, B, C, E, G.<br>
+        <b>"נכנסתי לכרטיס תלמידה מתוך הסימולציה"</b> — הכרטיס נפתח <b>במצב סימולציה</b>: הכותרת בכתום, יש באנר שמסביר, וכל ציון שתזיני נשמר בשכבת הניסוי בלבד. הממוצע והסטטוס שמוצגים הם של <b>התרחיש</b>, ולידם הערכים האמיתיים להשוואה. בראש הכרטיס יש מתג <b>ציונים אמיתיים / סימולציה</b> למעבר בכל רגע.<br>
+    <b>מה לא נערך במצב סימולציה:</b> משקל, חלוקת מגן/בחינה, סמל שאלון, יח"ל, הערות וצבעים. אלה נתונים אמיתיים ולא חלק משכבת הניסוי, ולכן הבקרות שלהם מוסתרות שם — כדי שלא תשני אותם בטעות בזמן שאת "רק מנסה".<br>
+        <b>"הזנתי ציון בסימולציה — האם הוא נכתב לציונים האמיתיים?"</b> — <b>לא.</b> ההזנה בסימולציה נשמרת בשכבה נפרדת לגמרי. היא לא מופיעה בהזנת ציונים, לא בכרטיס התלמידה, לא בדוחות, לא בייצוא לאקסל ולא בממוצע ובזכאות. בראש מסך הסימולציה יש הבטחה ירוקה שאומרת בדיוק את זה, ובהזנת הציונים מופיע פס כתום שמזכיר שיש שינויי ניסוי ושהם אינם מוצגים שם.<br>
+    <b>רוצה לוודא בעצמך?</b> הגדרות ← בדיקת מערכת ← <b>"שכבת הסימולציה מופרדת"</b>. הבדיקה סורקת את כל התלמידות ומדווחת כמה שינויי ניסוי יש וכמה מהם דלפו לציונים האמיתיים (אמור להיות 0).<br>
+    <b>הפעולה היחידה שמעבירה</b> היא "העברה לטבלה האמיתית" — כפתור בורדו נפרד בתחתית מסך הסימולציה, עם אישור כפול שמפרט את שמות התלמידות. עד גרסה 8.3 הוא היה כפתור ירוק בראש המסך וקל היה ללחוץ עליו בטעות.<br>
         <b>"שיניתי חלוקת מגן/בחינה ולא קרה כלום"</b> — כנראה לתלמידות יש <b>התאמה אישית</b> ברכיב הזה, והיא <b>תמיד גוברת</b> על ברירת המחדל. בהגדרות ← שינוי גורף מופיעה אזהרה "N עם התאמה אישית" ולידה כפתור <b>"כפה על כולן"</b> שמוחק את ההתאמות ומשווה את כולן. הכפתור <b>"ברירת מחדל"</b> משנה את המקצוע בכל רמות היח"ל — וזו הפעולה הרגילה.<br>
         <b>"מיון וסינון"</b> — בראש הזנת הציונים, הסימולציה והדוחות יש סרגל: <b>יח"ל</b> (במקצוע שנבחר), <b>מלאות/חסרות</b>, <b>סטטוס</b> (מצטיינות, פוטנציאל, זכאיות, מעכבים, גבוליות), ומיון לפי שם / כיתה / יח"ל. כשסינון פעיל מוצג "מוצגות 12 מתוך 41" וכפתור ניקוי — כדי שלא ייווצר רושם שנתונים נעלמו. <b>שימו לב:</b> פעולות גורפות (צביעה, סמל שאלון) והייצוא לאקסל, ההדפסה והמייל — כולם עובדים על <b>מה שמוצג בפועל</b>. זה בכוונה: מסנן ומחיל = בדיוק מה שרואים.<br>
         <b>"רישיון והתנסות"</b> — התוכנה פתוחה לגמרי 14 יום. מיום 7 מופיע פס תזכורת, ובתום ההתנסות נדרש קוד רישיון של המוסד. <b>הנתונים אינם נמחקים בשום שלב</b>, וגיבוי לקובץ פתוח גם במסך הנעילה. הקוד נגזר משם המוסד ולכן אינו יכול "לאבד" — הספק מנפיק אותו מחדש בכל רגע. הרישיון לתמיד, בלי תאריך תפוגה.<br>
