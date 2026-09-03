@@ -5985,7 +5985,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='8.9';
+const APP_VERSION='9.0';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
@@ -6323,17 +6323,43 @@ async function driveSyncAll(initial){
       }else if(rv>lv&&dirty){ dv.state='conflict'; conf[pid]=true; await driveConflict(pid); }
     }
     for(const pid of Object.keys(dv.queue)) if(!conf[pid]) await driveSave(pid);
+    if(initial) driveLanding();
     if(dv.state!=='conflict'&&dv.state!=='error'){ dv.state='synced'; dv.lastSync=Date.now(); LS.setItem('bagrutDvLast',String(dv.lastSync)); }
   }catch(e){ dv.state='error'; dv.lastErr=e.message; }
   dv.busy=false; renderSyncInd(); if(initial) render();
 }
+function driveRegisterProfile(pid,pl){
+  let pr=profiles.find(p=>p.id===pid);
+  if(!pr){ pr={id:pid,name:pl.name||''}; if(!pr.name) pr.unnamed=1; profiles.push(pr); saveProfiles(); return true; }
+  if(pl.name&&pr.name!==pl.name){ pr.name=pl.name; delete pr.unnamed; saveProfiles(); }
+  return false;
+}
+/* מכשיר שהותקן מחדש: הפרופיל הריק המקומי לא יסתיר את מה שירד מהדרייב. */
+function profEmpty(pid){
+  const s=(pid===currentProfileId)?state:loadProfileState(pid);
+  return !s||!(s.students||[]).length;
+}
+function driveLanding(){
+  if(!dv.newProf) return; dv.newProf=false;
+  const full=profiles.filter(p=>!profEmpty(p.id));
+  if(!full.length) return;
+  if(profEmpty(currentProfileId)){
+    const drop=currentProfileId, wasEmpty=profiles.find(p=>p.id===drop);
+    switchProfile(full[0].id);                                     // מציגים את מה שיש, לא מסך ריק
+    if(wasEmpty&&wasEmpty.unnamed&&drop!==full[0].id){             // ומנקים את השארית הריקה
+      profiles=profiles.filter(p=>p.id!==drop);
+      try{ LS.removeItem(profileKeyOf(drop)); }catch(e){}
+      saveProfiles();
+    }
+  }
+}
 function driveApplyRemote(pid,pl,rv){
+  const isNew=driveRegisterProfile(pid,pl);                 // חובה לפני הכתיבה: בלי רשומת פרופיל הנתונים בלתי נגישים
   const cur=(pid===currentProfileId)?state:loadProfileState(pid);
   const merged=applyPayload(cur,pl);
   if(pid===currentProfileId){ state=merged; save(true); }
   else saveProfileState(pid,merged);
-  const pr=profiles.find(p=>p.id===pid);
-  if(pr&&pl.name&&pr.name!==pl.name){ pr.name=pl.name; saveProfiles(); }
+  if(isNew) dv.newProf=true;
   setLocalVer(pid,rv); dv.sig[pid]=payloadSig(pl); saveBase(pid,merged);
 }
 
@@ -6433,6 +6459,7 @@ async function driveResolve(){
     }
   });
   pushUndo('מיזוג מהדרייב');
+  driveRegisterProfile(cf.pid,cf.pl||{});
   if(cf.pid===currentProfileId){ state=out; save(true); }                 // חובה: גם הזיכרון, לא רק האחסון
   else saveProfileState(cf.pid,out);
   saveBase(cf.pid,out);
