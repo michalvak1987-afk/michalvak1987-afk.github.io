@@ -389,6 +389,11 @@ table.tbl.grades tr:hover td:first-child{background:#f2f6ff;}
 .noteBtn:hover{background:var(--soft); color:var(--brand); border-color:var(--brand);}
 .noteBtn.has{background:#fffbeb; border-color:#f59e0b; color:#b45309;}
 .noteBtn .dot{position:absolute; top:-3px; inset-inline-end:-3px; width:7px; height:7px; border-radius:50%; background:#f59e0b; border:1.5px solid #fff;}
+.noteChip{background:#fffbeb; border:1px solid #fcd34d; color:#92400e; border-radius:999px;
+  padding:1px 6px; font-size:11px; line-height:1.5; cursor:pointer; max-width:100%;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:700;}
+.noteChip:hover{background:#fef3c7; border-color:#f59e0b;}
+@media (hover:none){ .noteChip{min-height:22px; padding:2px 8px;} }
 td.hasNote{position:relative;}
 td.hasNote::before{content:''; position:absolute; top:0; inset-inline-end:0; border-width:0 9px 9px 0; border-style:solid; border-color:transparent #f59e0b transparent transparent;}
 #tdModal{position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:215; display:none; align-items:flex-start; justify-content:center; padding:30px 15px; overflow:auto;}
@@ -2223,6 +2228,19 @@ function keyLabel(st,key){
   return s;
 }
 function noteOf(st,key){ return ((st.notes||{})[key]||'').trim(); }
+/* פתק לצפייה: מופיע בכל מקום שבו אין עריכה — סימולציה, דוחות — ולא כותב כלום */
+function noteChip(id,key,wide){
+  const st=(state.students||[]).find(s=>s.id===id); if(!st) return '';
+  const t=noteOf(st,key); if(!t) return '';
+  const short=t.length>(wide?60:14)?t.slice(0,wide?60:14)+'…':t;
+  return `<button class="noteChip" onclick="event.stopPropagation();viewNote('${id}','${key}')"
+    title="${esc(t)}">📝${wide?' '+esc(short):''}</button>`;
+}
+function viewNote(id,key){
+  const st=(state.students||[]).find(s=>s.id===id); if(!st) return;
+  const t=noteOf(st,key); if(!t) return;
+  infoDlg('📝 הערה — '+st.name, t+'\n\n(לעריכת ההערה — בלשונית הזנת ציונים או בכרטיס התלמידה)');
+}
 function noteBtn(st,key,label){
   const t=noteOf(st,key);
   return `<button class="noteBtn ${t?'has':''}" onclick="event.stopPropagation();openNote('${st.id}','${key}','${esc(label).replace(/'/g,'')}')"
@@ -3580,7 +3598,7 @@ function studentSubjEditor(st,subj){
         ${(()=>{const dv=(r.details||[])[i]; const v=dv&&dv.val!==null&&dv.val!==undefined?dv.val:null;
           return (v!==null&&c.w)?`<span class="pill" title="תרומה לציון הסופי">= ${Math.round(v*c.w/100*10)/10} נק׳ מתוך ${c.w}</span>`:'';})()}</div>
         ${isSim?'':`<div class="comp-row"><span class="lbl">משקל</span>${wIn}</div>`}
-        ${isSim?'':codeOptions(key).length?`<div class="comp-row"><span class="lbl">סמל</span>${codeSelect(st,key)} ${noteBtn(st,key,subj.name+' · '+c.n)}</div>`:`<div class="comp-row">${noteBtn(st,key,subj.name+' · '+c.n)}</div>`}</div>`;
+        ${isSim?(noteOf(st,key)?`<div class="comp-row">${noteChip(st.id,key,1)}</div>`:''):codeOptions(key).length?`<div class="comp-row"><span class="lbl">סמל</span>${codeSelect(st,key)} ${noteBtn(st,key,subj.name+' · '+c.n)}</div>`:`<div class="comp-row">${noteBtn(st,key,subj.name+' · '+c.n)}</div>`}</div>`;
       }
       const fl=(r.flips||[]).find(f=>f.comp===c.n);
       const flBadge=fl?` <span class="badge b-warn" title="ציון הבחינה (${fl.e}) גבוה מהמגן (${fl.m}) — המשקל הגדול עבר לבחינה: מגן ${fl.s}% / בחינה ${100-fl.s}%">🔀 היפוך לטובת הבחינה</span>`:'';
@@ -3603,7 +3621,7 @@ function studentSubjEditor(st,subj){
       ${rowM}${rowE}${rowFinal}
       ${isSim?'':`<div class="comp-row"><span class="lbl">חלוקה</span>${sSel}</div>
       <div class="comp-row"><span class="lbl">משקל</span>${wIn}</div>`}
-      ${isSim?'':(codeOptions(key).length?`<div class="comp-row"><span class="lbl">סמל</span>${codeSelect(st,key)} ${noteBtn(st,key,subj.name+' · '+c.n)}</div>`:`<div class="comp-row">${noteBtn(st,key,subj.name+' · '+c.n)}</div>`)}</div>`;
+      ${isSim?(noteOf(st,key)?`<div class="comp-row">${noteChip(st.id,key,1)}</div>`:''):(codeOptions(key).length?`<div class="comp-row"><span class="lbl">סמל</span>${codeSelect(st,key)} ${noteBtn(st,key,subj.name+' · '+c.n)}</div>`:`<div class="comp-row">${noteBtn(st,key,subj.name+' · '+c.n)}</div>`)}</div>`;
     }).join('')}</div>`;
     const hid=comps.map((c,i)=>({c,i})).filter(x=>isHidden(st,subj.id+'.'+x.i));
     if(hid.length) body+=`<div class="hiddenChips"><span class="note" style="align-self:center;">רכיבים שהוסרו:</span>
@@ -3640,7 +3658,7 @@ function studentSubjEditor(st,subj){
       <span class="shL">
         <span class="sjName">${esc(subj.name)}</span>${nameInput}${unitsSel}${flags}
       </span>
-      <span class="shTools">${noteBtn(st,subj.id,'הערה כללית — '+subj.name)}${bonusBtn}${presetSel}${testChip}${resetBtn}</span>
+      <span class="shTools">${isSim?noteChip(st.id,subj.id):noteBtn(st,subj.id,'הערה כללית — '+subj.name)}${bonusBtn}${presetSel}${testChip}${resetBtn}</span>
       <span class="shScore">${finalHtml}</span>
     </div>
   <div class="subj-body">${body}</div></div>`;
@@ -4685,7 +4703,8 @@ function simGrid(subj,studs){
           need=needCalc.ok?`<span class="needbadge" title="הזיני ציון זה כדי שהמקצוע יעבור">צריך ${needCalc.x}</span>`
                     :`<span class="badge b-bad" style="font-size:11px;">לא ניתן</span>`;
         }
-        tds+=`<td><div class="eWrap"><div class="eTag"></div><div class="eBox one"><div class="gcell"><small>&nbsp;</small><input type="number" min="0" max="100" data-k="s|${st.id}|${key}" class="${cls(key)}" value="${g[key]??''}" onchange="setGradeSim('${st.id}','${key}',this.value)">${need}</div></div></div></td>`;
+        const ntS=noteOf(st,key);
+        tds+=`<td class="${ntS?'hasNote':''}" ${ntS?`onclick="if(event.target===this)viewNote('${st.id}','${key}')"`:''}><div class="eWrap"><div class="eTag">${ntS?noteChip(st.id,key):''}</div><div class="eBox one"><div class="gcell"><small>&nbsp;</small><input type="number" min="0" max="100" data-k="s|${st.id}|${key}" class="${cls(key)}" value="${g[key]??''}" onchange="setGradeSim('${st.id}','${key}',this.value)">${need}</div></div></div></td>`;
       }else{
         const eff=c.s;
         const eSplit=(rSim.flips||[]).some(f=>f.comp===c.n)?(100-eff):eff;
@@ -4693,7 +4712,8 @@ function simGrid(subj,studs){
         const rE=eff<100?`<div class="gcell"><small>בחינה ${100-eSplit}%</small><input type="number" min="0" max="100" data-k="s|${st.id}|${key}.e" class="${cls(key+'.e')}" value="${g[key+'.e']??''}" onchange="setGradeSim('${st.id}','${key}.e',this.value)"></div>`:'';
         const dvS=(rSim.details||[])[i], cvS=(dvS&&dvS.val!==null&&dvS.val!==undefined)?Math.round(dvS.val):null;
         const avgS=(rM&&rE)?`<div class="eAvg${cvS===null?' pend':''}">${cvS===null?'ממתין לשני הציונים':`משוקלל <b>${cvS}</b>`}</div>`:'';
-        tds+=`<td><div class="eWrap"><div class="eTag"></div><div class="eBox">${rM}${rE}</div>${avgS}</div></td>`;
+        const ntM=noteOf(st,key);
+        tds+=`<td class="${ntM?'hasNote':''}" ${ntM?`onclick="if(event.target===this)viewNote('${st.id}','${key}')"`:''}><div class="eWrap"><div class="eTag">${ntM?noteChip(st.id,key):''}</div><div class="eBox">${rM}${rE}</div>${avgS}</div></td>`;
       }
     });
     // מבחני כיתה — לא נכנסים לציון הרשמי, רק משפרים את החיזוי
@@ -6032,7 +6052,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='9.5';
+const APP_VERSION='9.7';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
