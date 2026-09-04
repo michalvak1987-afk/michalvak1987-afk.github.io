@@ -5985,7 +5985,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='9.2';
+const APP_VERSION='9.3';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
@@ -6484,6 +6484,78 @@ async function driveResolve(){
   toast('הנתונים מוזגו וסונכרנו');
 }
 
+/* ---- דוח אבחון: הופך "לא עובד" לנתונים ---- */
+async function diagText(){
+  const L=[];
+  const P=(k,v)=>L.push(k+': '+v);
+  P('גרסה', APP_VERSION+'  ('+APP_DATE+')');
+  P('כתובת', location.href);
+  P('מכשיר', driveName()+' · '+(navigator.userAgent.slice(0,60)));
+  P('מחובר לרשת', navigator.onLine?'כן':'לא');
+  P('דרייב', !driveEnabled()?'לא מוגדר':(dv.on?'מחובר':'לא מחובר')+' · מצב='+dvStatus());
+  P('שגיאה אחרונה', dv.lastErr||'—');
+  P('סנכרון אחרון', (+(LS.getItem('bagrutDvLast')||0))?new Date(+LS.getItem('bagrutDvLast')).toLocaleString('he-IL'):'טרם');
+  P('בתור להעלאה', Object.keys(dv.queue).join(', ')||'—');
+  L.push('');
+  L.push('— סימולטורים במכשיר —');
+  P('הנוכחי', currentProfileId);
+  profiles.forEach(pr=>{
+    const st=(pr.id===currentProfileId)?state:loadProfileState(pr.id);
+    const b=loadBase(pr.id);
+    L.push('  ['+pr.id+'] "'+(pr.name||'(ללא שם)')+'"'+(pr.unnamed?' אלמוני':'')
+      +' · תלמידות='+((st&&st.students||[]).length)
+      +' · גרסה מקומית='+localVer(pr.id)
+      +' · נקודת מקור='+(b?((b.students||[]).length+' תלמידות'):'אין'));
+  });
+  L.push('');
+  L.push('— קבצים בדרייב —');
+  if(!dv.on){ L.push('  (לא מחובר)'); }
+  else{
+    try{
+      await driveIndex();
+      const ks=Object.keys(dv.files);
+      if(!ks.length) L.push('  אין קבצים בכלל');
+      for(const pid of ks){
+        const f=dv.files[pid];
+        let extra='';
+        try{ const pl=await driveLoad(pid);
+          extra=' · תלמידות='+((pl&&pl.state&&pl.state.students||[]).length)
+               +' · שם="'+((pl&&pl.name)||'')+'"'+' · ממכשיר='+((pl&&pl.device)||'?')
+               +' · סכימה='+((pl&&pl.schemaVer)||'?');
+        }catch(e){ extra=' · שגיאת קריאה: '+e.message; }
+        L.push('  sim-'+pid+'.json · גרסה='+f.ver+' · עודכן='+new Date(f.mtime).toLocaleString('he-IL')+extra);
+      }
+    }catch(e){ L.push('  שגיאה: '+e.message); }
+  }
+  return L.join('\n');
+}
+async function driveDiag(){
+  const box=document.getElementById('cfBox'), md=document.getElementById('cfModal');
+  if(!box||!md) return;
+  box.innerHTML='<div class="note">מכין דוח…</div>'; md.classList.add('show');
+  let t=''; try{ t=await diagText(); }catch(e){ t='שגיאה בהכנת הדוח: '+e.message; }
+  box.innerHTML=`<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+      <h2 class="sec" style="margin:0;">${ic('info',18)}דוח אבחון סנכרון</h2>
+      <button class="btn sec sm" onclick="document.getElementById('cfModal').classList.remove('show')">${ic('x',14)}סגירה</button>
+    </div>
+    <div class="note" style="margin-bottom:8px;">הדוח אינו מכיל ציונים ואינו מכיל שמות תלמידות — רק מצב המערכת.</div>
+    <pre id="diagPre" dir="ltr" style="text-align:left; background:var(--el2); border:1px solid var(--hair); border-radius:var(--r-md);
+      padding:12px; font-size:12px; line-height:1.6; max-height:52vh; overflow:auto; white-space:pre-wrap; direction:ltr;">${esc(t)}</pre>
+    <div class="toolbar" style="margin-top:10px;">
+      <button class="btn ok sm" onclick="diagCopy()">${ic('clipboard',13)}העתקת הדוח</button>
+      <button class="btn sec sm" onclick="diagSave()">${ic('down',13)}שמירה כקובץ</button>
+    </div>`;
+}
+function diagCopy(){
+  const t=(document.getElementById('diagPre')||{}).textContent||'';
+  try{ navigator.clipboard.writeText(t); toast('הדוח הועתק'); }
+  catch(e){ toast('לא ניתן להעתיק — השתמשי בשמירה כקובץ'); }
+}
+function diagSave(){
+  const t=(document.getElementById('diagPre')||{}).textContent||'';
+  try{ dlBlob(new Blob([t],{type:'text/plain;charset=utf-8'}),'אבחון-סנכרון.txt'); }catch(e){ toast('השמירה נכשלה'); }
+}
+
 /* ---- חיווי ---- */
 const DVS={ off:{t:'',c:''}, nodrive:{t:'לא מחובר לדרייב',c:'dvOff'}, local:{t:'נשמר במכשיר',c:'dvLocal'},
   saving:{t:'מסנכרן…',c:'dvSaving'}, synced:{t:'מסונכרן',c:'dvOk'},
@@ -6515,6 +6587,7 @@ function drivePanelHtml(){
   return `<div class="toolbar" style="margin-bottom:6px;">
     <span class="badge ${s==='synced'?'b-ok':s==='error'?'b-bad':'b-warn'}">${(DVS[s]||{}).t||''}</span>
     ${dv.on?`<button class="btn sm" onclick="driveSyncAll()">${ic('refresh',13)}סנכרן עכשיו</button>
+      <button class="btn sec sm" onclick="driveDiag()">${ic('info',13)}דוח אבחון</button>
       <button class="btn dz sm" onclick="driveDisconnect()">${ic('x',13)}ניתוק החשבון</button>`
      :`<button class="btn ok sm" onclick="driveConnect()">${ic('folder',13)}חיבור לגוגל דרייב</button>`}
   </div>
