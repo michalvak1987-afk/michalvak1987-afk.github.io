@@ -1197,6 +1197,117 @@ table.tbl.grades tbody tr:focus-within td:first-child{background:#eaf0ff;}
 </style>
 </head>
 <body>
+<script>
+"use strict";
+// אם משהו נופל — הודעה כתובה נכון, בלי להאשים את הסיבה הלא נכונה
+window.APP_BOOTED=false; window.FATAL_N=0;
+function fatalReport(msg,src,ln){
+  return 'גרסה '+(typeof APP_VERSION!=='undefined'?APP_VERSION:'?')+
+    '\n'+String(msg||'(ללא הודעה)')+
+    '\n'+String(src||'').split('/').pop()+':'+String(ln||'?')+
+    '\n'+String(location.href)+
+    '\n'+String(navigator.userAgent);
+}
+function showFatal(msg,src,ln){
+  try{
+    var isFile=(location.protocol==='file:');
+    var rep=fatalReport(msg,src,ln);
+    // התוכנה כבר עלתה — לא מחריבים את המסך בגלל תקלה נקודתית
+    if(window.APP_BOOTED){
+      if(window.FATAL_N++) return;
+      var b=document.createElement('div');
+      b.setAttribute('style','position:fixed;inset-inline:10px;bottom:10px;z-index:99999;background:#fff7ed;border:1px solid #fdba74;'+
+        'border-radius:14px;padding:12px 14px;font-family:Arial,sans-serif;direction:rtl;text-align:right;font-size:13.5px;'+
+        'line-height:1.7;box-shadow:0 8px 28px rgba(0,0,0,.18);max-width:520px;margin-inline:auto;');
+      b.innerHTML='<b>משהו נתקע בפעולה הזאת.</b> הנתונים שלך במקום — התוכנה ממשיכה לעבוד.'+
+        '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">'+
+        '<button style="min-height:38px;padding:0 14px;border-radius:10px;border:0;background:#4f46e5;color:#fff;font-weight:700;" '+
+          'onclick="location.reload()">טעינה מחדש</button>'+
+        '<button style="min-height:38px;padding:0 14px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;" '+
+          'onclick="try{exportJSON()}catch(e){}">גיבוי הנתונים</button>'+
+        '<button style="min-height:38px;padding:0 14px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;" '+
+          'onclick="this.parentNode.parentNode.remove()">סגירה</button></div>'+
+        '<details style="margin-top:8px;font-size:11.5px;color:#7c2d12;"><summary>פרטים לשליחה לספק</summary>'+
+        '<pre id="fatalRep" style="white-space:pre-wrap;text-align:left;direction:ltr;">'+rep.replace(/[<&]/g,'')+'</pre></details>';
+      document.body.appendChild(b); return;
+    }
+    if(document.getElementById('fatalBox')) return;
+    var d=document.createElement('div');
+    d.id='fatalBox';
+    d.setAttribute('style','position:fixed;inset:0;z-index:99999;background:#fff;padding:24px 18px;overflow:auto;font-family:Arial,sans-serif;direction:rtl;text-align:right;');
+    var advice = isFile
+      ? '<b>הסיבה כמעט בוודאות:</b> הקובץ נפתח <b>ישירות מהמכשיר</b> (אפליקציית הקבצים, וואטסאפ או מייל), ודפדפני נייד מגבילים מצב כזה.'+
+        '<br>פתחו את <b>כתובת האינטרנט</b> של התוכנה (מתחילה ב-https) ולא את הקובץ. באייפון — בספארי; באנדרואיד — בכרום.'
+      : '<b>מה כדאי לעשות, בסדר הזה:</b><br>'+
+        '1. <b>טעינה מחדש</b> — לרוב זה נפתר, במיוחד אם הרשת נפלה באמצע.<br>'+
+        '2. אם חזר — <b>גיבוי הנתונים</b>, ואז שליחת הפרטים למטה לספק.<br>'+
+        '3. הנתונים שלך <b>לא נמחקו</b>. הם בזיכרון המכשיר וממתינים.';
+    d.innerHTML='<div style="max-width:620px;margin:0 auto;">'+
+      '<div style="font-size:44px;">😕</div>'+
+      '<h2 style="font-size:20px;margin:8px 0;">התוכנה נעצרה בטעינה</h2>'+
+      '<div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:14px;padding:14px;margin:14px 0;font-size:15px;line-height:1.9;">'+advice+'</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;">'+
+      '<button style="min-height:44px;padding:0 18px;border-radius:12px;border:0;background:#4f46e5;color:#fff;font-weight:800;font-size:15px;" '+
+        'onclick="location.reload()">טעינה מחדש</button>'+
+      '<button style="min-height:44px;padding:0 18px;border-radius:12px;border:1px solid #cbd5e1;background:#fff;font-size:15px;" '+
+        'onclick="try{exportJSON()}catch(e){alert(\'הגיבוי אינו זמין במצב הזה\')}">גיבוי הנתונים</button></div>'+
+      '<div style="font-size:13px;color:#334155;margin-top:6px;"><b>הפרטים שהספק צריך</b> — צלמו או העתיקו:</div>'+
+      '<pre style="white-space:pre-wrap;text-align:left;direction:ltr;background:#f8fafc;border:1px solid #e2e8f0;'+
+        'border-radius:10px;padding:10px;font-size:11.5px;color:#334155;overflow:auto;">'+rep.replace(/[<&]/g,'')+'</pre></div>';
+    document.body.appendChild(d);
+  }catch(e){}
+}
+window.addEventListener('error',function(ev){
+  // כשל בטעינת ספרייה חיצונית (גרפים/אקסל) אינו תקלה בתוכנה — הוא לא יחסום כלום
+  var t=ev&&ev.target;
+  if(t&&t!==window&&(t.tagName==='SCRIPT'||t.tagName==='LINK'||t.tagName==='IMG')) return;
+  showFatal((ev&&ev.message)||'',(ev&&ev.filename)||'',(ev&&ev.lineno)||'');
+},true);
+window.addEventListener('unhandledrejection',function(ev){
+  var r=ev&&ev.reason;
+  showFatal('(הבטחה שנדחתה) '+String((r&&r.message)||r||''),(r&&r.fileName)||'',(r&&r.lineNumber)||'');
+});
+
+/* ===== גלאי קובץ קטוע =====
+   התוכנה היא קובץ אחד של ~470KB. אם ההורדה נקטעת (רשת סלולרית חלשה), הדפדפן
+   מקבל חצי קובץ, נכשל ב-SyntaxError, ושומר את החצי הזה במטמון — כלומר התקלה
+   חוזרת בכל פתיחה. הבדיקה: השורה האחרונה בקובץ קובעת דגל. אם הדגל חסר,
+   הקובץ לא הגיע במלואו, ואנחנו טוענים מחדש עם עקיפת מטמון — פעם אחת. */
+window.addEventListener('load',function(){ setTimeout(checkTruncated,60); });
+function checkTruncated(){
+  if(window.__FILE_OK) return;                       // הקובץ שלם
+  var tried=false;
+  try{ tried=sessionStorage.getItem('bagrutFixTry')==='1'; }catch(e){}
+  if(!tried){
+    try{ sessionStorage.setItem('bagrutFixTry','1'); }catch(e){}
+    var u=location.pathname+'?fix='+Date.now()+location.hash;
+    document.body.innerHTML='<div style="font-family:Arial;direction:rtl;text-align:center;padding:60px 20px;color:#334155;">'+
+      '<div style="font-size:34px;">⏳</div><h2 style="font-size:18px;">ההורדה נקטעה — טוען מחדש</h2>'+
+      '<p style="font-size:14px;color:#64748b;">רגע אחד. אין צורך לעשות דבר.</p></div>';
+    location.replace(u); return;
+  }
+  showTruncated();
+}
+function showTruncated(){
+  if(document.getElementById('fatalBox')) return;
+  var d=document.createElement('div'); d.id='fatalBox';
+  d.setAttribute('style','position:fixed;inset:0;z-index:99999;background:#fff;padding:24px 18px;overflow:auto;font-family:Arial,sans-serif;direction:rtl;text-align:right;');
+  d.innerHTML='<div style="max-width:620px;margin:0 auto;">'+
+    '<div style="font-size:44px;">📡</div>'+
+    '<h2 style="font-size:20px;margin:8px 0;">ההורדה לא הושלמה</h2>'+
+    '<div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:14px;padding:14px;margin:14px 0;font-size:15px;line-height:1.9;">'+
+    'התוכנה היא קובץ אחד גדול, והרשת נקטעה באמצע ההורדה. <b>זו לא תקלה בתוכנה ולא בנתונים שלך</b> — '+
+    'הם שמורים במכשיר וממתינים.<br><br><b>מה לעשות:</b><br>'+
+    '1. לוודא חיבור יציב — עדיף <b>Wi-Fi</b> ולא סלולרי.<br>'+
+    '2. ללחוץ <b>נסה שוב</b>.<br>'+
+    '3. אם חוזר: הגדרות ← ספארי ← מתקדם ← נתוני אתרים ← למחוק את github.io, ולפתוח שוב.</div>'+
+    '<button style="min-height:44px;padding:0 18px;border-radius:12px;border:0;background:#4f46e5;color:#fff;font-weight:800;font-size:15px;" '+
+      'onclick="try{sessionStorage.removeItem(\'bagrutFixTry\')}catch(e){}; location.replace(location.pathname+\'?fix=\'+Date.now())">נסה שוב</button>'+
+    '<p style="font-size:12px;color:#64748b;margin-top:16px;">'+String(location.href)+'<br>'+String(navigator.userAgent)+'</p></div>';
+  document.body.appendChild(d);
+}
+</script>
+
 <header class="app">
   <div id="logoSlot" style="flex-shrink:0;"></div>
   <div id="hdrCenter"></div>
@@ -1275,74 +1386,7 @@ table.tbl.grades tbody tr:focus-within td:first-child{background:#eaf0ff;}
 /* ===== שכבת אחסון עמידה =====
    ספארי חוסם localStorage בקבצים מקומיים (file://) ובחלק מהתצוגות המוטמעות, וזורק שגיאה.
    העטיפה הזו לא זורקת לעולם, ונופלת בחזרה לזיכרון בלבד — כך שהתוכנה תמיד תעלה. */
-// אם משהו נופל — הודעה כתובה נכון, בלי להאשים את הסיבה הלא נכונה
-var APP_BOOTED=false, FATAL_N=0;
-function fatalReport(msg,src,ln){
-  return 'גרסה '+(typeof APP_VERSION!=='undefined'?APP_VERSION:'?')+
-    '\n'+String(msg||'(ללא הודעה)')+
-    '\n'+String(src||'').split('/').pop()+':'+String(ln||'?')+
-    '\n'+String(location.href)+
-    '\n'+String(navigator.userAgent);
-}
-function showFatal(msg,src,ln){
-  try{
-    var isFile=(location.protocol==='file:');
-    var rep=fatalReport(msg,src,ln);
-    // התוכנה כבר עלתה — לא מחריבים את המסך בגלל תקלה נקודתית
-    if(APP_BOOTED){
-      if(FATAL_N++) return;
-      var b=document.createElement('div');
-      b.setAttribute('style','position:fixed;inset-inline:10px;bottom:10px;z-index:99999;background:#fff7ed;border:1px solid #fdba74;'+
-        'border-radius:14px;padding:12px 14px;font-family:Arial,sans-serif;direction:rtl;text-align:right;font-size:13.5px;'+
-        'line-height:1.7;box-shadow:0 8px 28px rgba(0,0,0,.18);max-width:520px;margin-inline:auto;');
-      b.innerHTML='<b>משהו נתקע בפעולה הזאת.</b> הנתונים שלך במקום — התוכנה ממשיכה לעבוד.'+
-        '<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">'+
-        '<button style="min-height:38px;padding:0 14px;border-radius:10px;border:0;background:#4f46e5;color:#fff;font-weight:700;" '+
-          'onclick="location.reload()">טעינה מחדש</button>'+
-        '<button style="min-height:38px;padding:0 14px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;" '+
-          'onclick="try{exportJSON()}catch(e){}">גיבוי הנתונים</button>'+
-        '<button style="min-height:38px;padding:0 14px;border-radius:10px;border:1px solid #cbd5e1;background:#fff;" '+
-          'onclick="this.parentNode.parentNode.remove()">סגירה</button></div>'+
-        '<details style="margin-top:8px;font-size:11.5px;color:#7c2d12;"><summary>פרטים לשליחה לספק</summary>'+
-        '<pre id="fatalRep" style="white-space:pre-wrap;text-align:left;direction:ltr;">'+rep.replace(/[<&]/g,'')+'</pre></details>';
-      document.body.appendChild(b); return;
-    }
-    if(document.getElementById('fatalBox')) return;
-    var d=document.createElement('div');
-    d.id='fatalBox';
-    d.setAttribute('style','position:fixed;inset:0;z-index:99999;background:#fff;padding:24px 18px;overflow:auto;font-family:Arial,sans-serif;direction:rtl;text-align:right;');
-    var advice = isFile
-      ? '<b>הסיבה כמעט בוודאות:</b> הקובץ נפתח <b>ישירות מהמכשיר</b> (אפליקציית הקבצים, וואטסאפ או מייל), ודפדפני נייד מגבילים מצב כזה.'+
-        '<br>פתחו את <b>כתובת האינטרנט</b> של התוכנה (מתחילה ב-https) ולא את הקובץ. באייפון — בספארי; באנדרואיד — בכרום.'
-      : '<b>מה כדאי לעשות, בסדר הזה:</b><br>'+
-        '1. <b>טעינה מחדש</b> — לרוב זה נפתר, במיוחד אם הרשת נפלה באמצע.<br>'+
-        '2. אם חזר — <b>גיבוי הנתונים</b>, ואז שליחת הפרטים למטה לספק.<br>'+
-        '3. הנתונים שלך <b>לא נמחקו</b>. הם בזיכרון המכשיר וממתינים.';
-    d.innerHTML='<div style="max-width:620px;margin:0 auto;">'+
-      '<div style="font-size:44px;">😕</div>'+
-      '<h2 style="font-size:20px;margin:8px 0;">התוכנה נעצרה בטעינה</h2>'+
-      '<div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:14px;padding:14px;margin:14px 0;font-size:15px;line-height:1.9;">'+advice+'</div>'+
-      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;">'+
-      '<button style="min-height:44px;padding:0 18px;border-radius:12px;border:0;background:#4f46e5;color:#fff;font-weight:800;font-size:15px;" '+
-        'onclick="location.reload()">טעינה מחדש</button>'+
-      '<button style="min-height:44px;padding:0 18px;border-radius:12px;border:1px solid #cbd5e1;background:#fff;font-size:15px;" '+
-        'onclick="try{exportJSON()}catch(e){alert(\'הגיבוי אינו זמין במצב הזה\')}">גיבוי הנתונים</button></div>'+
-      '<div style="font-size:13px;color:#334155;margin-top:6px;"><b>הפרטים שהספק צריך</b> — צלמו או העתיקו:</div>'+
-      '<pre style="white-space:pre-wrap;text-align:left;direction:ltr;background:#f8fafc;border:1px solid #e2e8f0;'+
-        'border-radius:10px;padding:10px;font-size:11.5px;color:#334155;overflow:auto;">'+rep.replace(/[<&]/g,'')+'</pre></div>';
-    document.body.appendChild(d);
-  }catch(e){}
-}
-window.addEventListener('error',function(ev){
-  // כשל בטעינת ספרייה חיצונית (גרפים/אקסל) אינו תקלה בתוכנה — הוא לא יחסום כלום
-  var t=ev&&ev.target;
-  if(t&&t!==window&&(t.tagName==='SCRIPT'||t.tagName==='LINK'||t.tagName==='IMG')) return;
-  showFatal((ev&&ev.message)||'',(ev&&ev.filename)||'',(ev&&ev.lineno)||'');
-},true);
-window.addEventListener('unhandledrejection',function(ev){
-  var r=ev&&ev.reason;
-  showFatal('(הבטחה שנדחתה) '+String((r&&r.message)||r||''),(r&&r.fileName)||'',(r&&r.lineNumber)||'');
-});
+/* שכבת הקריסה הועברה לראש ה-body — כדי שתרוץ גם אם הבלוק הזה לא מתקמפל */
 var STORAGE_OK=true, STORAGE_WHY='';
 var _mem={}, _memS={};
 function _probe(){
@@ -6052,7 +6096,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='9.7';
+const APP_VERSION='9.8';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
@@ -7020,7 +7064,7 @@ if(driveEnabled()){
   window.addEventListener('scroll',()=>{ const on=window.scrollY>90;
     if(on!==last){ last=on; document.body.classList.toggle('entry-scrolled',on); } },{passive:true});
 })();
-APP_BOOTED=true;                      // מכאן והלאה תקלה היא נקודתית, לא כשל טעינה
+window.APP_BOOTED=true;               // מכאן והלאה תקלה היא נקודתית, לא כשל טעינה
 }catch(err){
   window.dispatchEvent(new ErrorEvent('error',{message:(err&&err.message)||String(err),filename:'init',lineno:0}));
 }
@@ -7029,5 +7073,6 @@ try{ LS.setItem('bagrutTest','1'); LS.removeItem('bagrutTest'); }
 catch(e){ setTimeout(()=>alert('⚠️ הדפדפן חוסם שמירת נתונים (ייתכן מצב גלישה בסתר).\nהנתונים לא יישמרו בין פתיחות! פתחי בחלון דפדפן רגיל.'),400); }
 
 </script>
+<script>window.__FILE_OK=1;</script>
 </body>
 </html>
