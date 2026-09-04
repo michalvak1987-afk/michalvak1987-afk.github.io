@@ -5985,7 +5985,7 @@ function genderPanelHtml(){
 /* ============ בדיקת עדכוני גרסה ============
    מקור אמת אחד: APP_VERSION. הבדיקה מורידה את הקובץ עצמו מהשרת בעקיפת מטמון
    ומחלצת ממנו את המספר — כך שאין קובץ נוסף לתחזק, ואי אפשר לשכוח לעדכן מניפסט. */
-const APP_VERSION='9.3';
+const APP_VERSION='9.4';
 const APP_DATE='02.09.2026';
 const UPD_EVERY=20*60*60*1000;           // בדיקה אוטומטית פעם ב-20 שעות
 let latestVer='', updState='idle';       // idle|checking|current|available|error
@@ -6313,6 +6313,11 @@ async function driveSyncAll(initial){
   const conf={};
   try{
     await driveIndex();
+    if(initial) profiles.forEach(pr=>{                        // סימולטור שקיים רק במכשיר — להעלות אותו פעם אחת
+      if(dv.files[pr.id]) return;
+      const st=(pr.id===currentProfileId)?state:loadProfileState(pr.id);
+      if(st&&(st.students||[]).length) markDirty(pr.id);
+    });
     for(const pid of Object.keys(dv.files)){
       const rv=dv.files[pid].ver, lv=localVer(pid);
       const dirty=!!dv.queue[pid];
@@ -6330,11 +6335,13 @@ async function driveSyncAll(initial){
     for(const pid of Object.keys(dv.queue)) if(!conf[pid]) await driveSave(pid);
     if(initial) driveLanding();
     if(dv.wiped){ toast('הקובץ בדרייב היה ריק — '+dv.wiped+' תלמידות שוחזרו מהמכשיר הזה'); dv.wiped=0; }
+    if(dv.barDirty){ dv.barDirty=false; try{ renderProfileBar(); }catch(e){} }
     if(dv.state!=='conflict'&&dv.state!=='error'){ dv.state='synced'; dv.lastSync=Date.now(); LS.setItem('bagrutDvLast',String(dv.lastSync)); }
   }catch(e){ dv.state='error'; dv.lastErr=e.message; }
   dv.busy=false; renderSyncInd(); if(initial) render();
 }
 function driveRegisterProfile(pid,pl){
+  dv.barDirty=true;                                          // השם/הרשימה השתנו — שורת הסימולטור חייבת להתרנדר מחדש
   let pr=profiles.find(p=>p.id===pid);
   if(!pr){ pr={id:pid,name:pl.name||''}; if(!pr.name) pr.unnamed=1; profiles.push(pr); saveProfiles(); dv.newProf=true; return true; }
   if(pl.name&&pr.name!==pl.name){ pr.name=pl.name; delete pr.unnamed; saveProfiles(); }
@@ -6479,6 +6486,7 @@ async function driveResolve(){
   clearDirty(cf.pid); dv.state='saving';
   const el=document.getElementById('cfModal'); if(el) el.classList.remove('show');
   driveLanding();                                            // אחרת נשארים על הפרופיל הריק גם כשהנתונים כבר כאן
+  if(dv.barDirty){ dv.barDirty=false; try{ renderProfileBar(); }catch(e){} }
   render();
   await driveSave(cf.pid,true);
   toast('הנתונים מוזגו וסונכרנו');
